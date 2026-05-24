@@ -12,6 +12,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
         collection: '',
         badge: '',
         notes: '',
+        description: '',
         orientation: '',
         volume: '100 ML',
         price: '',
@@ -41,6 +42,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                 collection: productToEdit.collection || '',
                 badge: productToEdit.badge || '',
                 notes: productToEdit.notes,
+                description: productToEdit.description || '',
                 orientation: productToEdit.orientation || '',
                 volume: productToEdit.volume || '100 ML',
                 price: productToEdit.price,
@@ -55,6 +57,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                 collection: '',
                 badge: '',
                 notes: '',
+                description: '',
                 orientation: '',
                 volume: '100 ML',
                 price: '',
@@ -176,6 +179,31 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                             <label>Fragrance Notes</label>
                             <input type="text" name="notes" value={formData.notes} onChange={handleChange} placeholder="e.g. Oud • Rose • Amber" required />
                         </div>
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label>Description</label>
+                        <textarea
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            placeholder="Describe the fragrance, mood, inspiration..."
+                            rows={3}
+                            style={{
+                                padding: '0.75rem',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '4px',
+                                fontFamily: 'var(--font-body, Jost, sans-serif)',
+                                fontSize: '0.95rem',
+                                color: '#334155',
+                                backgroundColor: '#ffffff',
+                                transition: 'border-color 0.2s ease',
+                                width: '100%',
+                                boxSizing: 'border-box',
+                                resize: 'vertical',
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = '#c5a059'}
+                            onBlur={(e) => e.target.style.borderColor = '#cbd5e1'}
+                        />
                     </div>
                     <div className={styles.formGroup}>
                         <label>Volumes (comma separated)</label>

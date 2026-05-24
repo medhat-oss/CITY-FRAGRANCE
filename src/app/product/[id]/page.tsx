@@ -19,7 +19,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVolume, setSelectedVolume] = useState('');
-  const [notesOpen, setNotesOpen] = useState(true);
+  const [notesOpen, setNotesOpen] = useState(false);
   const [descOpen, setDescOpen] = useState(false);
   const [imgError, setImgError] = useState<Record<number, boolean>>({});
 
@@ -155,9 +155,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           {/* ═══ RIGHT: Product Details ═══ */}
           <div className="flex flex-col gap-0">
             {/* Brand */}
-            <span className="font-heading text-[0.7rem] tracking-[0.25em] text-ink-lighter uppercase mb-2">
-              City Fragrance
-            </span>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="font-heading text-[0.7rem] tracking-[0.25em] text-ink-lighter uppercase">
+                City Fragrance
+              </span>
+            </div>
 
             {/* Title */}
             <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-normal text-navy dark:text-white uppercase tracking-wide leading-tight mb-1.5">
@@ -205,6 +207,20 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   </button>
                 </div>
               </div>
+
+              {/* Orientation */}
+              {product.orientation && (
+                <div className="flex flex-col gap-2">
+                  <span className="font-heading text-[0.7rem] tracking-[0.15em] uppercase text-ink-light dark:text-slate-300 font-semibold">
+                    Orientation
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    <button className="px-5 py-2.5 border-2 border-navy bg-navy text-white font-heading text-xs uppercase tracking-wider rounded-sm transition-all duration-200 hover:bg-navy-light">
+                      {product.orientation}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Volume */}
               <div className="flex flex-col gap-2">
@@ -288,13 +304,17 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               {descOpen && (
                 <div className="pt-2 pb-4 animate-fade-up">
                   <p className="font-body text-sm leading-relaxed text-ink-light dark:text-slate-300 text-justify">
-                    Discover the essence of luxury with{' '}
-                    <strong className="text-navy dark:text-white">{product.name}</strong>.
-                    Carefully crafted with the finest ingredients, this exquisite{' '}
-                    {product.category.toLowerCase()} fragrance offers a long-lasting,
-                    unforgettable signature scent. A sophisticated composition of{' '}
-                    {product.notes} that captures the spirit of modern elegance and
-                    timeless Middle Eastern perfumery tradition.
+                    {product.description || (
+                      <>
+                        Discover the essence of luxury with{' '}
+                        <strong className="text-navy dark:text-white">{product.name}</strong>.
+                        Carefully crafted with the finest ingredients, this exquisite{' '}
+                        {product.category.toLowerCase()} fragrance offers a long-lasting,
+                        unforgettable signature scent. A sophisticated composition of{' '}
+                        {product.notes} that captures the spirit of modern elegance and
+                        timeless Middle Eastern perfumery tradition.
+                      </>
+                    )}
                   </p>
                 </div>
               )}
