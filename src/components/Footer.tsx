@@ -22,7 +22,7 @@ interface FooterLink {
 
 const QUICK_LINKS: FooterLink[] = [
   { label: 'Our Story', href: '/about' },
-  { label: 'Privacy Policy', href: '/privacy' },
+  { label: 'Privacy Policy', href: '/privacy-policy' },
   { label: 'Store Locator', href: '/stores' },
 ];
 
