@@ -1,0 +1,12 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "admin@cityfragrance.com",
+      "username": "admin",
+      "password": "$2b$10$wQ5Dt1fYLA8X4MtiP0Ccc.oJ/Frj37TKgBCBLxjC7woPiAUHLUQC.",
+      "role": "ADMIN",
+      "createdAt": "2026-05-24T19:44:10.803Z"
+    }
+  ]
+}

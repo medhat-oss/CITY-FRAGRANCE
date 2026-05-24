@@ -1,0 +1,213 @@
+[
+  {
+    "id": "p1",
+    "name": "Oud Supreme",
+    "category": "Oud",
+    "collection": "oud-collection",
+    "badge": "BEST SELLER",
+    "notes": "Oud • Rose • Amber",
+    "volume": "100 ML",
+    "price": 185,
+    "salePrice": null,
+    "images": [
+      "/images/product-placeholder.png",
+      "https://res.cloudinary.com/db31fu3ob/image/upload/v1779639294/upqfef4mlmkpnf91p0en.jpg"
+    ]
+  },
+  {
+    "id": "p2",
+    "name": "Midnight Musk",
+    "category": "Men",
+    "notes": "Musk • Vanilla • Sandalwood",
+    "volume": "50 ML, 100 ML",
+    "price": 175,
+    "salePrice": 140,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "EID SALE",
+    "collection": ""
+  },
+  {
+    "id": "p3",
+    "name": "Royal Amber",
+    "category": "Women",
+    "notes": "Amber • Patchouli • Bergamot",
+    "volume": "100 ML",
+    "price": 210,
+    "salePrice": null,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "",
+    "collection": "womens-collection"
+  },
+  {
+    "id": "p4",
+    "name": "Desert Bloom",
+    "category": "Women",
+    "collection": "new-arrivals",
+    "badge": "NEW",
+    "notes": "Jasmine • Saffron • Cedar",
+    "volume": "100 ML",
+    "price": 165,
+    "salePrice": null,
+    "images": [
+      "/images/product-placeholder.png"
+    ]
+  },
+  {
+    "id": "p5",
+    "name": "Oud Wood",
+    "category": "Men",
+    "notes": "Oud • Sandalwood • Cardamom",
+    "volume": "50 ML, 100 ML, 150 ML",
+    "price": 195,
+    "salePrice": null,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "NEW",
+    "collection": "oud-collection"
+  },
+  {
+    "id": "p6",
+    "name": "Leather Reserve",
+    "category": "Men",
+    "notes": "Leather • Oakmoss • Vetiver",
+    "volume": "100 ML",
+    "price": 150,
+    "salePrice": null,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "",
+    "collection": ""
+  },
+  {
+    "id": "p7",
+    "name": "Aqua Vetiver",
+    "category": "Men",
+    "notes": "Vetiver • Citrus • Marine",
+    "volume": "50 ML, 100 ML",
+    "price": 160,
+    "salePrice": 130,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "SALE",
+    "collection": ""
+  },
+  {
+    "id": "p8",
+    "name": "Rose Petals",
+    "category": "Women",
+    "notes": "Damascus Rose • Peony • Musk",
+    "volume": "100 ML",
+    "price": 180,
+    "salePrice": null,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "BEST SELLER",
+    "collection": ""
+  },
+  {
+    "id": "p9",
+    "name": "Vanilla Bloom",
+    "category": "Women",
+    "notes": "Madagascar Vanilla • Orchid",
+    "volume": "100 ML",
+    "price": 145,
+    "salePrice": null,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "",
+    "collection": ""
+  },
+  {
+    "id": "p10",
+    "name": "Saffron Noir",
+    "category": "Men",
+    "notes": "Saffron • Black Leather • Smoke",
+    "volume": "100 ML",
+    "price": 220,
+    "salePrice": null,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "BEST SELLER",
+    "collection": "mens-collection"
+  },
+  {
+    "id": "p11",
+    "name": "Jasmine Serenade",
+    "category": "Women",
+    "notes": "Jasmine • Musk • White Amber",
+    "volume": "50 ML, 100 ML",
+    "price": 190,
+    "salePrice": 160,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "NEW",
+    "collection": "womens-collection"
+  },
+  {
+    "id": "p12",
+    "name": "Oud Royale",
+    "category": "Oud",
+    "notes": "Royal Oud • Labdanum • Bergamot",
+    "volume": "100 ML",
+    "price": 250,
+    "salePrice": null,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "BEST SELLER",
+    "collection": "oud-collection"
+  },
+  {
+    "id": "p13",
+    "name": "Citrus Breeze",
+    "category": "Men",
+    "notes": "Bergamot • Grapefruit • Cedar",
+    "volume": "100 ML",
+    "price": 135,
+    "salePrice": 110,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "SALE",
+    "collection": "mens-collection"
+  },
+  {
+    "id": "p14",
+    "name": "Amber & Oud Gift Set",
+    "category": "Sets",
+    "notes": "Amber • Oud • Musk — 3 x 35 ML",
+    "volume": "3 x 35 ML",
+    "price": 320,
+    "salePrice": 280,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "BEST SELLER",
+    "collection": "gift-sets"
+  },
+  {
+    "id": "p15",
+    "name": "Crystal Rose",
+    "category": "Women",
+    "notes": "Rose • Pink Pepper • Musk",
+    "volume": "100 ML",
+    "price": 175,
+    "salePrice": null,
+    "images": [
+      "/images/product-placeholder.png"
+    ],
+    "badge": "NEW",
+    "collection": "new-arrivals"
+  }
+]

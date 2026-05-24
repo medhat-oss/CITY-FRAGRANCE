@@ -1,0 +1,76 @@
+[
+  {
+    "orderId": "CF-064542",
+    "customerName": "ahmed esmaell",
+    "phoneNumber": "01008308784",
+    "email": "malk35t@gmail.com",
+    "address": "ahmed street ",
+    "apartment": "power tower",
+    "city": "benha",
+    "governorate": "Menofia",
+    "items": [
+      {
+        "name": "Midnight Musk",
+        "quantity": 1,
+        "price": 140
+      }
+    ],
+    "totalPrice": 240,
+    "status": "قيد الانتظار",
+    "date": "2026-05-25",
+    "paymentMethod": "vodafone"
+  },
+  {
+    "orderId": "CF-206600",
+    "customerName": "ahmed esmaell",
+    "phoneNumber": "01008308784",
+    "address": "شسبشسب شسشب,  شسشس ش",
+    "city": " شسي شس شس ",
+    "items": [
+      {
+        "name": "Aqua Vetiver",
+        "quantity": 1,
+        "price": 130
+      }
+    ],
+    "totalPrice": 190,
+    "status": "قيد الانتظار",
+    "date": "2026-05-24",
+    "paymentMethod": "cod"
+  },
+  {
+    "orderId": "CF-832660",
+    "customerName": "ahmed esmaell",
+    "phoneNumber": "01008308784",
+    "address": "شسبشسب شسشب,  شسشس ش",
+    "city": " شسي شس شس ",
+    "items": [
+      {
+        "name": "Aqua Vetiver",
+        "quantity": 1,
+        "price": 130
+      }
+    ],
+    "totalPrice": 190,
+    "status": "قيد الانتظار",
+    "date": "2026-05-24",
+    "paymentMethod": "vodafone"
+  },
+  {
+    "orderId": "CF-089053",
+    "customerName": "ahmed esmaell",
+    "phoneNumber": "01008308784",
+    "address": "شسبشسب شسشب,  شسشس ش",
+    "city": " شسي شس شس ",
+    "items": [
+      {
+        "name": "Midnight Musk",
+        "quantity": 1,
+        "price": 140
+      }
+    ],
+    "totalPrice": 200,
+    "status": "قيد الانتظار",
+    "date": "2026-05-24"
+  }
+]
