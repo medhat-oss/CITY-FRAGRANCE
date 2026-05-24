@@ -23,6 +23,9 @@ export const metadata = {
   title: 'City Fragrance - Luxury Perfumes',
   description:
     'Discover luxurious fragrances that capture the essence of elegance and sophistication. Shop City Fragrance for premium Middle Eastern inspired perfumes.',
+  icons: {
+    icon: '/images/CF.jpeg',
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
