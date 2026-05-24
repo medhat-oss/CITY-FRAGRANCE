@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { formatEGP } from '@/utils/currency';
 import type { Order } from '@/types';
-import { FaClipboardList, FaTimes, FaEye } from 'react-icons/fa';
+import { FaClipboardList, FaTimes, FaEye, FaSpinner } from 'react-icons/fa';
 import styles from '../admin.module.css';
 
 const STATUSES = ['قيد الانتظار', 'مؤكد', 'قيد التجهيز', 'تم الشحن', 'تم التسليم', 'ملغي'];
@@ -18,11 +19,13 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function AdminOrdersPage() {
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchOrders = useCallback(() => {
     fetch('/api/admin/orders')
       .then((res) => res.json())
       .then((data) => {
@@ -32,7 +35,12 @@ export default function AdminOrdersPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    setUpdatingId(orderId);
     try {
       const res = await fetch('/api/admin/orders', {
         method: 'PUT',
@@ -44,9 +52,12 @@ export default function AdminOrdersPage() {
         setOrders((prev) =>
           prev.map((o) => (o.orderId === orderId ? { ...o, status: newStatus } : o))
         );
+        router.refresh();
       }
     } catch {
       /* ignore */
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -135,15 +146,21 @@ export default function AdminOrdersPage() {
                   </Td>
                   <Td>{order.paymentMethod || '\u2014'}</Td>
                   <Td>
-                    <select
-                      value={order.status}
-                      onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
-                      className={`text-xs font-semibold rounded-sm px-2 py-1 border-none cursor-pointer ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}
-                    >
-                      {STATUSES.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
+                        className={`text-xs font-semibold rounded-sm px-2 py-1 border-none cursor-pointer ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}
+                        disabled={updatingId === order.orderId}
+                      >
+                        {STATUSES.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                      {updatingId === order.orderId && (
+                        <FaSpinner className="animate-spin" style={{ fontSize: '0.75rem', color: '#16234D' }} />
+                      )}
+                    </div>
                   </Td>
                   <Td style={{ color: '#64748b' }}>{order.date}</Td>
                   <Td>

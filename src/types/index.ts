@@ -9,6 +9,7 @@ export interface Product {
   images: string[];
   badge: string;
   collection?: string;
+  orientation?: string;
 }
 
 export interface NavLink {

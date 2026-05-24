@@ -19,8 +19,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVolume, setSelectedVolume] = useState('');
-  const [selectedOrientation, setSelectedOrientation] = useState<string | null>(null);
   const [notesOpen, setNotesOpen] = useState(true);
+  const [descOpen, setDescOpen] = useState(false);
   const [imgError, setImgError] = useState<Record<number, boolean>>({});
 
   if (!isLoaded) {
@@ -55,13 +55,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const activeImage = imgError[activeImageIndex]
     ? '/placeholder.png'
     : productImages[activeImageIndex] || productImages[0];
-
-  const orientation =
-    product.category === 'Women'
-      ? 'Pour Femme'
-      : product.category === 'Men'
-        ? 'Pour Homme'
-        : 'Unisex';
 
   const volumeOptions = (product.volume || '100 ML')
     .split(',')
@@ -235,30 +228,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
               </div>
 
-              {/* Orientation */}
-              <div className="flex flex-col gap-2">
-                <span className="font-heading text-[0.7rem] tracking-[0.15em] uppercase text-ink-light dark:text-slate-300 font-semibold">
-                  Orientation
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {['Pour Femme', 'Pour Homme', 'Unisex'].map((opt) => {
-                    const isActive = (selectedOrientation || orientation) === opt;
-                    return (
-                      <button
-                        key={opt}
-                        onClick={() => setSelectedOrientation(opt)}
-                        className={`px-5 py-2.5 border-2 font-heading text-xs uppercase tracking-wider rounded-sm transition-all duration-200 ${
-                          isActive
-                            ? 'border-navy bg-navy text-white'
-                             : 'border-gray-200 text-ink-light dark:border-slate-700 dark:text-slate-200 hover:border-navy dark:hover:border-navy hover:text-navy dark:hover:text-white'
-                        }`}
-                      >
-                        {opt}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
 
             <div className="w-full h-px bg-gray-100 dark:bg-slate-800 my-5" />
@@ -303,20 +272,32 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             <div className="w-full h-px bg-gray-100 dark:bg-slate-800 my-5" />
 
-            {/* Description */}
-            <div className="mb-2">
-              <h3 className="font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold mb-3">
-                Description
-              </h3>
-              <p className="font-body text-sm leading-relaxed text-ink-light dark:text-slate-300 text-justify">
-                Discover the essence of luxury with{' '}
-                <strong className="text-navy dark:text-white">{product.name}</strong>. Carefully
-                crafted with the finest ingredients, this exquisite{' '}
-                {product.category.toLowerCase()} fragrance offers a long-lasting,
-                unforgettable signature scent. A sophisticated composition of{' '}
-                {product.notes} that captures the spirit of modern elegance and
-                timeless Middle Eastern perfumery tradition.
-              </p>
+            {/* Description Accordion */}
+            <div>
+              <button
+                onClick={() => setDescOpen(!descOpen)}
+                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-colors hover:text-gold"
+              >
+                <span>Description</span>
+                <HiChevronDown
+                  className={`text-sm transition-transform duration-300 ${
+                    descOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              {descOpen && (
+                <div className="pt-2 pb-4 animate-fade-up">
+                  <p className="font-body text-sm leading-relaxed text-ink-light dark:text-slate-300 text-justify">
+                    Discover the essence of luxury with{' '}
+                    <strong className="text-navy dark:text-white">{product.name}</strong>.
+                    Carefully crafted with the finest ingredients, this exquisite{' '}
+                    {product.category.toLowerCase()} fragrance offers a long-lasting,
+                    unforgettable signature scent. A sophisticated composition of{' '}
+                    {product.notes} that captures the spirit of modern elegance and
+                    timeless Middle Eastern perfumery tradition.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="w-full h-px bg-gray-100 dark:bg-slate-800 my-5" />

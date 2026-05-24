@@ -12,6 +12,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
         collection: '',
         badge: '',
         notes: '',
+        orientation: '',
         volume: '100 ML',
         price: '',
         salePrice: '',
@@ -40,6 +41,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                 collection: productToEdit.collection || '',
                 badge: productToEdit.badge || '',
                 notes: productToEdit.notes,
+                orientation: productToEdit.orientation || '',
                 volume: productToEdit.volume || '100 ML',
                 price: productToEdit.price,
                 salePrice: productToEdit.salePrice || '',
@@ -53,6 +55,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                 collection: '',
                 badge: '',
                 notes: '',
+                orientation: '',
                 volume: '100 ML',
                 price: '',
                 salePrice: '',
@@ -179,6 +182,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                         <input type="text" name="volume" value={formData.volume} onChange={handleChange} placeholder="e.g. 50 ML, 100 ML" required />
                     </div>
                     <div className={styles.formRow}>
+                        <div className={styles.formGroup}>
+                            <label>Orientation</label>
+                            <input type="text" name="orientation" value={formData.orientation} onChange={handleChange} placeholder="e.g. Pour Homme, Unisex, حريمي" />
+                        </div>
                         <div className={styles.formGroup}>
                             <label>Original Price ($)</label>
                             <input type="number" name="price" value={formData.price} onChange={handleChange} step="0.01" required />
