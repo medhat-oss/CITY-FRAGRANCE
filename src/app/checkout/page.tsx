@@ -171,7 +171,11 @@ export default function CheckoutPage() {
 
       const orderId = data.order.orderId;
       clearCart();
-      router.push(`/checkout/success?method=${selectedPayment}&orderId=${orderId}`);
+      if (selectedPayment === 'cod') {
+        router.push(`/checkout/success?orderId=${orderId}`);
+      } else {
+        router.push(`/checkout/payment?method=${selectedPayment}&orderId=${orderId}`);
+      }
     } catch (err) {
       setPaymentError(err instanceof Error ? err.message : 'Something went wrong');
       setIsProcessing(false);

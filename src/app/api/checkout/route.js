@@ -18,10 +18,13 @@ import { NextResponse } from 'next/server';
  * ─────────────────────────────────────────────────────────
  */
 
-const IS_TEST_MODE       = process.env.NEXT_PUBLIC_PAYMENT_MODE === 'test';
 const SANDBOX_KEY        = process.env.PAYMENT_GATEWAY_SANDBOX_KEY;
 const CARD_INTEGRATION   = process.env.PAYMENT_INTEGRATION_ID;
 const WALLET_INTEGRATION = process.env.PAYMENT_WALLET_INTEGRATION_ID;
+
+// Auto-detect: if keys are present, use production mode; otherwise fall back to test mode
+const HAS_KEYS           = !!(SANDBOX_KEY && CARD_INTEGRATION && WALLET_INTEGRATION);
+const IS_TEST_MODE       = process.env.NEXT_PUBLIC_PAYMENT_MODE === 'test' || !HAS_KEYS;
 
 export async function POST(request) {
     try {
