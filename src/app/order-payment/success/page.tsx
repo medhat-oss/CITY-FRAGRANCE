@@ -1,16 +1,17 @@
 'use client';
 
+import { use } from 'react';
 import Link from 'next/link';
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '201001234567';
 
 interface PageProps {
-  params: { [key: string]: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default function SuccessPage({ searchParams }: PageProps) {
-  const orderId = typeof searchParams.orderId === 'string' ? searchParams.orderId : '';
+  const resolvedParams = use(searchParams);
+  const orderId = typeof resolvedParams.orderId === 'string' ? resolvedParams.orderId : '';
 
   const waText = encodeURIComponent(
     `Hello, I would like to confirm my order #${orderId}`
