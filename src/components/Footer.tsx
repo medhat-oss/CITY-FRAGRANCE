@@ -149,9 +149,22 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-6 text-white/50 text-sm">
-          <p className="font-body text-xs">
-            &copy; {new Date().getFullYear()} City Fragrance. All rights reserved.
-          </p>
+          <div className="flex flex-col items-center sm:items-start gap-1">
+            <p className="font-body text-xs">
+              &copy; {new Date().getFullYear()} City Fragrance. All rights reserved.
+            </p>
+            <p className="font-body text-xs text-gray-500">
+              Designed &amp; Developed by{' '}
+              <a
+                href="https://wa.me/201223770207"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-gray-600 transition-all duration-300 hover:text-amber-500 hover:decoration-amber-500"
+              >
+                Medhat Elaraby <span className="inline-block">↗</span>
+              </a>
+            </p>
+          </div>
 
           <div className="flex items-center gap-4 text-xl text-white/30">
             <FaCcVisa />
@@ -160,8 +173,6 @@ export default function Footer() {
             <FaCcPaypal />
             <FaCcApplePay />
           </div>
-
-
         </div>
       </div>
     </footer>
