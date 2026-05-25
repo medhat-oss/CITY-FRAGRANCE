@@ -1,17 +1,14 @@
 'use client';
 
-import { use } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '201001234567';
 
-interface PageProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
-
-export default function SuccessPage({ searchParams }: PageProps) {
-  const resolvedParams = use(searchParams);
-  const orderId = typeof resolvedParams.orderId === 'string' ? resolvedParams.orderId : '';
+function SuccessContent() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('orderId') || '';
 
   const waText = encodeURIComponent(
     `Hello, I would like to confirm my order #${orderId}`
@@ -61,5 +58,19 @@ export default function SuccessPage({ searchParams }: PageProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#09142E] flex items-center justify-center">
+          <p className="text-white font-heading">Loading...</p>
+        </div>
+      }
+    >
+      <SuccessContent />
+    </Suspense>
   );
 }
