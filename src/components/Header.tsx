@@ -344,7 +344,7 @@ export default function Header() {
               Shipping &amp; taxes calculated at checkout
             </p>
             <Link
-              href="/payment-checkout"
+              href="/order-payment"
               onClick={closeCart}
               className="w-full flex items-center justify-center py-4 bg-gold text-navy font-heading text-xs font-semibold tracking-[0.15em] uppercase cursor-pointer rounded-sm transition-all duration-300 hover:bg-amber-500 no-underline mb-2"
             >
