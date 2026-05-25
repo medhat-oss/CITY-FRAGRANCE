@@ -141,7 +141,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
               {/* Included Perfumes */}
               <div className="border-t border-white/10 pt-6 mb-6">
                 <h2 className="font-heading text-sm tracking-[0.2em] uppercase text-white/80 mb-4">
-                  محتويات المجموعة / Included Perfumes
+                  Included Perfumes
                 </h2>
                 {includedProducts.length === 0 ? (
                   <p className="text-white/40 text-sm">No products assigned yet.</p>

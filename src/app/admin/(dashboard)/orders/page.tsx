@@ -7,15 +7,15 @@ import type { Order } from '@/types';
 import { FaClipboardList, FaTimes, FaEye, FaSpinner } from 'react-icons/fa';
 import styles from '../admin.module.css';
 
-const STATUSES = ['قيد الانتظار', 'مؤكد', 'قيد التجهيز', 'تم الشحن', 'تم التسليم', 'ملغي'];
+const STATUSES = ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
 const STATUS_COLORS: Record<string, string> = {
-  'قيد الانتظار': 'bg-yellow-100 text-yellow-800',
-  'مؤكد': 'bg-blue-100 text-blue-800',
-  'قيد التجهيز': 'bg-indigo-100 text-indigo-800',
-  'تم الشحن': 'bg-purple-100 text-purple-800',
-  'تم التسليم': 'bg-green-100 text-green-800',
-  'ملغي': 'bg-red-100 text-red-800',
+  'Pending': 'bg-yellow-100 text-yellow-800',
+  'Confirmed': 'bg-blue-100 text-blue-800',
+  'Processing': 'bg-indigo-100 text-indigo-800',
+  'Shipped': 'bg-purple-100 text-purple-800',
+  'Delivered': 'bg-green-100 text-green-800',
+  'Cancelled': 'bg-red-100 text-red-800',
 };
 
 export default function AdminOrdersPage() {
@@ -62,7 +62,7 @@ export default function AdminOrdersPage() {
   };
 
   const totalRevenue = orders
-    .filter((o) => o.status !== 'ملغي')
+    .filter((o) => o.status !== 'Cancelled')
     .reduce((sum, o) => sum + o.totalPrice, 0);
 
   if (loading) return null;
@@ -72,7 +72,7 @@ export default function AdminOrdersPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
         <FaClipboardList style={{ color: '#16234D', fontSize: '1.25rem' }} />
         <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#16234D', margin: 0 }}>
-          Orders Management &mdash; إدارة الطلبات
+          Orders Management
         </h2>
       </div>
 
@@ -92,7 +92,7 @@ export default function AdminOrdersPage() {
           fontWeight: 500,
         }}
       >
-        <span style={{ opacity: 0.8, fontWeight: 400 }}>إجمالي الإيرادات</span>
+                <span style={{ opacity: 0.8, fontWeight: 400 }}>Total Revenue</span>
         <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{formatEGP(totalRevenue)}</span>
       </div>
 
@@ -110,15 +110,15 @@ export default function AdminOrdersPage() {
           >
             <thead>
               <tr style={{ background: '#16234D', color: '#fff' }}>
-                <Th>رقم الطلب</Th>
-                <Th>العميل</Th>
-                <Th>الهاتف</Th>
-                <Th>المحافظة</Th>
-                <Th>المنتجات</Th>
-                <Th>الإجمالي</Th>
-                <Th>طريقة الدفع</Th>
-                <Th>الحالة</Th>
-                <Th>التاريخ</Th>
+                <Th>Order ID</Th>
+                <Th>Customer</Th>
+                <Th>Phone</Th>
+                <Th>Governorate</Th>
+                <Th>Items</Th>
+                <Th>Total</Th>
+                <Th>Payment</Th>
+                <Th>Status</Th>
+                <Th>Date</Th>
                 <Th>{'\u00A0'}</Th>
               </tr>
             </thead>
@@ -212,7 +212,7 @@ export default function AdminOrdersPage() {
         <div className={`${styles.modalOverlay} ${styles.active}`} onClick={() => setSelectedOrder(null)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px' }}>
             <div className={styles.modalHeader}>
-              <h3>Order Details &mdash; تفاصيل الطلب</h3>
+              <h3>Order Details</h3>
               <button type="button" className={styles.btnClose} onClick={() => setSelectedOrder(null)}>
                 <FaTimes />
               </button>
@@ -220,44 +220,44 @@ export default function AdminOrdersPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {/* Order ID & Date */}
-              <DetailRow label="رقم الطلب" value={selectedOrder.orderId} />
-              <DetailRow label="التاريخ" value={selectedOrder.date} />
-              <DetailRow label="الحالة" value={selectedOrder.status} />
+              <DetailRow label="Order ID" value={selectedOrder.orderId} />
+              <DetailRow label="Date" value={selectedOrder.date} />
+              <DetailRow label="Status" value={selectedOrder.status} />
 
               <div style={{ height: '1px', background: '#e2e8f0', margin: '0.25rem 0' }} />
 
               {/* Customer Info */}
               <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 600, color: '#16234D', margin: 0 }}>
-                Customer Information &mdash; معلومات العميل
+                Customer Information
               </h4>
-              <DetailRow label="الاسم" value={selectedOrder.customerName} />
-              <DetailRow label="البريد الإلكتروني" value={selectedOrder.email || '\u2014'} dir="ltr" />
-              <DetailRow label="الهاتف" value={selectedOrder.phoneNumber} dir="ltr" />
+              <DetailRow label="Name" value={selectedOrder.customerName} />
+              <DetailRow label="Email" value={selectedOrder.email || '\u2014'} dir="ltr" />
+              <DetailRow label="Phone" value={selectedOrder.phoneNumber} dir="ltr" />
 
               <div style={{ height: '1px', background: '#e2e8f0', margin: '0.25rem 0' }} />
 
               {/* Shipping Info */}
               <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 600, color: '#16234D', margin: 0 }}>
-                Shipping Details &mdash; معلومات الشحن
+                Shipping Details
               </h4>
-              <DetailRow label="المدينة" value={selectedOrder.city} />
-              <DetailRow label="المحافظة" value={selectedOrder.governorate || '\u2014'} />
-              <DetailRow label="العنوان" value={selectedOrder.address} />
+              <DetailRow label="City" value={selectedOrder.city} />
+              <DetailRow label="Governorate" value={selectedOrder.governorate || '\u2014'} />
+              <DetailRow label="Address" value={selectedOrder.address} />
               {selectedOrder.apartment && (
-                <DetailRow label="شقة / دور" value={selectedOrder.apartment} />
+                <DetailRow label="Apartment" value={selectedOrder.apartment} />
               )}
 
               <div style={{ height: '1px', background: '#e2e8f0', margin: '0.25rem 0' }} />
 
               {/* Payment & Items */}
               <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 600, color: '#16234D', margin: 0 }}>
-                Payment & Items &mdash; الدفع والمنتجات
+                Payment & Items
               </h4>
-              <DetailRow label="طريقة الدفع" value={selectedOrder.paymentMethod || '\u2014'} />
-              <DetailRow label="الإجمالي" value={formatEGP(selectedOrder.totalPrice)} />
+              <DetailRow label="Payment Method" value={selectedOrder.paymentMethod || '\u2014'} />
+              <DetailRow label="Total" value={formatEGP(selectedOrder.totalPrice)} />
               <div>
                 <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#16234D', display: 'block', marginBottom: '0.3rem' }}>
-                  المنتجات
+                  Items
                 </span>
                 {selectedOrder.items.map((item, i) => (
                   <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: '#334155', padding: '0.2rem 0', borderBottom: i < selectedOrder.items.length - 1 ? '1px solid #f1f5f9' : 'none' }}>

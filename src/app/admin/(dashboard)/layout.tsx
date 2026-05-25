@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <FaBoxOpen /> Products Management
             </Link>
             <Link href="/admin/orders" className={styles.sidebarLink}>
-              <FaClipboardList /> إدارة الطلبات
+               <FaClipboardList /> Orders
             </Link>
             <Link href="/admin/gift-sets" className={styles.sidebarLink}>
               <FaGift /> Gift Sets

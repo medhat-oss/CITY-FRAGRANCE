@@ -109,7 +109,7 @@ export default function CheckoutPage() {
     setPaymentError('');
 
     if (!selectedPayment) {
-      setPaymentError('يرجى اختيار طريقة الدفع');
+      setPaymentError('Please select a payment method');
       return;
     }
 
@@ -153,7 +153,7 @@ export default function CheckoutPage() {
 
         const checkoutData = await checkoutRes.json();
         if (!checkoutData.success) {
-          throw new Error('فشلت عملية الدفع. يرجى المحاولة مرة أخرى.');
+          throw new Error('Payment failed. Please try again.');
         }
       }
 
@@ -385,7 +385,7 @@ export default function CheckoutPage() {
               Payment
             </h2>
             <p className="font-body text-xs text-ink-lighter dark:text-slate-300 mb-5">
-              اختر طريقة الدفع عبر التحويل البنكي المباشر
+              Select your preferred payment method
             </p>
 
             <div className="flex flex-col gap-3">
@@ -398,8 +398,7 @@ export default function CheckoutPage() {
                     : 'border-slate-700 bg-[#11224D] text-white hover:border-amber-500/50'
                 }`}
               >
-                <span className="block text-base">فودافون كاش</span>
-                <span className="block text-xs font-normal opacity-70 mt-0.5">Vodafone Cash</span>
+                <span className="block text-base">Vodafone Cash</span>
               </button>
 
               <button
@@ -411,8 +410,7 @@ export default function CheckoutPage() {
                     : 'border-slate-700 bg-[#11224D] text-white hover:border-amber-500/50'
                 }`}
               >
-                <span className="block text-base">إنستا باي</span>
-                <span className="block text-xs font-normal opacity-70 mt-0.5">InstaPay</span>
+                <span className="block text-base">InstaPay</span>
               </button>
 
               <button
@@ -424,16 +422,15 @@ export default function CheckoutPage() {
                     : 'border-slate-700 bg-[#11224D] text-white hover:border-amber-500/50'
                 }`}
               >
-                <span className="block text-base">الدفع عند الاستلام</span>
-                <span className="block text-xs font-normal opacity-70 mt-0.5">Cash on Delivery</span>
+                <span className="block text-base">Cash on Delivery</span>
               </button>
             </div>
 
-            <p className="text-right text-xs md:text-sm text-white mb-1.5 font-medium leading-relaxed">
-              وفي حالة اختيار الدفع عند الاستلام واتمام الطلب سيتم التواصل معك عن طريق واتساب لتأكيد الطلب لتحويل deposit قيمته اقل من 15% من اجمالي الطلب
+            <p className="text-xs md:text-sm text-white mb-1.5 font-medium leading-relaxed">
+              For Cash on Delivery (COD) orders, our team will contact you via WhatsApp to confirm a secure deposit of less than 15% to finalize your request.
             </p>
             <p className="font-body text-xs text-ink-lighter dark:text-slate-400 mt-2">
-              سيتم عرض تفاصيل الدفع بعد تأكيد الطلب
+              Payment details will be displayed after order confirmation.
             </p>
           </section>
 

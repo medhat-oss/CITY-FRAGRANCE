@@ -155,12 +155,12 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                     </div>
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label>Product Type &mdash; نوع المنتج</label>
+                            <label>Product Type</label>
                             <select name="type" value={formData.type} onChange={handleChange} required>
-                                <option value="Men">Men &mdash; رجالي</option>
-                                <option value="Women">Women &mdash; نسائي</option>
-                                <option value="Unisex">Unisex &mdash; جنسين</option>
-                                <option value="Gift Sets">Gift Sets &mdash; مجموعات هدايا</option>
+                                <option value="Men">Men</option>
+                                <option value="Women">Women</option>
+                                <option value="Unisex">Unisex</option>
+                                <option value="Gift Sets">Gift Sets</option>
                             </select>
                         </div>
                         <div className={styles.formGroup}>
@@ -226,7 +226,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                     </div>
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label>Fragrance Concentration &mdash; تركيز العطر</label>
+                            <label>Fragrance Concentration</label>
                             <select name="concentration" value={formData.concentration} onChange={handleChange} required>
                                 <option value="Eau De Parfum">Eau De Parfum</option>
                                 <option value="Eau De Toilette">Eau De Toilette</option>
@@ -237,7 +237,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                         </div>
                         <div className={styles.formGroup}>
                             <label>Orientation</label>
-                            <input type="text" name="orientation" value={formData.orientation} onChange={handleChange} placeholder="e.g. Pour Homme, Unisex, حريمي" />
+                            <input type="text" name="orientation" value={formData.orientation} onChange={handleChange} placeholder="e.g. Pour Homme, Unisex" />
                         </div>
                         <div className={styles.formGroup}>
                             <label>Original Price ($)</label>

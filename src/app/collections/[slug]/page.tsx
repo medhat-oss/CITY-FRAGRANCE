@@ -9,35 +9,29 @@ import { useProducts } from '@/hooks/useProducts';
 import { formatEGP } from '@/utils/currency';
 import { HiArrowRight } from 'react-icons/hi2';
 
-const COLLECTION_META: Record<string, { title: string; subtitle: string; description: string }> = {
+const COLLECTION_META: Record<string, { title: string; description: string }> = {
   'new-arrivals': {
     title: 'NEW ARRIVALS',
-    subtitle: 'أحدث الإصدارات',
     description: 'Explore our latest exquisite scents — fresh, contemporary, and crafted for the modern connoisseur.',
   },
   'all-fragrances': {
     title: 'ALL FRAGRANCES',
-    subtitle: 'جميع العطور',
     description: 'Browse our complete universe of Arabic and international perfumes, from bold ouds to delicate florals.',
   },
   'oud-collection': {
     title: 'OUD COLLECTION',
-    subtitle: 'مجموعة العود',
     description: 'Rich, smoky, and deeply luxurious — our Oud Collection honors centuries of tradition.',
   },
   'mens-collection': {
     title: "MEN'S COLLECTION",
-    subtitle: 'مجموعة الرجال',
     description: 'Bold, confident, and distinguished — fragrances that command attention and leave a lasting impression.',
   },
   'womens-collection': {
     title: "WOMEN'S COLLECTION",
-    subtitle: 'مجموعة النساء',
     description: 'Elegant, enchanting, and unforgettable — a celebration of femininity in every bottle.',
   },
   'gift-sets': {
     title: 'GIFT SETS',
-    subtitle: 'المجموعات والهدايا',
     description: 'Curated sets perfect for gifting — beautifully packaged, thoughtfully paired, and ready to impress.',
   },
 };
@@ -116,9 +110,6 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
             <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight mb-4">
               {meta.title}
             </h1>
-            <p className="font-heading text-2xl sm:text-3xl text-gold/80 font-light">
-              {meta.subtitle}
-            </p>
             <div className="w-16 h-px bg-gold/50 mx-auto mt-6" />
             <p className="text-white/50 mt-8 max-w-2xl mx-auto text-lg leading-relaxed">
               {meta.description}

@@ -192,7 +192,7 @@ export default function AdminPage() {
               margin: 0,
             }}
           >
-            Site Customization &mdash; تخصيص الموقع
+            Site Customization
           </h2>
         </div>
 
@@ -328,7 +328,7 @@ export default function AdminPage() {
                 width: 'fit-content',
               }}
             >
-              Choose Image &mdash; اختيار صورة
+              Choose Image
               <input
                 type="file"
                 accept="image/*"
@@ -371,7 +371,7 @@ export default function AdminPage() {
                 color: '#16234D',
               }}
             >
-              Top Announcement Bar Text &mdash; نص شريط الإعلانات العلوي
+              Top Announcement Bar Text
             </label>
             <input
               type="text"
@@ -424,14 +424,14 @@ export default function AdminPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
           <FaCog style={{ color: '#16234D', fontSize: '1.1rem' }} />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#16234D', margin: 0 }}>
-            Mood Section Settings &mdash; إعدادات القسم الترويجي
+            Mood Section Settings
           </h2>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', maxWidth: '700px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             <label style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#16234D' }}>
-              Section Title &mdash; عنوان القسم
+              Section Title
             </label>
             <input
               type="text"
@@ -450,7 +450,7 @@ export default function AdminPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             <label style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#16234D' }}>
-              Background Image &mdash; صورة الخلفية
+              Background Image
             </label>
             {settings.moodImage && (
               <div style={{ width: '100%', height: '160px', borderRadius: '4px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#f8fafc', position: 'relative' }}>
@@ -468,7 +468,7 @@ export default function AdminPage() {
               borderRadius: '4px', fontFamily: 'var(--font-body)', fontSize: '0.85rem',
               cursor: 'pointer', border: 'none', width: 'fit-content',
             }}>
-              Choose Image &mdash; اختيار صورة
+              Choose Image
               <input
                 type="file" accept="image/*" style={{ display: 'none' }}
                 onChange={async (e) => {
@@ -488,7 +488,7 @@ export default function AdminPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', gridColumn: '1 / -1' }}>
             <label style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#16234D' }}>
-              Subtitle &mdash; النص الفرعي
+              Subtitle
             </label>
             <textarea
               value={settings.moodSubtitle}
@@ -543,7 +543,7 @@ export default function AdminPage() {
               margin: 0,
             }}
           >
-            Manage Collections &mdash; إدارة المجموعات
+            Manage Collections
           </h2>
         </div>
 

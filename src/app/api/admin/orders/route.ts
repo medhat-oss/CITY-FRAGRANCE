@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       governorate: body.governorate || '',
       items: body.items,
       totalPrice: body.totalPrice,
-      status: 'قيد الانتظار',
+      status: 'Pending',
       date: new Date().toLocaleDateString('en-CA'),
       paymentMethod: body.paymentMethod,
     };
