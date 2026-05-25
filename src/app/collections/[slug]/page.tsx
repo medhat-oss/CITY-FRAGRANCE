@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
@@ -51,9 +51,25 @@ const EMPTY_MESSAGES: Record<string, { line1: string; line2: string }> = {
   'gift-sets': { line1: 'Wrapping thoughtful surprises...', line2: 'Perfectly paired sets are being prepared.' },
 };
 
+interface GiftSet {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  productIds: string[];
+}
+
 export default function CollectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { getProductsByCollection, products } = useProducts();
+  const [giftSets, setGiftSets] = useState<GiftSet[]>([]);
+
+  useEffect(() => {
+    if (slug === 'gift-sets') {
+      fetch('/api/gift-sets', { next: { revalidate: 60 } }).then((r) => r.json()).then((d) => setGiftSets(d.giftSets || [])).catch(() => {});
+    }
+  }, [slug]);
 
   const meta = COLLECTION_META[slug];
   const emptyMsg = EMPTY_MESSAGES[slug] ?? { line1: 'Discovering new scents soon...', line2: '' };
@@ -106,7 +122,45 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
 
         {/* Grid */}
         <section className="max-w-7xl mx-auto px-6 pb-24">
-          {collectionProducts.length === 0 ? (
+          {slug === 'gift-sets' ? (
+            giftSets.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-white/40 text-lg">{emptyMsg.line1}</p>
+                <Link href="/collections" className="inline-flex items-center gap-2 mt-8 text-gold/70 hover:text-gold font-heading text-sm tracking-wider uppercase transition-colors">
+                  <HiArrowRight className="rotate-180" />
+                  Back to Collections
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {giftSets.map((gs) => {
+                  const includedProducts = gs.productIds.map((pid) => products.find((p) => p.id === pid)).filter(Boolean) as typeof products;
+                  return (
+                    <Link key={gs.id} href={`/collections/gift-sets/${gs.id}`} className="group block">
+                      <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:border-gold/40 hover:shadow-[0_0_40px_rgba(197,160,89,0.08)]">
+                        <div className="aspect-[4/5] relative overflow-hidden">
+                          <Image src={gs.image || '/images/product-placeholder.png'} alt={gs.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                        </div>
+                      <div className="p-6">
+                        <span className="text-xs uppercase tracking-widest text-gold/60 mb-1 block">Gift Set</span>
+                        <h3 className="font-heading text-xl font-light text-white mb-2">{gs.name}</h3>
+                        <p className="text-white/50 text-sm line-clamp-2 mb-3">{gs.description}</p>
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                          {includedProducts.map((p) => (
+                            <span key={p.id} className="text-[0.6rem] uppercase tracking-wider text-white/40 border border-white/10 px-2 py-0.5 rounded-sm">{p.name}</span>
+                          ))}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-amber-400 font-heading text-lg">{formatEGP(gs.price)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )
+          ) : collectionProducts.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-white/40 text-lg">{emptyMsg.line1}</p>
               {emptyMsg.line2 && (

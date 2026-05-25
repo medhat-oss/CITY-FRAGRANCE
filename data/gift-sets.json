@@ -1,0 +1,15 @@
+[
+  {
+    "id": "gs1779675482014",
+    "name": "mens",
+    "description": "anything",
+    "price": 2000,
+    "image": "",
+    "productIds": [
+      "p1",
+      "p3",
+      "p10"
+    ],
+    "createdAt": "2026-05-25T02:18:02.014Z"
+  }
+]

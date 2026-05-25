@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   HiOutlineEnvelope,
+  HiOutlineCheck,
 } from 'react-icons/hi2';
 import {
   FaInstagram,
@@ -37,6 +39,35 @@ const COLLECTION_LINKS: FooterLink[] = [
 
 export default function Footer() {
   const { dir } = useLocale();
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+
+  async function handleSubscribe(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus('loading');
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStatus('success');
+        setMessage('Subscribed successfully!');
+        setEmail('');
+      } else {
+        setStatus('error');
+        setMessage(data.message || 'Something went wrong');
+      }
+    } catch {
+      setStatus('error');
+      setMessage('Something went wrong');
+    }
+    setTimeout(() => { setStatus('idle'); setMessage(''); }, 4000);
+  }
 
   return (
     <footer className="bg-navy dark:bg-[#09142E] text-white" dir={dir}>
@@ -67,21 +98,35 @@ export default function Footer() {
             </p>
             <form
               className="flex"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={handleSubscribe}
             >
               <input
                 type="email"
                 placeholder="Email Address"
                 required
-                className="flex-1 px-4 py-3 bg-white/5 border border-white/20 text-white font-body text-base rounded-l-sm placeholder:text-white/40 focus:outline-none focus:border-gold transition-colors"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={status === 'loading'}
+                className="flex-1 px-4 py-3 bg-white/5 border border-white/20 text-white font-body text-base rounded-l-sm placeholder:text-white/40 focus:outline-none focus:border-gold transition-colors disabled:opacity-50"
               />
               <button
                 type="submit"
-                className="px-6 bg-gold text-navy border border-gold font-heading font-semibold uppercase tracking-[0.1em] cursor-pointer transition-colors hover:bg-gold-hover rounded-r-sm flex items-center"
+                disabled={status === 'loading'}
+                className="px-6 bg-gold text-navy border border-gold font-heading font-semibold uppercase tracking-[0.1em] cursor-pointer transition-colors hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-r-sm flex items-center"
               >
-                <HiOutlineEnvelope className="text-lg" />
+                {status === 'loading' ? (
+                  <span className="inline-block w-4 h-4 border-2 border-navy/30 border-t-navy rounded-full animate-spin" />
+                ) : (
+                  <HiOutlineEnvelope className="text-lg" />
+                )}
               </button>
             </form>
+            {message && (
+              <div className={`mt-3 flex items-center gap-2 text-xs font-body ${status === 'success' ? 'text-amber-400' : 'text-red-400'}`}>
+                {status === 'success' ? <HiOutlineCheck className="text-sm" /> : null}
+                {message}
+              </div>
+            )}
           </div>
 
           {/* Quick Links */}

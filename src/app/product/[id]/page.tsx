@@ -280,8 +280,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </button>
 
             <button
-              onClick={() => { buyNow(product, quantity); router.push('/checkout'); }}
-              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-navy bg-navy text-white cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-black"
+              onClick={() => { buyNow(product, quantity, activeVol); router.push('/checkout'); }}
+              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-white/20 bg-white/5 text-white cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-gold hover:text-navy hover:border-gold"
             >
               <HiBolt className="mr-2.5" /> Buy It Now
             </button>

@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react';
 import type { Product, CartItem } from '@/types';
@@ -16,13 +17,14 @@ interface CartContextValue {
   cartTotal: number;
   cartCount: number;
   addToCart: (product: Product, quantity?: number) => void;
+  addGiftSetToCart: (giftSet: { id: string; name: string; price: number; image: string }) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   toggleCart: () => void;
   openCart: () => void;
   closeCart: () => void;
   clearCart: () => void;
-  buyNow: (product: Product, quantity?: number) => void;
+  buyNow: (product: Product, quantity?: number, selectedVolume?: string) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -49,13 +51,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(CART_KEY, JSON.stringify(cartItems));
   }, [cartItems, isLoaded]);
 
-  useEffect(() => {
-    document.body.style.overflow = isCartOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isCartOpen]);
-
   const addToCart = useCallback((product: Product, quantity = 1) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
@@ -67,6 +62,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
         );
       }
       return [...prev, { ...product, quantity }];
+    });
+  }, []);
+
+  const addGiftSetToCart = useCallback((giftSet: { id: string; name: string; price: number; image: string }) => {
+    const cartId = 'gs_' + giftSet.id;
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.id === cartId);
+      if (existing) {
+        return prev.map((item) =>
+          item.id === cartId ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      const pseudoProduct: Product = {
+        id: cartId,
+        name: giftSet.name,
+        category: 'Gift Set',
+        notes: '',
+        volume: '',
+        price: giftSet.price,
+        salePrice: null,
+        images: giftSet.image ? [giftSet.image] : [],
+        badge: 'GIFT SET',
+      };
+      return [...prev, { ...pseudoProduct, quantity: 1 }];
     });
   }, []);
 
@@ -94,17 +113,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const closeCart = useCallback(() => setIsCartOpen(false), []);
   const clearCart = useCallback(() => setCartItems([]), []);
 
-  const buyNow = useCallback((product: Product, quantity = 1) => {
-    setCartItems([{ ...product, quantity }]);
+  const buyNow = useCallback((product: Product, quantity = 1, selectedVolume?: string) => {
+    setCartItems([{
+      ...product,
+      quantity,
+      volume: selectedVolume || product.volume,
+    }]);
     setIsCartOpen(false);
   }, []);
 
-  const cartTotal = cartItems.reduce((sum, item) => {
-    const price = item.salePrice ?? item.price;
-    return sum + price * item.quantity;
-  }, 0);
+  const cartTotal = useMemo(
+    () => cartItems.reduce((sum, item) => {
+      const price = item.salePrice ?? item.price;
+      return sum + price * item.quantity;
+    }, 0),
+    [cartItems]
+  );
 
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = useMemo(
+    () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    [cartItems]
+  );
 
   return (
     <CartContext.Provider
@@ -114,6 +143,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         cartTotal,
         cartCount,
         addToCart,
+        addGiftSetToCart,
         removeFromCart,
         updateQuantity,
         toggleCart,

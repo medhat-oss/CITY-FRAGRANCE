@@ -76,7 +76,7 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
     if (fetched.current) return;
     fetched.current = true;
     if (Object.keys(initialImages).length > 0) return;
-    fetch('/api/collections')
+    fetch('/api/collections', { next: { revalidate: 60 } })
       .then((res) => res.json())
       .then((data: { images: Record<string, string> }) => setCollectionImages(data.images))
       .catch(() => {});

@@ -19,7 +19,7 @@ const ProductsContext = createContext<ProductsContextValue | null>(null);
 
 async function fetchProducts(): Promise<Product[]> {
   try {
-    const res = await fetch('/api/products');
+    const res = await fetch('/api/products', { next: { revalidate: 60 } });
     const data = await res.json() as { products: Product[] };
     return data.products;
   } catch {

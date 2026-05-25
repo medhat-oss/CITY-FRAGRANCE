@@ -169,7 +169,7 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-[#09142E] text-slate-900 dark:text-slate-100 transition-colors duration-300">
       {/* Secure bar */}
-      <div className="bg-white dark:bg-brandDark-card border-b border-gray-100 dark:border-slate-800 px-6 sm:px-10 py-3 flex justify-end items-center gap-1.5 text-xs tracking-wide text-gray-400 dark:text-slate-400">
+      <div className="bg-white dark:bg-brandDark-card border-b border-gray-100 dark:border-slate-800 px-6 sm:px-10 py-1.5 flex justify-end items-center gap-1.5 text-xs tracking-wide text-gray-400 dark:text-slate-400">
         <HiLockClosed className="text-xs" />
         <span>Secure Checkout</span>
       </div>
@@ -177,13 +177,16 @@ export default function CheckoutPage() {
       {/* ===== Two-Column Layout ===== */}
       <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_480px]">
         {/* ═══ LEFT: Form ═══ */}
-        <form onSubmit={handleSubmit} className="px-4 sm:px-10 py-4 sm:py-6">
+        <form onSubmit={handleSubmit} className="px-4 sm:px-10 pt-0 pb-0">
           {/* Logo */}
-          <Link href="/" className="block mb-6 bg-transparent">
-            <img
+          <Link href="/" className="block my-0 bg-transparent">
+            <Image
               src="/images/checkout-logo.png"
               alt="City Fragrance"
+              width={220}
+              height={90}
               className="w-[160px] sm:w-[180px] md:w-[220px] h-auto object-contain bg-transparent mix-blend-screen"
+              priority
             />
           </Link>
 
@@ -431,8 +434,8 @@ export default function CheckoutPage() {
         </form>
 
         {/* ═══ RIGHT: Order Summary ═══ */}
-        <aside className="bg-[#fafafa] dark:bg-[#0c1b3d] border-l border-gray-100 dark:border-slate-800 px-4 sm:px-10 py-8 sm:py-12 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto order-first lg:order-last">
-          <h2 className="font-heading text-lg font-normal text-navy dark:text-white mb-6">
+        <aside className="bg-[#fafafa] dark:bg-[#0c1b3d] border-l border-gray-100 dark:border-slate-800 px-4 sm:px-10 pt-0 pb-8 sm:pb-12 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto order-first lg:order-last">
+          <h2 className="font-heading text-lg font-normal text-navy dark:text-white mb-4">
             Order summary
           </h2>
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import styles from './admin.module.css';
 import Link from 'next/link';
-import { FaBoxOpen, FaStore, FaClipboardList } from 'react-icons/fa';
+import { FaBoxOpen, FaStore, FaClipboardList, FaGift } from 'react-icons/fa';
 import AdminSidebarUser from '@/components/AdminSidebarUser';
 
 export const metadata = {
@@ -23,6 +23,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </Link>
             <Link href="/admin/orders" className={styles.sidebarLink}>
               <FaClipboardList /> إدارة الطلبات
+            </Link>
+            <Link href="/admin/gift-sets" className={styles.sidebarLink}>
+              <FaGift /> Gift Sets
             </Link>
             <Link href="/" className={styles.sidebarLink}>
               <FaStore /> Back to Store

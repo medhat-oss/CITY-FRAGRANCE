@@ -34,7 +34,7 @@ export default function CollectionCategories() {
   const [collectionImages, setCollectionImages] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
-    fetch('/api/collections')
+    fetch('/api/collections', { next: { revalidate: 60 } })
       .then((res) => res.json())
       .then((data: { images: Record<string, string> }) => setCollectionImages(data.images))
       .catch(() => setCollectionImages({}));
