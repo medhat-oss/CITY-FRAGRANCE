@@ -152,11 +152,11 @@ export default function CheckoutPage() {
 
       // Redirect to the correct page based on payment method
       if (selectedPayment === 'instapay') {
-        router.push(`/checkout/instapay?orderId=${orderId}`);
+        router.push(`/payment-checkout/instapay?orderId=${orderId}`);
       } else if (selectedPayment === 'vodafone') {
-        router.push(`/checkout/vodafone-cash?orderId=${orderId}`);
+        router.push(`/payment-checkout/vodafone-cash?orderId=${orderId}`);
       } else {
-        router.push(`/checkout/success?orderId=${orderId}`);
+        router.push(`/payment-checkout/success?orderId=${orderId}`);
       }
     } catch (err) {
       setPaymentError(err instanceof Error ? err.message : 'Something went wrong');

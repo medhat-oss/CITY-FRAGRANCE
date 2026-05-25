@@ -103,7 +103,7 @@ export default function PaymentMethodPage({ method }: { method: string }) {
         </a>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href={`/checkout/success?orderId=${orderId}`} className="text-white/50 hover:text-gold text-xs font-heading tracking-wider uppercase transition-colors no-underline">
+          <Link href={`/payment-checkout/success?orderId=${orderId}`} className="text-white/50 hover:text-gold text-xs font-heading tracking-wider uppercase transition-colors no-underline">
             I&apos;ll do this later
           </Link>
           <Link href="/" className="btn btn-primary btn-large">

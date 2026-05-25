@@ -84,7 +84,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
       image: giftSet.image,
     });
     closeCart();
-    router.push('/checkout');
+    router.push('/payment-checkout');
   }
 
   return (
