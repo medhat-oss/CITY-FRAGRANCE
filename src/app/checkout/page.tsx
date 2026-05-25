@@ -84,7 +84,7 @@ export default function CheckoutPage() {
   const [discountApplied, setDiscountApplied] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState('');
-  const [selectedPayment, setSelectedPayment] = useState<'vodafone' | 'instapay' | 'cod' | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<'vodafone' | 'instapay' | 'bank' | 'cod' | null>(null);
   const [shippingCost, setShippingCost] = useState(0);
 
   const handleChange = (
@@ -135,28 +135,6 @@ export default function CheckoutPage() {
         paymentMethod: selectedPayment,
       };
 
-      // For wallet payments (vodafone/instapay), call Paymob checkout first
-      if (selectedPayment === 'vodafone' || selectedPayment === 'instapay') {
-        const checkoutRes = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: total,
-            firstName: form.firstName,
-            lastName: form.lastName,
-            email: form.email,
-            phone: form.phone,
-            items,
-            paymentMethod: 'wallet',
-          }),
-        });
-
-        const checkoutData = await checkoutRes.json();
-        if (!checkoutData.success) {
-          throw new Error('Payment failed. Please try again.');
-        }
-      }
-
       // Save order
       const res = await fetch('/api/admin/orders', {
         method: 'POST',
@@ -171,10 +149,16 @@ export default function CheckoutPage() {
 
       const orderId = data.order.orderId;
       clearCart();
-      if (selectedPayment === 'cod') {
-        router.push(`/checkout/success?orderId=${orderId}`);
+
+      // Redirect to the correct page based on payment method
+      if (selectedPayment === 'instapay') {
+        router.push(`/checkout/instapay?orderId=${orderId}`);
+      } else if (selectedPayment === 'vodafone') {
+        router.push(`/checkout/vodafone-cash?orderId=${orderId}`);
+      } else if (selectedPayment === 'bank') {
+        router.push(`/checkout/bank-transfer?orderId=${orderId}`);
       } else {
-        router.push(`/checkout/payment?method=${selectedPayment}&orderId=${orderId}`);
+        router.push(`/checkout/success?orderId=${orderId}`);
       }
     } catch (err) {
       setPaymentError(err instanceof Error ? err.message : 'Something went wrong');
@@ -415,6 +399,18 @@ export default function CheckoutPage() {
                 }`}
               >
                 <span className="block text-base">InstaPay</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedPayment('bank')}
+                className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-200 ${
+                  selectedPayment === 'bank'
+                    ? 'border-amber-500 bg-amber-500/10 text-amber-400 font-bold'
+                    : 'border-slate-700 bg-[#11224D] text-white hover:border-amber-500/50'
+                }`}
+              >
+                <span className="block text-base">Bank Transfer</span>
               </button>
 
               <button

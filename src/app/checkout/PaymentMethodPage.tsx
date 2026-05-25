@@ -2,30 +2,40 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Suspense } from 'react';
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '201001234567';
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '201044415982';
 
-const ACCOUNT_DETAILS: Record<string, { title: string; number: string }> = {
-  vodafone: { title: 'Vodafone Cash Number', number: '01044415982' },
-  instapay: { title: 'InstaPay Account Number', number: '01092748940' },
+const ACCOUNT_DETAILS: Record<string, { title: string; number: string; note: string }> = {
+  instapay: {
+    title: 'InstaPay Account',
+    number: '01092748940',
+    note: 'Send the exact order amount to the InstaPay account above, then confirm via WhatsApp.',
+  },
+  'vodafone-cash': {
+    title: 'Vodafone Cash Number',
+    number: '01044415982',
+    note: 'Send the exact order amount to the Vodafone Cash number above, then confirm via WhatsApp.',
+  },
+  'bank-transfer': {
+    title: 'Bank Account Details',
+    number: 'City Fragrance — 1234567890 (CIB)',
+    note: 'Please transfer the exact order amount to the bank account above, then send the transfer receipt via WhatsApp.',
+  },
 };
 
-function PaymentContent() {
+export default function PaymentMethodPage({ method }: { method: string }) {
   const searchParams = useSearchParams();
-  const method = searchParams.get('method') || '';
   const orderId = searchParams.get('orderId') || '';
   const details = ACCOUNT_DETAILS[method];
 
   const waText = encodeURIComponent(
-    `Hello, I have completed the payment for order #${orderId}`
+    `Hello, I have completed the payment for order #${orderId} (${method})`
   );
   const waHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
 
   return (
     <div className="min-h-screen bg-[#09142E] flex items-center justify-center px-4 py-12">
       <div className="max-w-lg w-full text-center">
-        {/* Icon */}
         <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 text-3xl flex items-center justify-center mx-auto mb-6">
           &#9889;
         </div>
@@ -43,7 +53,6 @@ function PaymentContent() {
           </p>
         )}
 
-        {/* Account Details Card */}
         {details && (
           <div
             style={{
@@ -83,10 +92,9 @@ function PaymentContent() {
           className="font-body text-sm text-slate-300 leading-relaxed mb-8"
           style={{ lineHeight: '1.8' }}
         >
-          Please transfer the exact order amount to the account above, then click the button below to send a confirmation message via WhatsApp with the transfer receipt.
+          {details?.note || 'Please complete the payment and confirm via WhatsApp.'}
         </p>
 
-        {/* WhatsApp Button */}
         <a
           href={waHref}
           target="_blank"
@@ -109,19 +117,5 @@ function PaymentContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function PaymentPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[#09142E] flex items-center justify-center">
-          <p className="text-white font-heading">Loading...</p>
-        </div>
-      }
-    >
-      <PaymentContent />
-    </Suspense>
   );
 }
