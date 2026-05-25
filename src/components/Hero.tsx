@@ -55,8 +55,8 @@ export default function Hero() {
           premium fragrances.
         </p>
 
-        <div className="flex justify-center gap-6 animate-fade-up opacity-0 [animation-delay:0.8s]">
-          <Link href="/collections/all-fragrances" className="btn btn-primary btn-large">
+        <div className="flex justify-center gap-6 mt-12 animate-fade-up opacity-0 [animation-delay:0.8s]">
+          <Link href="/collections/all-fragrances" className="btn btn-primary rounded-full px-8 py-3 text-sm shadow-[0_8px_25px_rgba(197,160,89,0.35)] hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(197,160,89,0.45)]">
             Shop All Fragrances
           </Link>
         </div>

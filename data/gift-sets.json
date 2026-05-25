@@ -4,7 +4,7 @@
     "name": "mens",
     "description": "anything",
     "price": 2000,
-    "image": "",
+    "image": "/uploads/hero-bg-1779736356022.jpg",
     "productIds": [
       "p1",
       "p3",

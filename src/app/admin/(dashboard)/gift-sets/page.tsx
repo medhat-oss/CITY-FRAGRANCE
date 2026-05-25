@@ -25,6 +25,7 @@ export default function AdminGiftSetsPage() {
   const [editing, setEditing] = useState<GiftSet | null>(null);
   const [form, setForm] = useState<{ name: string; description: string; price: string; image: string; productIds: string[] }>({ name: '', description: '', price: '', image: '', productIds: [] });
   const [isUploading, setIsUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/gift-sets')
@@ -36,12 +37,14 @@ export default function AdminGiftSetsPage() {
   function openAdd() {
     setEditing(null);
     setForm({ name: '', description: '', price: '', image: '', productIds: [] });
+    setImagePreview(null);
     setModalOpen(true);
   }
 
   function openEdit(gs: GiftSet) {
     setEditing(gs);
     setForm({ name: gs.name, description: gs.description, price: String(gs.price), image: gs.image, productIds: [...gs.productIds] });
+    setImagePreview(null);
     setModalOpen(true);
   }
 
@@ -80,13 +83,18 @@ export default function AdminGiftSetsPage() {
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Show local preview immediately
+    const localUrl = URL.createObjectURL(file);
+    setImagePreview(localUrl);
+
     setIsUploading(true);
     const formData = new FormData();
     formData.append('file', file);
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await res.json();
-      if (data.url) setForm((prev) => ({ ...prev, image: data.url }));
+      if (data.path) setForm((prev) => ({ ...prev, image: data.path }));
     } catch { /* ignore */ }
     setIsUploading(false);
   }
@@ -172,19 +180,36 @@ export default function AdminGiftSetsPage() {
                 <div className={styles.formGroup}>
                   <label>Image</label>
                   <div className={styles.uploadArea}>
-                    <label htmlFor="gs-image-upload" className={styles.uploadLabel}>
-                      {isUploading ? (
-                        <span className={styles.uploadSpinner}><FaSpinner className={styles.spinIcon} /> Uploading...</span>
-                      ) : (
-                        <span className={styles.uploadPrompt}><FaCloudUploadAlt style={{ fontSize: '1.5rem' }} /><span>Upload Image</span></span>
-                      )}
-                    </label>
-                    <input id="gs-image-upload" type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} disabled={isUploading} />
-                    {form.image && (
-                      <div className={styles.uploadPreview}>
-                        <Image src={form.image} alt="Preview" width={50} height={50} style={{ objectFit: 'cover', borderRadius: '4px' }} />
-                        <span className={styles.previewLabel}>Uploaded</span>
+                    {/* ─── Preview (local or server image) ─── */}
+                    {(imagePreview || form.image) ? (
+                      <div style={{ position: 'relative', width: '100%', height: '180px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #e2e8f0', background: '#f8fafc' }}>
+                        <Image
+                          src={imagePreview || form.image}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                          sizes="300px"
+                          onLoad={() => imagePreview && URL.revokeObjectURL(imagePreview)}
+                        />
+                        {isUploading && (
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <FaSpinner className={styles.spinIcon} style={{ color: '#C5A059', fontSize: '2rem' }} />
+                          </div>
+                        )}
                       </div>
+                    ) : (
+                      <label htmlFor="gs-image-upload" className={styles.uploadLabel}>
+                        <span className={styles.uploadPrompt}><FaCloudUploadAlt style={{ fontSize: '1.5rem' }} /><span>Upload Image</span></span>
+                      </label>
+                    )}
+
+                    <input id="gs-image-upload" type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} disabled={isUploading} />
+
+                    {/* Re-upload button */}
+                    {(imagePreview || form.image) && (
+                      <label htmlFor="gs-image-upload" className={styles.uploadLabel} style={{ padding: '0.5rem', borderStyle: 'solid', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#16234D' }}>Change Image</span>
+                      </label>
                     )}
                   </div>
                 </div>

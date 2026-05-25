@@ -90,6 +90,9 @@ export default function AdminPage() {
     heroSubtitle: '',
     announcementText: '',
     heroBgImage: '',
+    moodTitle: '',
+    moodSubtitle: '',
+    moodImage: '',
   });
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -416,6 +419,110 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* ── Mood Section Settings ── */}
+      <div className={styles.adminContent} style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+          <FaCog style={{ color: '#16234D', fontSize: '1.1rem' }} />
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#16234D', margin: 0 }}>
+            Mood Section Settings &mdash; إعدادات القسم الترويجي
+          </h2>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', maxWidth: '700px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <label style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#16234D' }}>
+              Section Title &mdash; عنوان القسم
+            </label>
+            <input
+              type="text"
+              value={settings.moodTitle}
+              onChange={(e) => handleSettingsChange('moodTitle', e.target.value)}
+              placeholder="The Essence of Luxury & Elegance"
+              style={{
+                padding: '0.7rem 0.85rem', border: '1px solid #cbd5e1', borderRadius: '4px',
+                fontFamily: 'var(--font-body)', fontSize: '0.9rem', color: '#334155',
+                outline: 'none', transition: 'border-color 0.2s',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = '#C5A059')}
+              onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <label style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#16234D' }}>
+              Background Image &mdash; صورة الخلفية
+            </label>
+            {settings.moodImage && (
+              <div style={{ width: '100%', height: '160px', borderRadius: '4px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#f8fafc', position: 'relative' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={settings.moodImage}
+                  alt="Mood section preview"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+            )}
+            <label style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+              padding: '0.6rem 1.2rem', background: '#16234D', color: '#fff',
+              borderRadius: '4px', fontFamily: 'var(--font-body)', fontSize: '0.85rem',
+              cursor: 'pointer', border: 'none', width: 'fit-content',
+            }}>
+              Choose Image &mdash; اختيار صورة
+              <input
+                type="file" accept="image/*" style={{ display: 'none' }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const formData = new FormData();
+                  formData.append('file', file);
+                  try {
+                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.success) handleSettingsChange('moodImage', data.path);
+                  } catch { /* ignore */ }
+                }}
+              />
+            </label>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', gridColumn: '1 / -1' }}>
+            <label style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#16234D' }}>
+              Subtitle &mdash; النص الفرعي
+            </label>
+            <textarea
+              value={settings.moodSubtitle}
+              onChange={(e) => handleSettingsChange('moodSubtitle', e.target.value)}
+              placeholder="Discover timeless scents crafted for those who appreciate the finer things in life."
+              rows={3}
+              style={{
+                padding: '0.7rem 0.85rem', border: '1px solid #cbd5e1', borderRadius: '4px',
+                fontFamily: 'var(--font-body)', fontSize: '0.9rem', color: '#334155',
+                outline: 'none', transition: 'border-color 0.2s', resize: 'vertical',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = '#C5A059')}
+              onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.5rem' }}>
+          <button
+            onClick={handleSaveSettings}
+            disabled={saving}
+            className="btn btn-primary"
+            style={{ padding: '0.75rem 2rem', fontSize: '0.85rem' }}
+          >
+            {saving ? 'Saving...' : 'Save Settings'}
+          </button>
+          {saveMsg && (
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: saveMsg.includes('success') ? '#16a34a' : '#dc2626' }}>
+              {saveMsg}
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* ── Manage Collections ── */}
       <div className={styles.adminContent} style={{ marginBottom: '2rem' }}>
         <div
@@ -561,6 +668,7 @@ export default function AdminPage() {
               <tr>
                 <th>Image</th>
                 <th>Product Name</th>
+                <th>Type</th>
                 <th>Category</th>
                 <th>Price</th>
                 <th>Sale Price</th>
@@ -583,11 +691,12 @@ export default function AdminPage() {
                     />
                   </td>
                   <td>
-                    <strong>{product.name}</strong>
-                    <br />
-                    <small style={{ color: '#64748b' }}>{product.notes}</small>
-                  </td>
-                  <td>{product.category}</td>
+                            <strong>{product.name}</strong>
+                            <br />
+                            <small style={{ color: '#64748b' }}>{product.notes}</small>
+                          </td>
+                          <td>{product.type || '-'}</td>
+                          <td>{product.category}</td>
                   <td>{fmt(product.price)}</td>
                   <td>
                     {product.salePrice ? fmt(product.salePrice) : '-'}

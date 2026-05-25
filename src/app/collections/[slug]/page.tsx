@@ -64,11 +64,16 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
   const { slug } = use(params);
   const { getProductsByCollection, products } = useProducts();
   const [giftSets, setGiftSets] = useState<GiftSet[]>([]);
+  const [heroImage, setHeroImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (slug === 'gift-sets') {
       fetch('/api/gift-sets', { next: { revalidate: 60 } }).then((r) => r.json()).then((d) => setGiftSets(d.giftSets || [])).catch(() => {});
     }
+    fetch('/api/collections').then((r) => r.json()).then((d) => {
+      const img = d.images?.[slug];
+      if (img) setHeroImage(img);
+    }).catch(() => {});
   }, [slug]);
 
   const meta = COLLECTION_META[slug];
@@ -101,8 +106,9 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
       <Header />
       <main>
         {/* Hero */}
-        <section className="relative pt-32 pb-16 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.03] via-transparent to-transparent" />
+        <section className={`relative pt-32 pb-16 overflow-hidden ${heroImage ? 'bg-cover bg-center bg-no-repeat' : ''}`} style={heroImage ? { backgroundImage: `url('${heroImage}')` } : undefined}>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.03] via-transparent to-transparent mix-blend-overlay" />
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
             <p className="text-gold/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
               City Fragrance

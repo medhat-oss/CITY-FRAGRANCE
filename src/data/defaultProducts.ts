@@ -3,6 +3,7 @@ import type { Product } from '@/types';
 export const defaultProducts: Product[] = [
   {
     id: 'p1',
+    type: '',
     name: 'Oud Supreme',
     category: 'Oud',
     notes: 'Oud • Rose • Amber',
@@ -15,6 +16,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p2',
+    type: '',
     name: 'Midnight Musk',
     category: 'Men',
     notes: 'Musk • Vanilla • Sandalwood',
@@ -26,6 +28,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p3',
+    type: '',
     name: 'Royal Amber',
     category: 'Women',
     notes: 'Amber • Patchouli • Bergamot',
@@ -38,6 +41,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p4',
+    type: '',
     name: 'Desert Bloom',
     category: 'Women',
     notes: 'Jasmine • Saffron • Cedar',
@@ -49,6 +53,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p5',
+    type: '',
     name: 'Oud Wood',
     category: 'Men',
     notes: 'Oud • Sandalwood • Cardamom',
@@ -61,6 +66,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p6',
+    type: '',
     name: 'Leather Reserve',
     category: 'Men',
     notes: 'Leather • Oakmoss • Vetiver',
@@ -72,6 +78,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p7',
+    type: '',
     name: 'Aqua Vetiver',
     category: 'Men',
     notes: 'Vetiver • Citrus • Marine',
@@ -83,6 +90,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p8',
+    type: '',
     name: 'Rose Petals',
     category: 'Women',
     notes: 'Damascus Rose • Peony • Musk',
@@ -94,6 +102,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p9',
+    type: '',
     name: 'Vanilla Bloom',
     category: 'Women',
     notes: 'Madagascar Vanilla • Orchid',
@@ -105,6 +114,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p10',
+    type: '',
     name: 'Saffron Noir',
     category: 'Men',
     notes: 'Saffron • Black Leather • Smoke',
@@ -117,6 +127,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p11',
+    type: '',
     name: 'Jasmine Serenade',
     category: 'Women',
     notes: 'Jasmine • Musk • White Amber',
@@ -129,6 +140,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p12',
+    type: '',
     name: 'Oud Royale',
     category: 'Oud',
     notes: 'Royal Oud • Labdanum • Bergamot',
@@ -141,6 +153,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p13',
+    type: '',
     name: 'Citrus Breeze',
     category: 'Men',
     notes: 'Bergamot • Grapefruit • Cedar',
@@ -153,6 +166,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p14',
+    type: '',
     name: 'Amber & Oud Gift Set',
     category: 'Sets',
     notes: 'Amber • Oud • Musk — 3 x 35 ML',
@@ -165,6 +179,7 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 'p15',
+    type: '',
     name: 'Crystal Rose',
     category: 'Women',
     notes: 'Rose • Pink Pepper • Musk',

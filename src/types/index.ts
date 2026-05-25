@@ -1,6 +1,7 @@
 export interface Product {
   id: string;
   name: string;
+  type: string;
   category: string;
   notes: string;
   volume: string;
@@ -11,6 +12,7 @@ export interface Product {
   collection?: string;
   description?: string;
   orientation?: string;
+  concentration?: string;
 }
 
 export interface NavLink {
@@ -50,4 +52,7 @@ export interface SiteSettings {
   heroSubtitle: string;
   announcementText: string;
   heroBgImage: string;
+  moodTitle: string;
+  moodSubtitle: string;
+  moodImage: string;
 }

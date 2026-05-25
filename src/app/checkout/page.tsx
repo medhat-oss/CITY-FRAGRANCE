@@ -122,21 +122,46 @@ export default function CheckoutPage() {
         price: item.salePrice ?? item.price,
       }));
 
+      const orderData = {
+        customerName: `${form.firstName} ${form.lastName}`,
+        phoneNumber: form.phone,
+        email: form.email,
+        address: form.address,
+        apartment: form.apartment,
+        city: form.city,
+        governorate: form.governorate,
+        items,
+        totalPrice: total,
+        paymentMethod: selectedPayment,
+      };
+
+      // For wallet payments (vodafone/instapay), call Paymob checkout first
+      if (selectedPayment === 'vodafone' || selectedPayment === 'instapay') {
+        const checkoutRes = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: total,
+            firstName: form.firstName,
+            lastName: form.lastName,
+            email: form.email,
+            phone: form.phone,
+            items,
+            paymentMethod: 'wallet',
+          }),
+        });
+
+        const checkoutData = await checkoutRes.json();
+        if (!checkoutData.success) {
+          throw new Error('فشلت عملية الدفع. يرجى المحاولة مرة أخرى.');
+        }
+      }
+
+      // Save order
       const res = await fetch('/api/admin/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerName: `${form.firstName} ${form.lastName}`,
-          phoneNumber: form.phone,
-          email: form.email,
-          address: form.address,
-          apartment: form.apartment,
-          city: form.city,
-          governorate: form.governorate,
-          items,
-          totalPrice: total,
-          paymentMethod: selectedPayment,
-        }),
+        body: JSON.stringify(orderData),
       });
 
       const data = await res.json();
@@ -404,7 +429,10 @@ export default function CheckoutPage() {
               </button>
             </div>
 
-            <p className="font-body text-xs text-ink-lighter dark:text-slate-400 mt-4">
+            <p className="text-right text-xs md:text-sm text-white mb-1.5 font-medium leading-relaxed">
+              وفي حالة اختيار الدفع عند الاستلام واتمام الطلب سيتم التواصل معك عن طريق واتساب لتأكيد الطلب لتحويل deposit قيمته اقل من 15% من اجمالي الطلب
+            </p>
+            <p className="font-body text-xs text-ink-lighter dark:text-slate-400 mt-2">
               سيتم عرض تفاصيل الدفع بعد تأكيد الطلب
             </p>
           </section>

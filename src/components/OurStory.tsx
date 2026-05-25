@@ -14,11 +14,6 @@ const values = [
     ar: { title: 'القيمة', desc: 'الأناقة الحقيقية لا تُحدد بسعر مرتفع. نقدم تجارب استثنائية بأسعار مناسبة وصادقة.' },
     icon: '◆',
   },
-  {
-    en: { title: 'Experience', desc: 'From the moment you browse to the moment your fragrance arrives—every step is crafted with care and dedication to you.' },
-    ar: { title: 'التجربة', desc: 'من أول نظرة حتى وصول عطرك — كل خطوة مصممة بعناية واهتمام من أجلك.' },
-    icon: '✧',
-  },
 ];
 
 function FadeInSection({ children, className = '', delay = 0, ...rest }: { children: React.ReactNode; className?: string; delay?: number } & React.HTMLAttributes<HTMLDivElement>) {
@@ -179,7 +174,7 @@ export default function OurStory() {
           </div>
         </FadeInSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {values.map((v, i) => (
             <FadeInSection key={v.en.title} delay={i * 150}>
               <div className="group relative h-full border border-white/10 rounded-2xl p-8 bg-white/[0.03] transition-all duration-500 hover:border-gold/40 hover:bg-gold/[0.03] hover:shadow-[0_0_40px_rgba(197,160,89,0.06)]">

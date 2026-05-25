@@ -77,6 +77,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const pseudoProduct: Product = {
         id: cartId,
         name: giftSet.name,
+        type: 'Gift Sets',
         category: 'Gift Set',
         notes: '',
         volume: '',

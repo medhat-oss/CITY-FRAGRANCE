@@ -50,13 +50,13 @@ export default function CollectionCategories() {
   return (
     <section className="py-16 px-4 sm:px-8 bg-slate-50 dark:bg-[#09142E] border-b dark:border-slate-800" dir={dir}>
       <div className="max-w-container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 gap-3 md:gap-6">
           {collections.map((collection) => (
             <Link
               key={collection.title}
               href={collection.href}
               prefetch={true}
-              className="group relative overflow-hidden rounded-sm block h-[350px] sm:h-[400px] border border-amber-500/20 dark:border-brandDark-border dark:bg-brandDark-card"
+              className="group relative overflow-hidden rounded-sm block h-[200px] sm:h-[360px] border border-amber-500/20 dark:border-brandDark-border dark:bg-brandDark-card"
             >
               {!loaded ? (
                 <div className="absolute inset-0 bg-slate-800/50 animate-pulse" />
@@ -70,15 +70,15 @@ export default function CollectionCategories() {
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/10 to-transparent flex flex-col justify-end p-8 sm:p-10 text-white">
-                <h3 className="font-heading text-3xl sm:text-4xl font-light mb-2">
+              <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/10 to-transparent flex flex-col justify-end p-3 md:p-6 text-white">
+                <h3 className="font-heading text-sm sm:text-base md:text-2xl font-light mb-1 leading-tight">
                   {collection.title}
                 </h3>
-                <p className="font-body text-sm sm:text-base text-amber-400/90 mb-3">
+                <p className="hidden sm:block text-xs text-amber-400/90 mb-2.5">
                   {collection.subtitle}
                 </p>
-                <span className="font-heading text-xs uppercase tracking-[0.15em] text-amber-400 flex items-center gap-2 transition-all duration-300 group-hover:gap-3">
-                  Explore Now <HiArrowRight />
+                <span className="font-heading text-[10px] sm:text-xs uppercase tracking-tight text-amber-400 flex items-center gap-1 transition-all duration-300 group-hover:gap-1.5">
+                  Explore Now <HiArrowRight className="w-2.5 h-2.5 md:w-4 md:h-4" />
                 </span>
               </div>
             </Link>

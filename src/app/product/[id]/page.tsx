@@ -1,10 +1,10 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { HiMinus, HiPlus, HiChevronDown, HiShoppingBag, HiBolt } from 'react-icons/hi2';
+import { HiMinus, HiPlus, HiChevronDown, HiShoppingBag, HiBolt, HiXMark, HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/context/CartContext';
 import { formatEGP } from '@/utils/currency';
@@ -22,12 +22,64 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [notesOpen, setNotesOpen] = useState(false);
   const [descOpen, setDescOpen] = useState(false);
   const [imgError, setImgError] = useState<Record<number, boolean>>({});
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const product = products.find((p) => p.id === id);
+
+  const productImages = product?.images?.length
+    ? product.images
+    : ['/images/product-placeholder.png'];
+
+  const activeImage = imgError[activeImageIndex]
+    ? '/placeholder.png'
+    : productImages[activeImageIndex] || productImages[0];
+
+  const volumeOptions = (product?.volume || '100 ML')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+  const activeVol =
+    selectedVolume && volumeOptions.includes(selectedVolume)
+      ? selectedVolume
+      : volumeOptions[0];
+
+  const goToPrev = useCallback(() => {
+    setLightboxIndex((prev) => (prev === 0 ? productImages.length - 1 : prev - 1));
+  }, [productImages.length]);
+
+  const goToNext = useCallback(() => {
+    setLightboxIndex((prev) => (prev === productImages.length - 1 ? 0 : prev + 1));
+  }, [productImages.length]);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxOpen(false);
+      if (e.key === 'ArrowLeft') goToPrev();
+      if (e.key === 'ArrowRight') goToNext();
+    };
+    window.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [lightboxOpen, goToPrev, goToNext]);
+
+  const notesList = product?.notes
+    ? product.notes.split('•').map((n) => n.trim()).filter(Boolean)
+    : [];
+
+  const third = Math.ceil(notesList.length / 3) || 1;
+  const topNotes = notesList.slice(0, third);
+  const middleNotes = notesList.slice(third, third * 2);
+  const baseNotesList = notesList.slice(third * 2);
 
   if (!isLoaded) {
     return <div className="h-screen bg-white dark:bg-[#09142E]" />;
   }
-
-  const product = products.find((p) => p.id === id);
 
   if (!product) {
     return (
@@ -46,34 +98,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       </>
     );
   }
-
-  const productImages =
-    product.images?.length
-      ? product.images
-      : ['/images/product-placeholder.png'];
-
-  const activeImage = imgError[activeImageIndex]
-    ? '/placeholder.png'
-    : productImages[activeImageIndex] || productImages[0];
-
-  const volumeOptions = (product.volume || '100 ML')
-    .split(',')
-    .map((v) => v.trim())
-    .filter(Boolean);
-
-  const activeVol =
-    selectedVolume && volumeOptions.includes(selectedVolume)
-      ? selectedVolume
-      : volumeOptions[0];
-
-  const notesList = product.notes
-    ? product.notes.split('•').map((n) => n.trim()).filter(Boolean)
-    : [];
-
-  const third = Math.ceil(notesList.length / 3) || 1;
-  const topNotes = notesList.slice(0, third);
-  const middleNotes = notesList.slice(third, third * 2);
-  const baseNotesList = notesList.slice(third * 2);
 
   return (
     <>
@@ -121,7 +145,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
 
             {/* Main Image */}
-            <div className="relative flex-1 aspect-[3/4] bg-[#f8f8f8] dark:bg-slate-900 overflow-hidden rounded-sm">
+            <button
+              onClick={() => { setLightboxOpen(true); setLightboxIndex(activeImageIndex); }}
+              className="relative flex-1 aspect-[3/4] bg-[#f8f8f8] dark:bg-slate-900 overflow-hidden rounded-sm cursor-zoom-in text-left focus:outline-none"
+            >
               {product.badge && (
                 <span
                   className={`absolute top-4 left-4 z-10 font-heading text-xs font-semibold tracking-widest px-3 py-1.5 uppercase rounded-sm ${
@@ -149,7 +176,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   {activeImageIndex + 1} / {productImages.length}
                 </div>
               )}
-            </div>
+            </button>
           </div>
 
           {/* ═══ RIGHT: Product Details ═══ */}
@@ -196,14 +223,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             {/* Attributes */}
             <div className="flex flex-col gap-5">
-              {/* Type */}
+              {/* Concentration */}
               <div className="flex flex-col gap-2">
                 <span className="font-heading text-[0.7rem] tracking-[0.15em] uppercase text-ink-light dark:text-slate-300 font-semibold">
-                  Type
+                  Concentration
                 </span>
                 <div className="flex flex-wrap gap-2">
                   <button className="px-5 py-2.5 border-2 border-navy bg-navy text-white font-heading text-xs uppercase tracking-wider rounded-sm transition-all duration-200 hover:bg-navy-light">
-                    Eau De Parfum
+                    {product.concentration || 'Eau De Parfum'}
                   </button>
                 </div>
               </div>
@@ -368,6 +395,56 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           </div>
         </div>
       </main>
+
+      {/* ─── Lightbox ─── */}
+      {lightboxOpen && (
+        <div className="fixed inset-0 z-[999] bg-black/95 flex items-center justify-center">
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-6 right-6 z-10 text-white/70 hover:text-white transition-colors"
+            aria-label="Close lightbox"
+          >
+            <HiXMark className="text-3xl" />
+          </button>
+
+          {productImages.length > 1 && (
+            <>
+              <button
+                onClick={goToPrev}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white/70 hover:text-white transition-colors"
+                aria-label="Previous image"
+              >
+                <HiChevronLeft className="text-4xl" />
+              </button>
+              <button
+                onClick={goToNext}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white/70 hover:text-white transition-colors"
+                aria-label="Next image"
+              >
+                <HiChevronRight className="text-4xl" />
+              </button>
+            </>
+          )}
+
+          <div className="relative w-full h-full max-w-5xl max-h-[90vh] mx-auto p-8 flex items-center justify-center">
+            <Image
+              src={productImages[lightboxIndex] || '/images/product-placeholder.png'}
+              alt={`${product.name} ${lightboxIndex + 1}`}
+              fill
+              className="object-contain"
+              sizes="90vw"
+              priority
+            />
+          </div>
+
+          {productImages.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/60 font-heading text-sm tracking-wider">
+              {lightboxIndex + 1} / {productImages.length}
+            </div>
+          )}
+        </div>
+      )}
+
       <Footer />
     </>
   );

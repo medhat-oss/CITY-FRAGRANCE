@@ -8,12 +8,14 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
     const [formData, setFormData] = useState({
         id: '',
         name: '',
+        type: 'Men',
         category: 'Men',
         collection: '',
         badge: '',
         notes: '',
         description: '',
         orientation: '',
+        concentration: 'Eau De Parfum',
         volume: '100 ML',
         price: '',
         salePrice: '',
@@ -38,12 +40,14 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
             setFormData({
                 id: productToEdit.id,
                 name: productToEdit.name,
+                type: productToEdit.type || 'Men',
                 category: productToEdit.category,
                 collection: productToEdit.collection || '',
                 badge: productToEdit.badge || '',
                 notes: productToEdit.notes,
                 description: productToEdit.description || '',
                 orientation: productToEdit.orientation || '',
+                concentration: productToEdit.concentration || 'Eau De Parfum',
                 volume: productToEdit.volume || '100 ML',
                 price: productToEdit.price,
                 salePrice: productToEdit.salePrice || '',
@@ -53,12 +57,14 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
             setFormData({
                 id: '',
                 name: '',
+                type: 'Men',
                 category: 'Men',
                 collection: '',
                 badge: '',
                 notes: '',
                 description: '',
                 orientation: '',
+                concentration: 'Eau De Parfum',
                 volume: '100 ML',
                 price: '',
                 salePrice: '',
@@ -149,6 +155,15 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                     </div>
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
+                            <label>Product Type &mdash; نوع المنتج</label>
+                            <select name="type" value={formData.type} onChange={handleChange} required>
+                                <option value="Men">Men &mdash; رجالي</option>
+                                <option value="Women">Women &mdash; نسائي</option>
+                                <option value="Unisex">Unisex &mdash; جنسين</option>
+                                <option value="Gift Sets">Gift Sets &mdash; مجموعات هدايا</option>
+                            </select>
+                        </div>
+                        <div className={styles.formGroup}>
                             <label>Category</label>
                             <select name="category" value={formData.category} onChange={handleChange} required>
                                 <option value="Men">Men</option>
@@ -210,6 +225,16 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                         <input type="text" name="volume" value={formData.volume} onChange={handleChange} placeholder="e.g. 50 ML, 100 ML" required />
                     </div>
                     <div className={styles.formRow}>
+                        <div className={styles.formGroup}>
+                            <label>Fragrance Concentration &mdash; تركيز العطر</label>
+                            <select name="concentration" value={formData.concentration} onChange={handleChange} required>
+                                <option value="Eau De Parfum">Eau De Parfum</option>
+                                <option value="Eau De Toilette">Eau De Toilette</option>
+                                <option value="Parfum">Parfum</option>
+                                <option value="Extrait De Parfum">Extrait De Parfum</option>
+                                <option value="Cologne">Cologne</option>
+                            </select>
+                        </div>
                         <div className={styles.formGroup}>
                             <label>Orientation</label>
                             <input type="text" name="orientation" value={formData.orientation} onChange={handleChange} placeholder="e.g. Pour Homme, Unisex, حريمي" />

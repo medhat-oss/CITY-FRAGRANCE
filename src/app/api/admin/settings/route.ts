@@ -9,6 +9,9 @@ interface SiteSettings {
   heroSubtitle: string;
   announcementText: string;
   heroBgImage: string;
+  moodTitle: string;
+  moodSubtitle: string;
+  moodImage: string;
 }
 
 const DEFAULTS: SiteSettings = {
@@ -16,6 +19,9 @@ const DEFAULTS: SiteSettings = {
   heroSubtitle: 'Eid Al Adha Special',
   announcementText: 'EID AL ADHA SALE UP TO 20% OFF ENDS SOON... SHOP NOW',
   heroBgImage: '/images/hero-banner.png',
+  moodTitle: 'The Essence of Luxury & Elegance',
+  moodSubtitle: 'Discover timeless scents crafted for those who appreciate the finer things in life.',
+  moodImage: '/images/hero-banner.png',
 };
 
 async function readSettings(): Promise<SiteSettings> {
@@ -49,6 +55,9 @@ export async function POST(request: Request) {
       heroSubtitle: body.heroSubtitle ?? current.heroSubtitle,
       announcementText: body.announcementText ?? current.announcementText,
       heroBgImage: body.heroBgImage ?? current.heroBgImage,
+      moodTitle: body.moodTitle ?? current.moodTitle,
+      moodSubtitle: body.moodSubtitle ?? current.moodSubtitle,
+      moodImage: body.moodImage ?? current.moodImage,
     };
     await writeSettings(updated);
     return NextResponse.json({ success: true, settings: updated });
