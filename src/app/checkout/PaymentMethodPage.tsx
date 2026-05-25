@@ -16,11 +16,6 @@ const ACCOUNT_DETAILS: Record<string, { title: string; number: string; note: str
     number: '01044415982',
     note: 'Send the exact order amount to the Vodafone Cash number above, then confirm via WhatsApp.',
   },
-  'bank-transfer': {
-    title: 'Bank Account Details',
-    number: 'City Fragrance — 1234567890 (CIB)',
-    note: 'Please transfer the exact order amount to the bank account above, then send the transfer receipt via WhatsApp.',
-  },
 };
 
 export default function PaymentMethodPage({ method }: { method: string }) {
