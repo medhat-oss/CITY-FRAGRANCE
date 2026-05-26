@@ -45,6 +45,7 @@ export async function PUT(request: Request) {
       images[slug] = result.secure_url;
       await writeJsonFile(FILE, images);
 
+      revalidatePath('/');
       revalidatePath('/collections');
       revalidatePath('/collections/' + slug);
 
@@ -57,6 +58,7 @@ export async function PUT(request: Request) {
     images[body.slug] = body.imageUrl;
     await writeJsonFile(FILE, images);
 
+    revalidatePath('/');
     revalidatePath('/collections');
     revalidatePath('/collections/' + body.slug);
     revalidatePath('/collections', 'layout');

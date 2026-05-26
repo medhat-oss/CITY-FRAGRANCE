@@ -34,6 +34,7 @@ export async function POST(request: Request) {
     const data = await readJsonFile<GiftSet[]>(FILE, []);
     data.push(giftSet);
     await writeJsonFile(FILE, data);
+    revalidatePath('/');
     revalidatePath('/collections/gift-sets');
     revalidatePath('/collections/gift-sets', 'layout');
     return NextResponse.json({ success: true, giftSet });
@@ -56,6 +57,7 @@ export async function PUT(request: Request) {
     }
     data[index] = { ...data[index], ...body, price: parseFloat(body.price) || data[index].price };
     await writeJsonFile(FILE, data);
+    revalidatePath('/');
     revalidatePath('/collections/gift-sets');
     revalidatePath('/collections/gift-sets', 'layout');
     return NextResponse.json({ success: true, giftSet: data[index] });
@@ -77,6 +79,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'Gift set not found' }, { status: 404 });
     }
     await writeJsonFile(FILE, filtered);
+    revalidatePath('/');
     revalidatePath('/collections/gift-sets');
     revalidatePath('/collections/gift-sets', 'layout');
     return NextResponse.json({ success: true });
