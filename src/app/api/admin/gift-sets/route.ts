@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 
 const FILE = 'gift-sets.json';
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
     const data = await readJsonFile<GiftSet[]>(FILE, []);
     data.push(giftSet);
     await writeJsonFile(FILE, data);
+    revalidatePath('/collections/gift-sets');
     return NextResponse.json({ success: true, giftSet });
   } catch (err) {
     console.error('GIFT SET CREATE ERROR:', err);
@@ -53,6 +55,7 @@ export async function PUT(request: Request) {
     }
     data[index] = { ...data[index], ...body, price: parseFloat(body.price) || data[index].price };
     await writeJsonFile(FILE, data);
+    revalidatePath('/collections/gift-sets');
     return NextResponse.json({ success: true, giftSet: data[index] });
   } catch (err) {
     console.error('GIFT SET UPDATE ERROR:', err);
@@ -72,6 +75,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'Gift set not found' }, { status: 404 });
     }
     await writeJsonFile(FILE, filtered);
+    revalidatePath('/collections/gift-sets');
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('GIFT SET DELETE ERROR:', err);

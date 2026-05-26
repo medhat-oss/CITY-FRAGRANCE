@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 
 const FILE = 'site-settings.json';
@@ -48,6 +49,8 @@ export async function POST(request: Request) {
       moodImage: body.moodImage ?? current.moodImage,
     };
     await writeJsonFile(FILE, updated);
+    revalidatePath('/');
+    revalidatePath('/collections');
     return NextResponse.json({ success: true, settings: updated });
   } catch (err) {
     console.error('SETTINGS SAVE ERROR:', err);

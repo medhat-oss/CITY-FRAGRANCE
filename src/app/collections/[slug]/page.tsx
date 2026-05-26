@@ -62,7 +62,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
 
   useEffect(() => {
     if (slug === 'gift-sets') {
-      fetch('/api/gift-sets', { next: { revalidate: 60 } }).then((r) => r.json()).then((d) => setGiftSets(d.giftSets || [])).catch(() => {});
+      fetch('/api/gift-sets', { cache: 'no-store' }).then((r) => r.json()).then((d) => setGiftSets(d.giftSets || [])).catch(() => {});
     }
     fetch('/api/collections').then((r) => r.json()).then((d) => {
       const img = d.images?.[slug];

@@ -29,7 +29,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/gift-sets', { next: { revalidate: 60 } })
+    fetch('/api/gift-sets', { cache: 'no-store' })
       .then((r) => r.json())
       .then((d) => {
         const found = (d.giftSets || []).find((gs: GiftSet) => gs.id === id);

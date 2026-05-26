@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 
 const FILE = 'products.json';
@@ -14,6 +15,8 @@ export async function POST(request: Request) {
     const products = await readJsonFile<any[]>(FILE, []);
     products.push(product);
     await writeJsonFile(FILE, products);
+    revalidatePath('/');
+    revalidatePath('/collections/all-fragrances');
     return NextResponse.json({ success: true, product });
   } catch (err) {
     console.error('PRODUCT ADD DATABASE ERROR:', err);
@@ -34,6 +37,8 @@ export async function PUT(request: Request) {
     }
     products[index] = updated;
     await writeJsonFile(FILE, products);
+    revalidatePath('/');
+    revalidatePath('/collections/all-fragrances');
     return NextResponse.json({ success: true, product: updated });
   } catch (err) {
     console.error('PRODUCT UPDATE DATABASE ERROR:', err);
@@ -53,6 +58,8 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
     await writeJsonFile(FILE, filtered);
+    revalidatePath('/');
+    revalidatePath('/collections/all-fragrances');
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('PRODUCT DELETE DATABASE ERROR:', err);
