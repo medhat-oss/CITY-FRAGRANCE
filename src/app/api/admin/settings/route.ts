@@ -24,7 +24,24 @@ const DEFAULTS: SiteSettings = {
   moodImage: '/images/hero-banner.png',
 };
 
+const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
 export async function GET() {
+  // 1. Try Cloudinary raw URL directly (source of truth)
+  if (cloudName) {
+    try {
+      const url = `https://res.cloudinary.com/${cloudName}/raw/upload/city-fragrance-data/${FILE}`;
+      const res = await fetch(url, { cache: 'no-store' });
+      if (res.ok) {
+        const saved = (await res.json()) as Partial<SiteSettings>;
+        return NextResponse.json({ ...DEFAULTS, ...saved });
+      }
+    } catch {
+      // Cloudinary not reachable — fall through
+    }
+  }
+
+  // 2. Fallback to local / build folder via readJsonFile
   const saved = await readJsonFile<Partial<SiteSettings>>(FILE, {});
   const settings = { ...DEFAULTS, ...saved };
   return NextResponse.json(settings);
