@@ -45,17 +45,18 @@ export default function AdminPage() {
     setUploadingSlug(slug);
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('slug', slug);
     try {
-      const uploadRes = await fetch('/api/upload', {
-        method: 'POST',
+      const res = await fetch('/api/admin/collections', {
+        method: 'PUT',
         body: formData,
       });
-      const uploadData = await uploadRes.json();
-      if (uploadData.success) {
-        setCollectionImages((prev) => ({ ...prev, [slug]: uploadData.path }));
+      const data = await res.json();
+      if (data.success) {
+        setCollectionImages((prev) => ({ ...prev, [slug]: data.path }));
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('COLLECTION UPLOAD FAILED:', err);
     }
     setUploadingSlug(null);
   };
