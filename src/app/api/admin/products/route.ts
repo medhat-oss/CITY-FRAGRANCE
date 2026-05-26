@@ -30,6 +30,7 @@ export async function POST(request: Request) {
     await writeProducts(products);
     return NextResponse.json({ success: true, product });
   } catch (err) {
+    console.error('PRODUCT ADD DATABASE ERROR:', err);
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Failed to add product' },
       { status: 500 }
@@ -49,6 +50,7 @@ export async function PUT(request: Request) {
     await writeProducts(products);
     return NextResponse.json({ success: true, product: updated });
   } catch (err) {
+    console.error('PRODUCT UPDATE DATABASE ERROR:', err);
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Failed to update product' },
       { status: 500 }
@@ -67,6 +69,7 @@ export async function DELETE(request: Request) {
     await writeProducts(filtered);
     return NextResponse.json({ success: true });
   } catch (err) {
+    console.error('PRODUCT DELETE DATABASE ERROR:', err);
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Failed to delete product' },
       { status: 500 }
