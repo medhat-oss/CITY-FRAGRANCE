@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Order {
+  id             String   @id @default(cuid())
+  orderId        String   @unique
+  customerName   String
+  phoneNumber    String
+  email          String   @default("")
+  address        String
+  apartment      String   @default("")
+  city           String
+  governorate    String   @default("")
+  items          Json
+  totalPrice     Float
+  status         String   @default("Pending")
+  date           String
+  paymentMethod  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Product {
+  id            String   @id
+  name          String
+  type          String   @default("")
+  category      String   @default("")
+  collection    String   @default("")
+  badge         String   @default("")
+  notes         String   @default("")
+  description   String   @default("")
+  orientation   String   @default("")
+  concentration String   @default("")
+  volume        String   @default("")
+  price         Float
+  salePrice     Float?
+  images        Json     @default("[]")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model GiftSet {
+  id          String   @id
+  name        String
+  description String   @default("")
+  price       Float
+  image       String   @default("")
+  productIds  Json     @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model AdminUser {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
+  name     String @default("Admin")
+  role     String @default("ADMIN")
+}
+
+model SiteSetting {
+  id                String @id @default("default")
+  heroTitle         String @default("")
+  heroSubtitle      String @default("")
+  announcementText  String @default("")
+  heroBgImage       String @default("")
+  moodTitle         String @default("")
+  moodSubtitle      String @default("")
+  moodImage         String @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model CollectionImage {
+  slug  String @id
+  image String @default("")
+}
