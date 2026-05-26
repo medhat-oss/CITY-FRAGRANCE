@@ -59,12 +59,11 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
   useEffect(() => {
     if (fetched.current) return;
     fetched.current = true;
-    if (Object.keys(initialImages).length > 0) return;
     fetch('/api/collections', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data: { images: Record<string, string> }) => setCollectionImages(data.images))
       .catch(() => {});
-  }, [initialImages]);
+  }, []);
 
   const collections: Collection[] = COLLECTION_META.map((meta) => ({
     ...meta,
