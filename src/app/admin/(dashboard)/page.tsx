@@ -30,6 +30,7 @@ export default function AdminPage() {
   const [uploadingSlug, setUploadingSlug] = useState<string | null>(null);
   const [collectionsSaving, setCollectionsSaving] = useState(false);
   const [collectionsMsg, setCollectionsMsg] = useState('');
+  const [collectionsUploadError, setCollectionsUploadError] = useState('');
 
   useEffect(() => {
     fetch('/api/admin/collections')
@@ -43,6 +44,7 @@ export default function AdminPage() {
 
   const handleCollectionImageUpload = async (slug: string, file: File) => {
     setUploadingSlug(slug);
+    setCollectionsUploadError('');
     const formData = new FormData();
     formData.append('file', file);
     formData.append('slug', slug);
@@ -54,9 +56,12 @@ export default function AdminPage() {
       const data = await res.json();
       if (data.success) {
         setCollectionImages((prev) => ({ ...prev, [slug]: data.path }));
+      } else {
+        setCollectionsUploadError(data.error || 'Upload failed');
       }
     } catch (err) {
       console.error('COLLECTION UPLOAD FAILED:', err);
+      setCollectionsUploadError('Network error. Please try again.');
     }
     setUploadingSlug(null);
   };
@@ -642,10 +647,14 @@ export default function AdminPage() {
                   }}
                 />
               </label>
+              {collectionsUploadError && (
+                <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>
+                  {collectionsUploadError}
+                </p>
+              )}
             </div>
           ))}
         </div>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.5rem' }}>
           <button
             onClick={handleSaveCollectionImages}
