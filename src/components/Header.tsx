@@ -171,7 +171,7 @@ export default function Header() {
                 <Link
                   href="/"
                   onClick={() => setMobileOpen(false)}
-                  className="block font-heading text-base text-white/80 hover:text-amber-400 transition-colors py-2.5 border-b border-white/5"
+                  className="block font-heading text-base text-white hover:bg-white hover:text-[#09142E] transition-colors py-2.5 px-3 rounded-sm border-b border-white/5"
                 >
                   Home
                 </Link>
@@ -181,7 +181,7 @@ export default function Header() {
                   <Link
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="block font-heading text-base text-white/80 hover:text-amber-400 transition-colors py-2.5 border-b border-white/5"
+                    className="block font-heading text-base text-white hover:bg-white hover:text-[#09142E] transition-colors py-2.5 px-3 rounded-sm border-b border-white/5"
                   >
                     {link.label}
                   </Link>

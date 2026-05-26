@@ -57,8 +57,8 @@
 
 .sidebarLink:hover,
 .sidebarLink.active {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #c5a059;
+  background-color: #ffffff;
+  color: #16234d;
 }
 
 /* ─── Main Content ─── */
