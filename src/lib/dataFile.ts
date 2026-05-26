@@ -41,21 +41,13 @@ async function uploadToCloudinary(filename: string, content: string): Promise<vo
       api_key: process.env.CLOUDINARY_API_KEY,
       api_secret: process.env.CLOUDINARY_API_SECRET,
     });
-    const buffer = Buffer.from(content, 'utf-8');
-    await new Promise<void>((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          resource_type: 'raw',
-          public_id: `city-fragrance-data/${filename}`,
-          overwrite: true,
-          invalidate: true,
-        },
-        (error) => {
-          if (error) reject(error);
-          else resolve();
-        }
-      );
-      stream.end(buffer);
+    const base64 = Buffer.from(content, 'utf-8').toString('base64');
+    const dataUri = `data:text/json;base64,${base64}`;
+    await cloudinary.uploader.upload(dataUri, {
+      resource_type: 'raw',
+      public_id: `city-fragrance-data/${filename}`,
+      overwrite: true,
+      invalidate: true,
     });
   } catch (err) {
     console.error(`CLOUDINARY UPLOAD ERROR (${filename}):`, err);
@@ -100,6 +92,6 @@ export async function writeJsonFile(filename: string, data: unknown): Promise<vo
     console.error(`LOCAL WRITE ERROR (${filename}):`, err);
   }
 
-  // Also persist to Cloudinary for Vercel stateless survival
+  // Persist to Cloudinary for Vercel stateless survival
   await uploadToCloudinary(filename, content);
 }

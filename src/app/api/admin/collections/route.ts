@@ -21,7 +21,7 @@ export async function PUT(request: Request) {
     const contentType = request.headers.get('content-type') || '';
 
     if (contentType.includes('multipart/form-data')) {
-      // ── Upload + Save in one call (like products) ──
+      // ── Upload + Save in one call ──
       const formData = await request.formData();
       const slug = formData.get('slug') as string | null;
       const file = formData.get('file') as File | null;
@@ -32,16 +32,12 @@ export async function PUT(request: Request) {
 
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
+      const base64 = buffer.toString('base64');
+      const dataUri = `data:${file.type};base64,${base64}`;
 
-      const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: 'city-fragrance/collections', resource_type: 'image' },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result as { secure_url: string });
-          }
-        );
-        stream.end(buffer);
+      const result = await cloudinary.uploader.upload(dataUri, {
+        folder: 'city-fragrance/collections',
+        resource_type: 'image',
       });
 
       const images = await readJsonFile<Record<string, string>>(FILE, {});

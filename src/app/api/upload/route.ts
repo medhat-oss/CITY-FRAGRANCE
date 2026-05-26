@@ -28,16 +28,12 @@ export async function POST(request: Request) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const base64 = buffer.toString('base64');
+    const dataUri = `data:${file.type};base64,${base64}`;
 
-    const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: 'city-fragrance', resource_type: 'image' },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result as { secure_url: string });
-        }
-      );
-      stream.end(buffer);
+    const result = await cloudinary.uploader.upload(dataUri, {
+      folder: 'city-fragrance',
+      resource_type: 'image',
     });
 
     return NextResponse.json({ success: true, path: result.secure_url });
