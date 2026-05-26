@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 
-const SETTINGS_PATH = path.join(process.cwd(), 'data', 'site-settings.json');
+const FILE = 'site-settings.json';
 
 interface SiteSettings {
   heroTitle: string;
@@ -24,21 +23,9 @@ const DEFAULTS: SiteSettings = {
   moodImage: '/images/hero-banner.png',
 };
 
-async function readSettings(): Promise<SiteSettings> {
-  try {
-    const raw = await fs.readFile(SETTINGS_PATH, 'utf-8');
-    return { ...DEFAULTS, ...JSON.parse(raw) };
-  } catch {
-    return DEFAULTS;
-  }
-}
-
-async function writeSettings(settings: SiteSettings): Promise<void> {
-  await fs.writeFile(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf-8');
-}
-
 export async function GET() {
-  const settings = await readSettings();
+  const saved = await readJsonFile<Partial<SiteSettings>>(FILE, {});
+  const settings = { ...DEFAULTS, ...saved };
   return NextResponse.json(settings, {
     headers: {
       'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
@@ -49,7 +36,8 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<SiteSettings>;
-    const current = await readSettings();
+    const saved = await readJsonFile<Partial<SiteSettings>>(FILE, {});
+    const current = { ...DEFAULTS, ...saved };
     const updated: SiteSettings = {
       heroTitle: body.heroTitle ?? current.heroTitle,
       heroSubtitle: body.heroSubtitle ?? current.heroSubtitle,
@@ -59,9 +47,10 @@ export async function POST(request: Request) {
       moodSubtitle: body.moodSubtitle ?? current.moodSubtitle,
       moodImage: body.moodImage ?? current.moodImage,
     };
-    await writeSettings(updated);
+    await writeJsonFile(FILE, updated);
     return NextResponse.json({ success: true, settings: updated });
   } catch (err) {
+    console.error('SETTINGS SAVE ERROR:', err);
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Failed to save settings' },
       { status: 500 }

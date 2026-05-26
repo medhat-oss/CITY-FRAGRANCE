@@ -1,25 +1,11 @@
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 
-const DATA_PATH = path.join(process.cwd(), 'data', 'subscribers.json');
+const FILE = 'subscribers.json';
 
 interface Subscriber {
   email: string;
   subscribedAt: string;
-}
-
-async function readSubscribers(): Promise<Subscriber[]> {
-  try {
-    const raw = await fs.readFile(DATA_PATH, 'utf-8');
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
-}
-
-async function writeSubscribers(subscribers: Subscriber[]): Promise<void> {
-  await fs.writeFile(DATA_PATH, JSON.stringify(subscribers, null, 2), 'utf-8');
 }
 
 export async function POST(request: Request) {
@@ -33,7 +19,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const subscribers = await readSubscribers();
+    const subscribers = await readJsonFile<Subscriber[]>(FILE, []);
 
     if (subscribers.some((s) => s.email.toLowerCase() === email.toLowerCase())) {
       return NextResponse.json(
@@ -43,12 +29,13 @@ export async function POST(request: Request) {
     }
 
     subscribers.push({ email, subscribedAt: new Date().toISOString() });
-    await writeSubscribers(subscribers);
+    await writeJsonFile(FILE, subscribers);
 
     return NextResponse.json({ success: true, message: 'Subscribed successfully' });
-  } catch {
+  } catch (err) {
+    console.error('SUBSCRIBE ERROR:', err);
     return NextResponse.json(
-      { success: false, message: 'Something went wrong' },
+      { success: false, message: err instanceof Error ? err.message : 'Something went wrong' },
       { status: 500 }
     );
   }
