@@ -207,7 +207,7 @@ export default function CheckoutPage() {
               <h2 className="font-heading text-lg font-normal text-navy dark:text-white">Contact</h2>
               <span className="font-body text-xs text-ink-lighter dark:text-slate-300">
                 Already have an account?{' '}
-                <Link href="#" className="text-navy dark:text-gold underline underline-offset-2">
+                <Link href="#" className="text-navy dark:text-white underline underline-offset-2">
                   Log in
                 </Link>
               </span>
@@ -380,7 +380,7 @@ export default function CheckoutPage() {
                 onClick={() => setSelectedPayment('vodafone')}
                 className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-200 ${
                   selectedPayment === 'vodafone'
-                    ? 'border-amber-500 bg-amber-500/10 text-amber-400 font-bold'
+                    ? 'border-amber-500 bg-amber-500/10 text-white font-bold'
                     : 'border-slate-700 bg-[#11224D] text-white hover:border-amber-500/50'
                 }`}
               >
@@ -392,7 +392,7 @@ export default function CheckoutPage() {
                 onClick={() => setSelectedPayment('instapay')}
                 className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-200 ${
                   selectedPayment === 'instapay'
-                    ? 'border-amber-500 bg-amber-500/10 text-amber-400 font-bold'
+                    ? 'border-amber-500 bg-amber-500/10 text-white font-bold'
                     : 'border-slate-700 bg-[#11224D] text-white hover:border-amber-500/50'
                 }`}
               >
@@ -404,7 +404,7 @@ export default function CheckoutPage() {
                 onClick={() => setSelectedPayment('cod')}
                 className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-200 ${
                   selectedPayment === 'cod'
-                    ? 'border-amber-500 bg-amber-500/10 text-amber-400 font-bold'
+                    ? 'border-amber-500 bg-amber-500/10 text-white font-bold'
                     : 'border-slate-700 bg-[#11224D] text-white hover:border-amber-500/50'
                 }`}
               >
@@ -438,7 +438,7 @@ export default function CheckoutPage() {
 
             <p className="font-body text-xs text-ink-lighter dark:text-slate-300 text-center">
               By placing your order, you agree to our{' '}
-              <Link href="/privacy-policy" className="text-navy dark:text-gold underline underline-offset-2">
+              <Link href="/privacy-policy" className="text-navy dark:text-white underline underline-offset-2">
                 Privacy Policy
               </Link>
             </p>

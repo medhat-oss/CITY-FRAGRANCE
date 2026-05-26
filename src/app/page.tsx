@@ -49,7 +49,7 @@ export default function Home() {
           </div>
 
           <div className="relative z-[2] max-w-container mx-auto px-4 sm:px-16 text-white flex flex-col items-center text-center w-full">
-            <span className="font-heading text-sm sm:text-base uppercase tracking-[0.25em] text-gold block mb-5 animate-fade-up opacity-0 [animation-delay:0.2s]">
+            <span className="font-heading text-sm sm:text-base uppercase tracking-[0.25em] text-white block mb-5 animate-fade-up opacity-0 [animation-delay:0.2s]">
               City Fragrance
             </span>
 

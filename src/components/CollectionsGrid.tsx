@@ -77,7 +77,7 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
       <section className="relative pt-32 pb-16 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.03] via-transparent to-transparent" />
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <p className="text-gold/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
+          <p className="text-white/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
             City Fragrance
           </p>
           <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight mb-4">
@@ -130,7 +130,7 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
                 <div className="w-12 h-px bg-gold/40 mb-4 transition-all duration-500 group-hover:w-full group-hover:bg-gold/60" />
 
                 {/* CTA */}
-                <span className="inline-flex items-center gap-2 text-xs font-heading uppercase tracking-[0.15em] text-white/70 transition-all duration-300 group-hover:text-gold group-hover:gap-3">
+                <span className="inline-flex items-center gap-2 text-xs font-heading uppercase tracking-[0.15em] text-white/70 transition-all duration-300 group-hover:text-white group-hover:gap-3">
                   Explore Collection
                   <HiArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
                 </span>

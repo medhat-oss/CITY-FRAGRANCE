@@ -62,7 +62,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-amber-400"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-white"
           >
             <path
               strokeLinecap="round"
@@ -76,7 +76,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search products..."
-            className="w-full pl-14 pr-6 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 text-lg focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition-all"
+            className="w-full pl-14 pr-6 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 text-lg focus:outline-none focus:border-white focus:ring-1 focus:ring-white/50 transition-all"
           />
         </div>
         <button
@@ -120,7 +120,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     />
                   </div>
                   <div className="p-4">
-                    <p className="text-xs uppercase tracking-widest text-amber-400 mb-1">
+                    <p className="text-xs uppercase tracking-widest text-white mb-1">
                       {product.category}
                     </p>
                     <h3 className="text-white font-heading text-lg">{product.name}</h3>
@@ -128,7 +128,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     <div className="mt-2">
                       {product.salePrice ? (
                         <div className="flex items-center gap-2">
-                          <span className="text-amber-400 font-heading">
+                          <span className="text-white font-heading">
                             {formatEGP(product.salePrice)}
                           </span>
                           <span className="text-white/40 line-through text-sm">
@@ -136,7 +136,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                           </span>
                         </div>
                       ) : (
-                        <span className="text-amber-400 font-heading">
+                        <span className="text-white font-heading">
                           {formatEGP(product.price)}
                         </span>
                       )}

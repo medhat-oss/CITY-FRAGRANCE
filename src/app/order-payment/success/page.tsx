@@ -30,7 +30,7 @@ function SuccessContent() {
         </p>
 
         {orderId && (
-          <p className="font-heading text-gold text-sm tracking-wider mb-8">
+          <p className="font-heading text-white text-sm tracking-wider mb-8">
             Order #{orderId}
           </p>
         )}

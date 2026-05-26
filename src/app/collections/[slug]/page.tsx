@@ -85,7 +85,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
         <main className="flex items-center justify-center min-h-[60vh] px-6">
           <div className="text-center">
             <p className="text-white/40 text-lg">Collection not found</p>
-            <Link href="/collections" className="text-gold hover:underline mt-4 inline-block">
+            <Link href="/collections" className="text-white hover:underline mt-4 inline-block">
               &larr; Back to Collections
             </Link>
           </div>
@@ -104,7 +104,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/60" />
           <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.03] via-transparent to-transparent mix-blend-overlay" />
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-            <p className="text-gold/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
+            <p className="text-white/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
               City Fragrance
             </p>
             <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight mb-4">
@@ -123,7 +123,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
             giftSets.length === 0 ? (
               <div className="text-center py-20">
                 <p className="text-white/40 text-lg">{emptyMsg.line1}</p>
-                <Link href="/collections" className="inline-flex items-center gap-2 mt-8 text-gold/70 hover:text-gold font-heading text-sm tracking-wider uppercase transition-colors">
+                <Link href="/collections" className="inline-flex items-center gap-2 mt-8 text-white/70 hover:text-white font-heading text-sm tracking-wider uppercase transition-colors">
                   <HiArrowRight className="rotate-180" />
                   Back to Collections
                 </Link>
@@ -139,7 +139,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                           <Image src={gs.image || '/images/product-placeholder.png'} alt={gs.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
                         </div>
                       <div className="p-6">
-                        <span className="text-xs uppercase tracking-widest text-gold/60 mb-1 block">Gift Set</span>
+                        <span className="text-xs uppercase tracking-widest text-white/60 mb-1 block">Gift Set</span>
                         <h3 className="font-heading text-xl font-light text-white mb-2">{gs.name}</h3>
                         <p className="text-white/50 text-sm line-clamp-2 mb-3">{gs.description}</p>
                         <div className="flex flex-wrap gap-1.5 mb-4">
@@ -148,7 +148,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                           ))}
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-amber-400 font-heading text-lg">{formatEGP(gs.price)}</span>
+                          <span className="text-white font-heading text-lg">{formatEGP(gs.price)}</span>
                         </div>
                       </div>
                     </div>
@@ -165,7 +165,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
               )}
               <Link
                 href="/collections"
-                className="inline-flex items-center gap-2 mt-8 text-gold/70 hover:text-gold font-heading text-sm tracking-wider uppercase transition-colors"
+                className="inline-flex items-center gap-2 mt-8 text-white/70 hover:text-white font-heading text-sm tracking-wider uppercase transition-colors"
               >
                 <HiArrowRight className="rotate-180" />
                 Back to Collections
@@ -198,7 +198,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                         )}
                       </div>
                       <div className="p-6">
-                        <p className="text-xs uppercase tracking-widest text-amber-400/70 mb-1">
+                        <p className="text-xs uppercase tracking-widest text-white/70 mb-1">
                           {product.category}
                         </p>
                         <h3 className="font-heading text-xl font-light text-white mb-2">
@@ -211,7 +211,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                           <div>
                             {product.salePrice ? (
                               <div className="flex items-center gap-2">
-                                <span className="text-amber-400 font-heading text-lg">
+                                <span className="text-white font-heading text-lg">
                                   {formatEGP(product.salePrice)}
                                 </span>
                                 <span className="text-white/30 line-through text-sm">
@@ -219,12 +219,12 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                                 </span>
                               </div>
                             ) : (
-                              <span className="text-amber-400 font-heading text-lg">
+                              <span className="text-white font-heading text-lg">
                                 {formatEGP(product.price)}
                               </span>
                             )}
                           </div>
-                          <span className="text-white/40 group-hover:text-gold transition-colors">
+                          <span className="text-white/40 group-hover:text-white transition-colors">
                             <HiArrowRight />
                           </span>
                         </div>

@@ -74,10 +74,10 @@ export default function CollectionCategories() {
                 <h3 className="font-heading text-sm sm:text-base md:text-2xl font-light mb-1 leading-tight">
                   {collection.title}
                 </h3>
-                <p className="hidden sm:block text-xs text-amber-400/90 mb-2.5">
+                <p className="hidden sm:block text-xs text-white/90 mb-2.5">
                   {collection.subtitle}
                 </p>
-                <span className="font-heading text-[10px] sm:text-xs uppercase tracking-tight text-amber-400 flex items-center gap-1 transition-all duration-300 group-hover:gap-1.5">
+                <span className="font-heading text-[10px] sm:text-xs uppercase tracking-tight text-white flex items-center gap-1 transition-all duration-300 group-hover:gap-1.5">
                   Explore Now <HiArrowRight className="w-2.5 h-2.5 md:w-4 md:h-4" />
                 </span>
               </div>

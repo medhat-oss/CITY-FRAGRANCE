@@ -67,7 +67,7 @@ export default function PrivacyPolicy() {
       <section className="relative pt-32 pb-16 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.02] via-transparent to-transparent" />
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <p className="text-gold/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
+          <p className="text-white/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
             City Fragrance
           </p>
           <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-light text-white leading-tight mb-4">
@@ -98,7 +98,7 @@ export default function PrivacyPolicy() {
                 <ul className="space-y-4">
                   {section.rules.map((rule, i) => (
                     <li key={i} className="flex items-start gap-3 text-white/70 text-base leading-relaxed">
-                      <span className="text-gold mt-1.5 shrink-0">•</span>
+                      <span className="text-white mt-1.5 shrink-0">•</span>
                       <span>{rule}</span>
                     </li>
                   ))}
@@ -108,7 +108,7 @@ export default function PrivacyPolicy() {
                 <ol className="space-y-4">
                   {section.steps.map((step, i) => (
                     <li key={i} className="flex items-start gap-3 text-white/70 text-base leading-relaxed">
-                      <span className="text-gold font-heading text-sm mt-0.5 shrink-0 w-6">{i + 1}.</span>
+                      <span className="text-white font-heading text-sm mt-0.5 shrink-0 w-6">{i + 1}.</span>
                       <span>{step}</span>
                     </li>
                   ))}
@@ -124,7 +124,7 @@ export default function PrivacyPolicy() {
         <div className="max-w-4xl mx-auto px-6 py-20">
           <FadeSection delay={300}>
             <div className="text-center mb-10">
-              <p className="text-gold/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
+              <p className="text-white/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
                 Need Assistance?
               </p>
               <h2 className="font-heading text-2xl sm:text-3xl font-light text-white mb-4">
@@ -138,7 +138,7 @@ export default function PrivacyPolicy() {
                 For any inquiries regarding exchanges, returns, or our policies, please do not hesitate to reach out to our Customer Care team.
               </p>
               <div className="inline-flex items-center gap-3 border border-gold/30 rounded-xl px-6 py-4 bg-white/[0.02]">
-                <span className="text-gold/80 font-heading text-sm tracking-wider">Phone / WhatsApp</span>
+                <span className="text-white/80 font-heading text-sm tracking-wider">Phone / WhatsApp</span>
                 <span className="text-white font-heading text-lg">01044415982</span>
               </div>
             </div>
@@ -146,7 +146,7 @@ export default function PrivacyPolicy() {
             <div className="text-center mt-12">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 text-xs font-heading uppercase tracking-[0.15em] text-white/60 hover:text-gold transition-colors no-underline"
+                className="inline-flex items-center gap-2 text-xs font-heading uppercase tracking-[0.15em] text-white/60 hover:text-white transition-colors no-underline"
               >
                 Back to Home <HiArrowRight />
               </Link>

@@ -105,11 +105,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       <main className="bg-white dark:bg-[#09142E] text-slate-900 dark:text-slate-100 transition-colors duration-300 px-4 sm:px-8 py-6 sm:py-10">
         {/* Breadcrumb */}
         <nav className="max-w-container mx-auto flex items-center gap-2 text-xs uppercase tracking-widest text-ink-lighter dark:text-slate-400 mb-8">
-          <Link href="/" className="hover:text-navy dark:hover:text-gold transition-colors">
+          <Link href="/" className="hover:text-navy dark:hover:text-white transition-colors">
             Home
           </Link>
           <span className="text-gray-300 dark:text-slate-600">/</span>
-          <Link href="/" className="hover:text-navy dark:hover:text-gold transition-colors">
+          <Link href="/" className="hover:text-navy dark:hover:text-white transition-colors">
             {product.category}
           </Link>
           <span className="text-gray-300 dark:text-slate-600">/</span>
@@ -301,7 +301,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {/* Action Buttons */}
             <button
               onClick={() => { addToCart(product, quantity); openCart(); }}
-              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-gold bg-gold text-navy cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-transparent hover:text-gold mb-3"
+              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-gold bg-gold text-navy cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-transparent hover:text-white mb-3"
             >
               <HiShoppingBag className="mr-2.5" /> Add to Cart
             </button>
@@ -319,7 +319,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div>
               <button
                 onClick={() => setDescOpen(!descOpen)}
-                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-colors hover:text-gold"
+                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-colors hover:text-white"
               >
                 <span>Description</span>
                 <HiChevronDown
@@ -353,7 +353,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div>
               <button
                 onClick={() => setNotesOpen(!notesOpen)}
-                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-colors hover:text-gold"
+                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-colors hover:text-white"
               >
                 <span>Perfume Notes</span>
                 <HiChevronDown

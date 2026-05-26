@@ -50,7 +50,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
         <main className="flex items-center justify-center min-h-[60vh] px-6">
           <div className="text-center">
             <p className="text-white/40 text-lg">Gift set not found</p>
-            <Link href="/collections/gift-sets" className="text-gold hover:underline mt-4 inline-block">
+            <Link href="/collections/gift-sets" className="text-white hover:underline mt-4 inline-block">
               &larr; Back to Gift Sets
             </Link>
           </div>
@@ -94,11 +94,11 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
         <div className="max-w-7xl mx-auto">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-xs uppercase tracking-widest text-white/40 mb-10">
-            <Link href="/" className="hover:text-gold transition-colors">Home</Link>
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <span>/</span>
-            <Link href="/collections" className="hover:text-gold transition-colors">Collections</Link>
+            <Link href="/collections" className="hover:text-white transition-colors">Collections</Link>
             <span>/</span>
-            <Link href="/collections/gift-sets" className="hover:text-gold transition-colors">Gift Sets</Link>
+            <Link href="/collections/gift-sets" className="hover:text-white transition-colors">Gift Sets</Link>
             <span>/</span>
             <span className="text-white/70">{giftSet.name}</span>
           </nav>
@@ -122,7 +122,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Right: Details */}
             <div className="flex flex-col gap-0">
-              <span className="font-heading text-[0.7rem] tracking-[0.25em] text-gold/60 uppercase mb-2">
+              <span className="font-heading text-[0.7rem] tracking-[0.25em] text-white/60 uppercase mb-2">
                 City Fragrance
               </span>
               <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-light text-white uppercase tracking-wide leading-tight mb-4">
@@ -134,7 +134,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
                 {giftSet.description}
               </p>
 
-              <span className="font-heading text-3xl sm:text-4xl font-semibold text-amber-400 tracking-tight mb-8">
+              <span className="font-heading text-3xl sm:text-4xl font-semibold text-white tracking-tight mb-8">
                 {formatEGP(giftSet.price)}
               </span>
 
@@ -153,18 +153,18 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
                         href={`/product/${p.id}`}
                         className="group flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/10 transition-all duration-300 hover:bg-white/[0.06] hover:border-gold/40"
                       >
-                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-gold/10 text-gold text-xs font-heading font-semibold shrink-0">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-white/10 text-white text-xs font-heading font-semibold shrink-0">
                           {idx + 1}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-body text-sm text-white/80 group-hover:text-amber-400 transition-colors truncate">
+                          <p className="font-body text-sm text-white/80 group-hover:text-white transition-colors truncate">
                             {p.name}
                           </p>
                           <p className="font-body text-[0.65rem] text-white/30 uppercase tracking-wider mt-0.5">
                             {p.category}
                           </p>
                         </div>
-                        <span className="text-white/30 group-hover:text-gold transition-colors text-lg">
+                        <span className="text-white/30 group-hover:text-white transition-colors text-lg">
                           <HiArrowRight />
                         </span>
                       </Link>

@@ -94,7 +94,7 @@ export default function Header() {
               className="text-white bg-transparent border-none cursor-pointer p-2"
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-white hover:text-amber-400 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-white hover:text-white transition-colors">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </button>
@@ -116,7 +116,7 @@ export default function Header() {
           <div className="flex flex-1 justify-end items-center gap-1">
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="p-2 text-white transition-colors hover:text-gold bg-transparent border-none cursor-pointer"
+              className="p-2 text-white transition-colors hover:text-white bg-transparent border-none cursor-pointer"
               aria-label="Search products"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -125,7 +125,7 @@ export default function Header() {
             </button>
             <button
               onClick={toggleCart}
-              className="relative p-2 text-white transition-colors hover:text-gold bg-transparent border-none cursor-pointer"
+              className="relative p-2 text-white transition-colors hover:text-white bg-transparent border-none cursor-pointer"
               aria-label={`Cart (${cartCount} items)`}
             >
               <HiOutlineShoppingBag className="w-6 h-6" />
@@ -200,7 +200,7 @@ export default function Header() {
                 href="https://www.instagram.com/city_fragrance_?igsh=eGJzMnBxejB0NnY5&utm_source=qr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/50 text-xl transition-all duration-300 hover:text-amber-400 hover:scale-110"
+                className="text-white/50 text-xl transition-all duration-300 hover:text-white hover:scale-110"
                 aria-label="Instagram"
               >
                 <FaInstagram />
@@ -209,7 +209,7 @@ export default function Header() {
                 href="https://www.tiktok.com/@city_fragrance?_r=1&_t=ZS-96bneau2lj2"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/50 text-xl transition-all duration-300 hover:text-amber-400 hover:scale-110"
+                className="text-white/50 text-xl transition-all duration-300 hover:text-white hover:scale-110"
                 aria-label="TikTok"
               >
                 <FaTiktok />
@@ -266,7 +266,7 @@ export default function Header() {
               <p className="font-body text-base text-gray-400">Your cart is empty.</p>
               <button
                 onClick={closeCart}
-                className="mt-6 font-heading text-xs font-semibold tracking-[0.2em] uppercase text-gold border border-gold/50 px-8 py-3 rounded-sm bg-transparent cursor-pointer transition-all duration-300 hover:bg-gold hover:text-navy"
+                className="mt-6 font-heading text-xs font-semibold tracking-[0.2em] uppercase text-white border border-white/50 px-8 py-3 rounded-sm bg-transparent cursor-pointer transition-all duration-300 hover:bg-white hover:text-black"
               >
                 Continue Shopping
               </button>
@@ -294,13 +294,13 @@ export default function Header() {
                       {item.notes && (
                         <span className="font-body text-xs text-gray-400 italic">{item.notes}</span>
                       )}
-                      <span className="font-heading text-sm font-bold text-amber-400 mt-0.5">
+                      <span className="font-heading text-sm font-bold text-white mt-0.5">
                         {formatEGP(price)}
                       </span>
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="w-7 h-7 flex items-center justify-center border border-gray-600 rounded-sm bg-transparent cursor-pointer text-gray-300 text-xs transition-all duration-200 hover:border-gold hover:text-gold hover:bg-gold/10"
+                          className="w-7 h-7 flex items-center justify-center border border-gray-600 rounded-sm bg-transparent cursor-pointer text-gray-300 text-xs transition-all duration-200 hover:border-white hover:text-white hover:bg-white/10"
                           aria-label={`Decrease quantity of ${item.name}`}
                         >
                           <HiMinus />
@@ -310,7 +310,7 @@ export default function Header() {
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-7 h-7 flex items-center justify-center border border-gray-600 rounded-sm bg-transparent cursor-pointer text-gray-300 text-xs transition-all duration-200 hover:border-gold hover:text-gold hover:bg-gold/10"
+                          className="w-7 h-7 flex items-center justify-center border border-gray-600 rounded-sm bg-transparent cursor-pointer text-gray-300 text-xs transition-all duration-200 hover:border-white hover:text-white hover:bg-white/10"
                           aria-label={`Increase quantity of ${item.name}`}
                         >
                           <HiPlus />
@@ -336,7 +336,7 @@ export default function Header() {
           <div className="px-6 py-5 border-t border-white/10 shrink-0 bg-[#0c1b3d]">
             <div className="flex justify-between items-center mb-2 font-heading text-xs uppercase tracking-[0.08em] text-gray-400">
               <span>Subtotal</span>
-              <span className="text-base font-bold text-amber-400">
+              <span className="text-base font-bold text-white">
                 {formatEGP(cartTotal)}
               </span>
             </div>

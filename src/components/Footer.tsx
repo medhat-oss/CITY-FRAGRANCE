@@ -79,7 +79,7 @@ export default function Footer() {
             <h3 className="font-heading text-2xl sm:text-3xl font-light tracking-[0.1em] mb-1">
               CITY FRAGRANCE
             </h3>
-            <p className="font-heading text-xs tracking-[0.25em] text-gold uppercase mb-4">
+            <p className="font-heading text-xs tracking-[0.25em] text-white/80 uppercase mb-4">
               Luxury Perfumes
             </p>
             <p className="font-body text-sm text-white/70 leading-relaxed">
@@ -122,7 +122,7 @@ export default function Footer() {
               </button>
             </form>
             {message && (
-              <div className={`mt-3 flex items-center gap-2 text-xs font-body ${status === 'success' ? 'text-amber-400' : 'text-red-400'}`}>
+              <div className={`mt-3 flex items-center gap-2 text-xs font-body ${status === 'success' ? 'text-white' : 'text-red-400'}`}>
                 {status === 'success' ? <HiOutlineCheck className="text-sm" /> : null}
                 {message}
               </div>
@@ -140,7 +140,7 @@ export default function Footer() {
                   <Link
                     href={link.href}
                     prefetch="auto"
-                    className="font-body text-sm text-white/70 transition-colors hover:text-gold"
+                    className="font-body text-sm text-white/70 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -154,7 +154,7 @@ export default function Footer() {
                 href="https://www.instagram.com/city_fragrance_?igsh=eGJzMnBxejB0NnY5&utm_source=qr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/50 text-xl transition-colors duration-300 hover:text-amber-500"
+                className="text-white/50 text-xl transition-colors duration-300 hover:text-white"
                 aria-label="Instagram"
               >
                 <FaInstagram />
@@ -163,7 +163,7 @@ export default function Footer() {
                 href="https://www.tiktok.com/@city_fragrance?_r=1&_t=ZS-96bneau2lj2"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/50 text-xl transition-colors duration-300 hover:text-amber-500"
+                className="text-white/50 text-xl transition-colors duration-300 hover:text-white"
                 aria-label="TikTok"
               >
                 <FaTiktok />
@@ -182,7 +182,7 @@ export default function Footer() {
                   <Link
                     href={link.href}
                     prefetch="auto"
-                    className="font-body text-sm text-white/70 transition-colors hover:text-gold"
+                    className="font-body text-sm text-white/70 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -204,7 +204,7 @@ export default function Footer() {
                 href="https://wa.me/201223770207"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline decoration-gray-600 transition-all duration-300 hover:text-amber-500 hover:decoration-amber-500"
+                className="underline decoration-gray-600 transition-all duration-300 hover:text-white hover:decoration-amber-500"
               >
                 Medhat Elaraby <span className="inline-block">↗</span>
               </a>

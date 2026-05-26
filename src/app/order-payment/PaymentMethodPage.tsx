@@ -31,7 +31,7 @@ export default function PaymentMethodPage({ method }: { method: string }) {
   return (
     <div className="min-h-screen bg-[#09142E] flex items-center justify-center px-4 py-12">
       <div className="max-w-lg w-full text-center">
-        <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 text-3xl flex items-center justify-center mx-auto mb-6">
+        <div className="w-16 h-16 rounded-full bg-white/20 text-white text-3xl flex items-center justify-center mx-auto mb-6">
           &#9889;
         </div>
 
@@ -43,7 +43,7 @@ export default function PaymentMethodPage({ method }: { method: string }) {
         </p>
 
         {orderId && (
-          <p className="font-heading text-gold text-sm tracking-wider mb-8">
+          <p className="font-heading text-white text-sm tracking-wider mb-8">
             Order #{orderId}
           </p>
         )}
@@ -62,7 +62,7 @@ export default function PaymentMethodPage({ method }: { method: string }) {
               style={{
                 fontFamily: 'var(--font-heading)',
                 fontSize: '0.85rem',
-                color: '#D4AF37',
+                color: '#f8fafc',
                 marginBottom: '0.75rem',
               }}
             >
@@ -103,7 +103,7 @@ export default function PaymentMethodPage({ method }: { method: string }) {
         </a>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href={`/order-payment/success?orderId=${orderId}`} className="text-white/50 hover:text-gold text-xs font-heading tracking-wider uppercase transition-colors no-underline">
+          <Link href={`/order-payment/success?orderId=${orderId}`} className="text-white/50 hover:text-white text-xs font-heading tracking-wider uppercase transition-colors no-underline">
             I&apos;ll do this later
           </Link>
           <Link href="/" className="btn btn-primary btn-large">

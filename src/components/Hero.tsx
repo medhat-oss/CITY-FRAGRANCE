@@ -40,7 +40,7 @@ export default function Hero() {
         dir={dir}
       >
         <span
-          className="font-heading text-sm sm:text-base uppercase tracking-[0.25em] text-gold block mb-5 animate-fade-up opacity-0 [animation-delay:0.2s]"
+          className="font-heading text-sm sm:text-base uppercase tracking-[0.25em] text-white block mb-5 animate-fade-up opacity-0 [animation-delay:0.2s]"
           dangerouslySetInnerHTML={{ __html: subtitle }}
         />
 
@@ -51,7 +51,7 @@ export default function Hero() {
 
         <p className="font-body text-base sm:text-lg font-light max-w-md mb-8 animate-fade-up opacity-0 [animation-delay:0.6s] text-white/90">
           Exclusive Eid collection — enjoy{' '}
-          <strong className="text-gold font-semibold">20% off</strong> on all
+          <strong className="text-white font-semibold">20% off</strong> on all
           premium fragrances.
         </p>
 

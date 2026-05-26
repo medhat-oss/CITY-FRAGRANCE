@@ -60,7 +60,7 @@ export default function StoresPage() {
         <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-[#09142E]/60 via-[#09142E]/80 to-[#09142E]" />
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-            <p className="text-gold/60 font-heading text-sm tracking-[0.3em] uppercase mb-6 animate-fade-up">
+            <p className="text-white/60 font-heading text-sm tracking-[0.3em] uppercase mb-6 animate-fade-up">
               City Fragrance
             </p>
             <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight mb-6 animate-fade-up">
@@ -76,22 +76,22 @@ export default function StoresPage() {
             {STORES.map((store, i) => (
               <FadeInSection key={store.name} delay={i * 150}>
                 <div className="group relative h-full border border-white/10 rounded-2xl p-8 bg-white/[0.03] transition-all duration-500 hover:border-gold/40 hover:bg-gold/[0.03] hover:shadow-[0_0_40px_rgba(197,160,89,0.06)]">
-                  <div className="text-gold/60 text-2xl mb-4 tracking-widest font-heading">
+                  <div className="text-white/60 text-2xl mb-4 tracking-widest font-heading">
                     {store.name}
                   </div>
                   <div className="space-y-3 font-body text-white/70">
                     <p className="flex items-start gap-3">
-                      <span className="text-gold/60 mt-0.5 shrink-0">&#9906;</span>
+                      <span className="text-white/60 mt-0.5 shrink-0">&#9906;</span>
                       <span>{store.address}</span>
                     </p>
                     <p className="flex items-center gap-3">
-                      <span className="text-gold/60 shrink-0">&#9742;</span>
-                      <a href={`tel:${store.phone.replace(/\s/g, '')}`} className="hover:text-gold transition-colors no-underline">
+                      <span className="text-white/60 shrink-0">&#9742;</span>
+                      <a href={`tel:${store.phone.replace(/\s/g, '')}`} className="hover:text-white transition-colors no-underline">
                         {store.phone}
                       </a>
                     </p>
                     <p className="flex items-start gap-3">
-                      <span className="text-gold/60 mt-0.5 shrink-0">&#9200;</span>
+                      <span className="text-white/60 mt-0.5 shrink-0">&#9200;</span>
                       <span className="text-sm">{store.hours}</span>
                     </p>
                   </div>
@@ -105,7 +105,7 @@ export default function StoresPage() {
         <section className="border-t border-white/5">
           <div className="max-w-3xl mx-auto px-6 py-20 text-center">
             <FadeInSection>
-              <p className="text-gold/40 font-heading text-sm tracking-[0.3em] uppercase mb-4">
+              <p className="text-white/40 font-heading text-sm tracking-[0.3em] uppercase mb-4">
                 Visit Us
               </p>
               <h2 className="font-heading text-3xl sm:text-4xl font-light text-white mb-6 leading-relaxed">
