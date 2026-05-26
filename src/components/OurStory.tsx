@@ -137,7 +137,7 @@ export default function OurStory() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {values.map((v, i) => (
             <FadeInSection key={v.title} delay={i * 150}>
-              <div className="group relative h-full border border-white/10 rounded-2xl p-8 bg-white/[0.03] transition-all duration-500 hover:border-gold/40 hover:bg-gold/[0.03] hover:shadow-[0_0_40px_rgba(197,160,89,0.06)]">
+              <div className="group relative h-full border border-white/10 rounded-2xl p-8 bg-white/[0.03] transition-all duration-500 hover:border-white/40 hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.06)]">
                 <div className="text-3xl text-white/60 mb-6 group-hover:scale-110 transition-transform duration-500">
                   {v.icon}
                 </div>

@@ -130,7 +130,7 @@ export default function Header() {
             >
               <HiOutlineShoppingBag className="w-6 h-6" />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-gold text-navy text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-[0_2px_5px_rgba(197,160,89,0.4)]">
+                <span className="absolute top-0 right-0 bg-white text-[#09142E] text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-[0_2px_5px_rgba(255,255,255,0.4)]">
                   {cartCount}
                 </span>
               )}
@@ -346,13 +346,13 @@ export default function Header() {
             <Link
               href="/order-payment"
               onClick={closeCart}
-              className="w-full flex items-center justify-center py-4 bg-gold text-navy font-heading text-xs font-semibold tracking-[0.15em] uppercase cursor-pointer rounded-sm transition-all duration-300 hover:bg-amber-500 no-underline mb-2"
+              className="w-full flex items-center justify-center py-4 bg-transparent text-white border border-white font-heading text-xs font-semibold tracking-[0.15em] uppercase cursor-pointer rounded-sm transition-all duration-300 hover:bg-white hover:text-[#09142E] no-underline mb-2"
             >
               Proceed to Checkout
             </Link>
             <button
               onClick={closeCart}
-              className="w-full py-3 bg-transparent text-gray-400 border border-gray-600 font-heading text-xs tracking-[0.1em] uppercase cursor-pointer rounded-sm transition-all duration-300 hover:bg-gold hover:text-navy hover:border-gold"
+              className="w-full py-3 bg-white text-[#09142E] border border-white font-heading text-xs tracking-[0.1em] uppercase cursor-pointer rounded-sm transition-all duration-300 hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB]"
             >
               Continue Shopping
             </button>

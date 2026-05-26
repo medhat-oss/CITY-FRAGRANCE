@@ -134,7 +134,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                   const includedProducts = gs.productIds.map((pid) => products.find((p) => p.id === pid)).filter(Boolean) as typeof products;
                   return (
                     <Link key={gs.id} href={`/collections/gift-sets/${gs.id}`} className="group block">
-                      <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:border-gold/40 hover:shadow-[0_0_40px_rgba(197,160,89,0.08)]">
+                      <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
                         <div className="aspect-[4/5] relative overflow-hidden">
                           <Image src={gs.image || '/images/product-placeholder.png'} alt={gs.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
                         </div>
@@ -182,7 +182,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                     className="group block"
                     prefetch={true}
                   >
-                    <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:border-gold/40 hover:shadow-[0_0_40px_rgba(197,160,89,0.08)]">
+                    <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
                       <div className="aspect-[4/5] relative overflow-hidden">
                         <Image
                           src={imgSrc}
@@ -192,7 +192,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                         {product.badge && (
-                          <span className="absolute top-4 left-4 bg-gold text-navy text-xs font-heading font-semibold tracking-wider uppercase px-3 py-1.5 rounded-sm">
+                          <span className="absolute top-4 left-4 bg-white text-[#09142E] text-xs font-heading font-semibold tracking-wider uppercase px-3 py-1.5 rounded-sm">
                             {product.badge}
                           </span>
                         )}

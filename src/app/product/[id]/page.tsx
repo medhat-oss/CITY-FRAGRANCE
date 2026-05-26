@@ -128,7 +128,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   onClick={() => { setActiveImageIndex(index); setImgError((prev) => ({ ...prev, [index]: false })); }}
                   className={`w-16 h-20 sm:w-[80px] sm:h-[100px] shrink-0 overflow-hidden rounded-sm border-2 transition-all duration-300 ${
                     index === activeImageIndex
-                      ? 'border-gold opacity-100 shadow-[0_0_12px_rgba(197,160,89,0.3)]'
+                      ? 'border-white opacity-100 shadow-[0_0_12px_rgba(255,255,255,0.3)]'
                       : 'border-white/10 opacity-50 hover:opacity-80 hover:border-white/30'
                   }`}
                 >
@@ -301,14 +301,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {/* Action Buttons */}
             <button
               onClick={() => { addToCart(product, quantity); openCart(); }}
-              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-gold bg-gold text-navy cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-transparent hover:text-white mb-3"
+              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB] mb-3"
             >
               <HiShoppingBag className="mr-2.5" /> Add to Cart
             </button>
 
             <button
               onClick={() => { buyNow(product, quantity, activeVol); router.push('/order-payment'); }}
-              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-white/20 bg-white/5 text-white cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-gold hover:text-navy hover:border-gold"
+              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB]"
             >
               <HiBolt className="mr-2.5" /> Buy It Now
             </button>

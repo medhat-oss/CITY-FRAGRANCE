@@ -44,12 +44,12 @@
   }
 
   .btn-primary {
-    @apply bg-gold text-navy border border-gold
-           shadow-[0_4px_15px_rgba(197,160,89,0.3)];
+    @apply bg-[#F9FAFB] text-[#09142E] border border-[#F9FAFB]
+           shadow-[0_4px_15px_rgba(255,255,255,0.15)];
   }
 
   .btn-primary:hover {
-    @apply bg-transparent text-white shadow-none;
+    @apply bg-[#E5E7EB] text-white border-[#E5E7EB] shadow-none;
   }
 
   .btn-outline {
@@ -62,10 +62,10 @@
 
   .btn-large {
     @apply px-16 py-5 text-lg
-           shadow-[0_8px_25px_rgba(197,160,89,0.35)];
+           shadow-[0_8px_25px_rgba(255,255,255,0.2)];
   }
 
   .btn-large:hover {
-    @apply -translate-y-0.5 shadow-[0_12px_30px_rgba(197,160,89,0.45)];
+    @apply -translate-y-0.5 shadow-[0_12px_30px_rgba(255,255,255,0.3)];
   }
 }

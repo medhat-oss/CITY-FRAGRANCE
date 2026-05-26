@@ -98,7 +98,7 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
               key={collection.id}
               href={collection.href}
               prefetch={true}
-              className="group relative block h-[480px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-500 hover:border-gold/40 hover:shadow-[0_0_50px_rgba(197,160,89,0.08)]"
+              className="group relative block h-[480px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_50px_rgba(255,255,255,0.08)]"
             >
               {/* Background Image with Zoom */}
               <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-110">

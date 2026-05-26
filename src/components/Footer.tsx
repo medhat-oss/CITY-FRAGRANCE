@@ -107,12 +107,12 @@ export default function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={status === 'loading'}
-                className="flex-1 px-4 py-3 bg-white/5 border border-white/20 text-white font-body text-base rounded-l-sm placeholder:text-white/40 focus:outline-none focus:border-gold transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-3 bg-white/5 border border-white/20 text-white font-body text-base rounded-l-sm placeholder:text-white/40 focus:outline-none focus:border-white transition-colors disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="px-6 bg-gold text-navy border border-gold font-heading font-semibold uppercase tracking-[0.1em] cursor-pointer transition-colors hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-r-sm flex items-center"
+                className="px-6 bg-white text-[#09142E] border border-white font-heading font-semibold uppercase tracking-[0.1em] cursor-pointer transition-colors hover:bg-[#E5E7EB] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-r-sm flex items-center"
               >
                 {status === 'loading' ? (
                   <span className="inline-block w-4 h-4 border-2 border-navy/30 border-t-navy rounded-full animate-spin" />

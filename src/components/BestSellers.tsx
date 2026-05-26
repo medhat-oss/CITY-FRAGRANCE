@@ -31,7 +31,7 @@ export default function BestSellers({ products, title = 'Best Sellers' }: BestSe
           <Link
             href="/collections/all"
             prefetch="auto"
-            className="font-heading text-xs uppercase tracking-[0.1em] text-navy dark:text-slate-300 font-medium relative pb-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-gold after:transition-transform after:duration-300 hover:after:scale-x-0 hover:after:origin-left"
+            className="font-heading text-xs uppercase tracking-[0.1em] text-navy dark:text-slate-300 font-medium relative pb-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-0 hover:after:origin-left"
           >
             View All
           </Link>

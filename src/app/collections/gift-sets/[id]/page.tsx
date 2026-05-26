@@ -115,7 +115,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
               />
-              <span className="absolute top-4 left-4 bg-gold text-navy text-xs font-heading font-semibold tracking-wider uppercase px-3 py-1.5 rounded-sm">
+              <span className="absolute top-4 left-4 bg-white text-[#09142E] text-xs font-heading font-semibold tracking-wider uppercase px-3 py-1.5 rounded-sm">
                 Gift Set
               </span>
             </div>
@@ -151,7 +151,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
                       <Link
                         key={p.id}
                         href={`/product/${p.id}`}
-                        className="group flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/10 transition-all duration-300 hover:bg-white/[0.06] hover:border-gold/40"
+                        className="group flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/10 transition-all duration-300 hover:bg-white/[0.06] hover:border-white/40"
                       >
                         <span className="flex items-center justify-center w-7 h-7 rounded-full bg-white/10 text-white text-xs font-heading font-semibold shrink-0">
                           {idx + 1}
@@ -176,13 +176,13 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
               {/* Actions */}
               <button
                 onClick={handleAddToCart}
-                className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-gold bg-gold text-navy cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-transparent hover:text-gold mb-3"
+                className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB] mb-3"
               >
                 <HiShoppingBag className="mr-2.5" /> Add to Cart
               </button>
               <button
                 onClick={handleBuyNow}
-                className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-white/20 bg-white/5 text-white cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-gold hover:text-navy hover:border-gold"
+                className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB]"
               >
                 <HiBolt className="mr-2.5" /> Buy It Now
               </button>
