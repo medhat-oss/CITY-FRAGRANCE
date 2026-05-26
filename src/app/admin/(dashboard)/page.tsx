@@ -103,6 +103,8 @@ export default function AdminPage() {
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  const [heroUploadError, setHeroUploadError] = useState('');
+  const [moodUploadError, setMoodUploadError] = useState('');
 
   useEffect(() => {
     fetch('/api/admin/settings')
@@ -342,6 +344,7 @@ export default function AdminPage() {
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
+                  setHeroUploadError('');
                   const formData = new FormData();
                   formData.append('file', file);
                   const controller = new AbortController();
@@ -356,33 +359,38 @@ export default function AdminPage() {
                     const data = await res.json();
                     if (data.success) {
                       handleSettingsChange('heroBgImage', data.path);
+                    } else {
+                      setHeroUploadError(data.error || 'Upload failed');
                     }
                   } catch {
                     clearTimeout(timeout);
-                    /* ignore */
+                    setHeroUploadError('Network error. Please try again.');
                   }
                 }}
               />
-            </label>
-          </div>
+              </label>
+              {heroUploadError && (
+                <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{heroUploadError}</p>
+              )}
+            </div>
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.4rem',
-              gridColumn: '1 / -1',
-            }}
-          >
-            <label
+            <div
               style={{
-                fontFamily: 'var(--font-heading)',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: '#16234D',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.4rem',
+                gridColumn: '1 / -1',
               }}
             >
-              Top Announcement Bar Text
+              <label
+                style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: '#16234D',
+                }}
+              >
+                Top Announcement Bar Text
             </label>
             <input
               type="text"
@@ -485,6 +493,7 @@ export default function AdminPage() {
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
+                  setMoodUploadError('');
                   const formData = new FormData();
                   formData.append('file', file);
                   const controller = new AbortController();
@@ -494,10 +503,14 @@ export default function AdminPage() {
                     clearTimeout(timeout);
                     const data = await res.json();
                     if (data.success) handleSettingsChange('moodImage', data.path);
-                  } catch { clearTimeout(timeout); /* ignore */ }
+                    else setMoodUploadError(data.error || 'Upload failed');
+                  } catch { clearTimeout(timeout); setMoodUploadError('Network error. Please try again.'); }
                 }}
               />
             </label>
+            {moodUploadError && (
+              <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{moodUploadError}</p>
+            )}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', gridColumn: '1 / -1' }}>

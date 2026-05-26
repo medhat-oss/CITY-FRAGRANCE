@@ -49,14 +49,16 @@ export async function POST(request: Request) {
       moodImage: body.moodImage ?? current.moodImage,
     };
     await writeJsonFile(FILE, updated);
+    console.log('SETTINGS SAVED to local and Cloudinary (if configured)');
     revalidatePath('/');
     revalidatePath('/collections');
     revalidatePath('/stores');
     return NextResponse.json({ success: true, settings: updated });
-  } catch (err) {
+  } catch (err: any) {
     console.error('SETTINGS SAVE ERROR:', err);
+    const message = err?.message || 'Failed to save settings';
     return NextResponse.json(
-      { success: false, error: err instanceof Error ? err.message : 'Failed to save settings' },
+      { success: false, error: message },
       { status: 500 }
     );
   }
