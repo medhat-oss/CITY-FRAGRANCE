@@ -15,6 +15,7 @@ cloudinary.config({
   cloud_name: cloudName,
   api_key: apiKey,
   api_secret: apiSecret,
+  secure: true,
 });
 
 export async function POST(request: Request) {

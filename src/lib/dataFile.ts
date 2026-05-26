@@ -40,6 +40,7 @@ async function uploadToCloudinary(filename: string, content: string): Promise<vo
       cloud_name: cloudName,
       api_key: process.env.CLOUDINARY_API_KEY,
       api_secret: process.env.CLOUDINARY_API_SECRET,
+      secure: true,
     });
     const base64 = Buffer.from(content, 'utf-8').toString('base64');
     const dataUri = `data:text/json;base64,${base64}`;
