@@ -99,11 +99,16 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
         data.append('file', file);
         data.append('upload_preset', uploadPreset);
 
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
+
         try {
             const res = await fetch(
                 `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-                { method: 'POST', body: data }
+                { method: 'POST', body: data, signal: controller.signal }
             );
+
+            clearTimeout(timeout);
 
             if (!res.ok) {
                 throw new Error('Upload failed. Check your Cloudinary preset settings.');
@@ -113,8 +118,13 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
             // Append the new URL to the images array instead of replacing
             setFormData(prev => ({ ...prev, images: [...prev.images, json.secure_url] }));
         } catch (err) {
-            setUploadError(err.message || 'Image upload failed');
+            if (err.name === 'AbortError') {
+                setUploadError('Upload timed out. Please try again.');
+            } else {
+                setUploadError(err.message || 'Image upload failed');
+            }
         } finally {
+            clearTimeout(timeout);
             setIsUploading(false);
             // Reset the file input so the same file can be re-selected
             e.target.value = '';

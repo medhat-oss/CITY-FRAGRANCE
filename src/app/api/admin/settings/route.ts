@@ -51,6 +51,7 @@ export async function POST(request: Request) {
     await writeJsonFile(FILE, updated);
     revalidatePath('/');
     revalidatePath('/collections');
+    revalidatePath('/stores');
     return NextResponse.json({ success: true, settings: updated });
   } catch (err) {
     console.error('SETTINGS SAVE ERROR:', err);

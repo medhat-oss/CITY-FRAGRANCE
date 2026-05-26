@@ -62,7 +62,7 @@ export async function PUT(request: Request) {
 
     revalidatePath('/collections');
     revalidatePath('/collections/' + body.slug);
-
+    revalidatePath('/collections', 'layout');
     return NextResponse.json({ success: true, images });
   } catch (err) {
     console.error('COLLECTION UPLOAD ERROR:', err);

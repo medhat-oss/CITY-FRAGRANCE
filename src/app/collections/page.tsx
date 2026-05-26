@@ -4,6 +4,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CollectionsGrid from '@/components/CollectionsGrid';
 
+export const dynamic = 'force-dynamic';
+
 async function getCollectionImages(): Promise<Record<string, string>> {
   try {
     const raw = await fs.readFile(

@@ -91,11 +91,16 @@ export default function AdminGiftSetsPage() {
     setIsUploading(true);
     const formData = new FormData();
     formData.append('file', file);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
     try {
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const res = await fetch('/api/upload', { method: 'POST', body: formData, signal: controller.signal });
+      clearTimeout(timeout);
       const data = await res.json();
       if (data.path) setForm((prev) => ({ ...prev, image: data.path }));
-    } catch { /* ignore */ }
+    } catch {
+      clearTimeout(timeout);
+    }
     setIsUploading(false);
   }
 

@@ -339,16 +339,21 @@ export default function AdminPage() {
                   if (!file) return;
                   const formData = new FormData();
                   formData.append('file', file);
+                  const controller = new AbortController();
+                  const timeout = setTimeout(() => controller.abort(), 30000);
                   try {
                     const res = await fetch('/api/upload', {
                       method: 'POST',
                       body: formData,
+                      signal: controller.signal,
                     });
+                    clearTimeout(timeout);
                     const data = await res.json();
                     if (data.success) {
                       handleSettingsChange('heroBgImage', data.path);
                     }
                   } catch {
+                    clearTimeout(timeout);
                     /* ignore */
                   }
                 }}
@@ -477,11 +482,14 @@ export default function AdminPage() {
                   if (!file) return;
                   const formData = new FormData();
                   formData.append('file', file);
+                  const controller = new AbortController();
+                  const timeout = setTimeout(() => controller.abort(), 30000);
                   try {
-                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                    const res = await fetch('/api/upload', { method: 'POST', body: formData, signal: controller.signal });
+                    clearTimeout(timeout);
                     const data = await res.json();
                     if (data.success) handleSettingsChange('moodImage', data.path);
-                  } catch { /* ignore */ }
+                  } catch { clearTimeout(timeout); /* ignore */ }
                 }}
               />
             </label>

@@ -17,6 +17,12 @@ export async function POST(request: Request) {
     await writeJsonFile(FILE, products);
     revalidatePath('/');
     revalidatePath('/collections/all-fragrances');
+    revalidatePath('/collections/mens-collection');
+    revalidatePath('/collections/womens-collection');
+    revalidatePath('/collections/oud-collection');
+    revalidatePath('/collections/new-arrivals');
+    revalidatePath('/collections/gift-sets');
+    revalidatePath('/product', 'layout');
     return NextResponse.json({ success: true, product });
   } catch (err) {
     console.error('PRODUCT ADD DATABASE ERROR:', err);
@@ -39,6 +45,12 @@ export async function PUT(request: Request) {
     await writeJsonFile(FILE, products);
     revalidatePath('/');
     revalidatePath('/collections/all-fragrances');
+    revalidatePath('/collections/mens-collection');
+    revalidatePath('/collections/womens-collection');
+    revalidatePath('/collections/oud-collection');
+    revalidatePath('/collections/new-arrivals');
+    revalidatePath('/collections/gift-sets');
+    revalidatePath('/product', 'layout');
     return NextResponse.json({ success: true, product: updated });
   } catch (err) {
     console.error('PRODUCT UPDATE DATABASE ERROR:', err);
@@ -60,6 +72,12 @@ export async function DELETE(request: Request) {
     await writeJsonFile(FILE, filtered);
     revalidatePath('/');
     revalidatePath('/collections/all-fragrances');
+    revalidatePath('/collections/mens-collection');
+    revalidatePath('/collections/womens-collection');
+    revalidatePath('/collections/oud-collection');
+    revalidatePath('/collections/new-arrivals');
+    revalidatePath('/collections/gift-sets');
+    revalidatePath('/product', 'layout');
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('PRODUCT DELETE DATABASE ERROR:', err);
