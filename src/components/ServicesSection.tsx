@@ -9,18 +9,18 @@ export function ServicesSection() {
   return (
     <section className="py-16 px-4 sm:px-8 bg-cream dark:bg-[#09142E] border-t border-navy/10 dark:border-slate-800" dir={dir}>
       <div className="max-w-container mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-          <div className="flex flex-col items-center">
+        <div className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none gap-4 sm:grid sm:grid-cols-3 sm:gap-8 sm:overflow-visible text-center">
+          <div className="flex flex-col items-center snap-center shrink-0 w-[80vw] sm:w-auto">
             <HiOutlineGift className="text-3xl text-white mb-4" />
             <h3 className="font-heading text-lg text-navy dark:text-white mb-1">Premium Packaging</h3>
             <p className="font-body text-sm text-ink-lighter dark:text-slate-400">An elegant unboxing experience</p>
           </div>
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center snap-center shrink-0 w-[80vw] sm:w-auto">
             <HiOutlineShieldCheck className="text-3xl text-white mb-4" />
             <h3 className="font-heading text-lg text-navy dark:text-white mb-1">Secure Checkout</h3>
             <p className="font-body text-sm text-ink-lighter dark:text-slate-400">100% secure payment</p>
           </div>
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center snap-center shrink-0 w-[80vw] sm:w-auto">
             <HiOutlineArrowPath className="text-3xl text-white mb-4" />
             <h3 className="font-heading text-lg text-navy dark:text-white mb-1">Easy Returns</h3>
             <p className="font-body text-sm text-ink-lighter dark:text-slate-400">30-day return policy</p>

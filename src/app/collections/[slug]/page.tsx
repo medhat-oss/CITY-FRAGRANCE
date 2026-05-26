@@ -129,7 +129,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                 {giftSets.map((gs) => {
                   const includedProducts = gs.productIds.map((pid) => products.find((p) => p.id === pid)).filter(Boolean) as typeof products;
                   return (
@@ -172,7 +172,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
               {collectionProducts.map((product) => {
                 const imgSrc = product.images?.[0] || '/images/product-placeholder.png';
                 return (
