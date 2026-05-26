@@ -15,12 +15,16 @@ import type { SiteSettings } from '@/types';
 export default function Home() {
   const { isLoaded, getBestSellers } = useProducts();
   const [moodSettings, setMoodSettings] = useState({ moodTitle: '', moodSubtitle: '', moodImage: '' });
+  const [moodLoaded, setMoodLoaded] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/settings', { cache: 'no-store' })
       .then((r) => r.json())
-      .then((data: SiteSettings) => setMoodSettings({ moodTitle: data.moodTitle, moodSubtitle: data.moodSubtitle, moodImage: data.moodImage }))
-      .catch(() => {});
+      .then((data: SiteSettings) => {
+        setMoodSettings({ moodTitle: data.moodTitle, moodSubtitle: data.moodSubtitle, moodImage: data.moodImage });
+        setMoodLoaded(true);
+      })
+      .catch(() => setMoodLoaded(true));
   }, []);
 
   if (!isLoaded) return null;
@@ -38,14 +42,18 @@ export default function Home() {
         {/* ─── Mood / CTA Section ─── */}
         <section className="relative h-[calc(100vh-120px)] min-h-[600px] flex items-center overflow-hidden">
           <div className="absolute inset-0 z-[1]">
-            <Image
-              src={moodSettings.moodImage || '/images/hero-banner.png'}
-              alt="Luxury fragrance ambiance"
-              fill
-              priority
-              className="object-cover"
-              sizes="100vw"
-            />
+            {moodLoaded && moodSettings.moodImage ? (
+              <Image
+                src={moodSettings.moodImage}
+                alt="Luxury fragrance ambiance"
+                fill
+                priority
+                className="object-cover"
+                sizes="100vw"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[#09142E]" />
+            )}
             <div className="absolute inset-0 bg-gradient-to-b from-[#09142E]/45 via-transparent to-[#09142E]/60" />
           </div>
 

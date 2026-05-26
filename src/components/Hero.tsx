@@ -17,21 +17,25 @@ export default function Hero() {
       .catch(() => setSettings(null));
   }, []);
 
+  const loaded = settings !== null;
   const title = settings?.heroTitle || 'Celebrate in Luxury & Scent';
   const subtitle = settings?.heroSubtitle || 'Eid Al Adha Special';
-  const bgImage = settings?.heroBgImage || '/images/hero-banner.png';
 
   return (
     <section className="relative h-[calc(100vh-120px)] min-h-[600px] flex items-center overflow-hidden">
       <div className="absolute inset-0 z-[1]">
-        <Image
-          src={bgImage}
-          alt="Hero banner"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
+        {loaded && settings?.heroBgImage ? (
+          <Image
+            src={settings.heroBgImage}
+            alt="Hero banner"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[#09142E]" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-[#09142E]/45 via-transparent to-[#09142E]/60" />
       </div>
 
