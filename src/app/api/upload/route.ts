@@ -41,12 +41,13 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, path: result.secure_url });
-  } catch (err) {
+  } catch (err: any) {
     console.error('UPLOAD ERROR DETAILS:', err);
-    const message = err instanceof Error ? err.message : 'Upload failed';
+    const message = err?.message || err?.error?.message || 'Upload failed';
+    const status = err?.http_code || 500;
     return NextResponse.json(
       { success: false, error: message },
-      { status: 500 }
+      { status }
     );
   }
 }

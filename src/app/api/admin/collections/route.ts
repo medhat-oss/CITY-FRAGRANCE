@@ -64,11 +64,13 @@ export async function PUT(request: Request) {
     revalidatePath('/collections/' + body.slug);
     revalidatePath('/collections', 'layout');
     return NextResponse.json({ success: true, images });
-  } catch (err) {
+  } catch (err: any) {
     console.error('COLLECTION UPLOAD ERROR:', err);
+    const message = err?.message || err?.error?.message || 'Failed to save collection image';
+    const status = err?.http_code || 500;
     return NextResponse.json(
-      { success: false, error: err instanceof Error ? err.message : 'Failed to save collection image' },
-      { status: 500 }
+      { success: false, error: message },
+      { status }
     );
   }
 }
