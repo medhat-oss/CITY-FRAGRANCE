@@ -116,21 +116,21 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
               <div className="absolute inset-0 bg-gradient-to-t from-[#09142E] via-[#09142E]/60 to-[#09142E]/20 transition-opacity duration-500 group-hover:from-[#09142E]" />
 
               {/* Content */}
-              <div className="absolute inset-0 flex flex-col justify-end p-8 z-10">
-                <div className="mb-5">
-                  <h3 className="font-heading text-3xl font-light text-white mb-1">
+              <div className="absolute inset-0 flex flex-col justify-end p-3 sm:p-8 z-10">
+                <div className="mb-2 sm:mb-5">
+                  <h3 className="font-heading text-base sm:text-3xl font-light text-white leading-tight sm:leading-normal">
                     {collection.title}
                   </h3>
-                  <p className="text-white/60 text-sm leading-relaxed max-w-xs">
+                  <p className="text-white/60 text-[10px] sm:text-sm leading-tight sm:leading-relaxed mt-1 sm:mt-0">
                     {collection.description}
                   </p>
                 </div>
 
                 {/* Divider */}
-                <div className="w-12 h-px bg-gold/40 mb-4 transition-all duration-500 group-hover:w-full group-hover:bg-gold/60" />
+                <div className="w-8 sm:w-12 h-px bg-gold/40 mb-2 sm:mb-4 transition-all duration-500 group-hover:w-full group-hover:bg-gold/60" />
 
                 {/* CTA */}
-                <span className="inline-flex items-center gap-2 text-xs font-heading uppercase tracking-[0.15em] text-white/70 transition-all duration-300 group-hover:text-white group-hover:gap-3">
+                <span className="inline-flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs font-heading uppercase tracking-[0.1em] sm:tracking-[0.15em] text-white/70 transition-all duration-300 group-hover:text-white group-hover:gap-2 sm:group-hover:gap-3">
                   Explore Collection
                   <HiArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
