@@ -92,13 +92,13 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
 
       {/* ─── Grid ─── */}
       <section className="max-w-7xl mx-auto px-6 pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {collections.map((collection) => (
             <Link
               key={collection.id}
               href={collection.href}
               prefetch={true}
-              className="group relative block h-[480px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_50px_rgba(255,255,255,0.08)]"
+              className="group relative block h-[280px] sm:h-[480px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_50px_rgba(255,255,255,0.08)]"
             >
               {/* Background Image with Zoom */}
               <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-110">
@@ -108,7 +108,7 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
                   fill
                   priority
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
                 />
               </div>
 
