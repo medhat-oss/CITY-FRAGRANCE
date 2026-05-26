@@ -135,20 +135,20 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                   return (
                     <Link key={gs.id} href={`/collections/gift-sets/${gs.id}`} className="group block">
                       <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
-                        <div className="aspect-[4/5] relative overflow-hidden">
-                          <Image src={gs.image || '/images/product-placeholder.png'} alt={gs.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                        <div className="relative aspect-square overflow-hidden bg-transparent">
+                          <Image src={gs.image || '/images/product-placeholder.png'} alt={gs.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="(max-width: 640px) 50vw, 25vw" />
                         </div>
-                      <div className="p-6">
+                      <div className="p-3 sm:p-6">
                         <span className="text-xs uppercase tracking-widest text-white/60 mb-1 block">Gift Set</span>
-                        <h3 className="font-heading text-xl font-light text-white mb-2">{gs.name}</h3>
-                        <p className="text-white/50 text-sm line-clamp-2 mb-3">{gs.description}</p>
-                        <div className="flex flex-wrap gap-1.5 mb-4">
+                        <h3 className="font-heading text-base sm:text-xl font-normal text-white mb-1 sm:mb-2">{gs.name}</h3>
+                        <p className="text-white/50 text-xs sm:text-sm line-clamp-2 mb-2 sm:mb-3">{gs.description}</p>
+                        <div className="flex flex-wrap gap-1.5 mb-2 sm:mb-4">
                           {includedProducts.map((p) => (
                             <span key={p.id} className="text-[0.6rem] uppercase tracking-wider text-white/40 border border-white/10 px-2 py-0.5 rounded-sm">{p.name}</span>
                           ))}
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-white font-heading text-lg">{formatEGP(gs.price)}</span>
+                          <span className="text-white font-heading text-sm sm:text-lg">{formatEGP(gs.price)}</span>
                         </div>
                       </div>
                     </div>
@@ -183,48 +183,48 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                     prefetch={true}
                   >
                     <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
-                      <div className="aspect-[4/5] relative overflow-hidden">
+                      <div className="relative aspect-square overflow-hidden bg-transparent">
                         <Image
                           src={imgSrc}
                           alt={product.name}
                           fill
                           className="object-cover transition-transform duration-700 group-hover:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         />
                         {product.badge && (
-                          <span className="absolute top-4 left-4 bg-white text-[#09142E] text-xs font-heading font-semibold tracking-wider uppercase px-3 py-1.5 rounded-sm">
+                          <span className="absolute top-3 left-3 z-[2] bg-white text-[#09142E] text-xs font-heading font-semibold tracking-wider uppercase px-3 py-1.5 rounded-sm">
                             {product.badge}
                           </span>
                         )}
                       </div>
-                      <div className="p-6">
+                      <div className="p-3 sm:p-6">
                         <p className="text-xs uppercase tracking-widest text-white/70 mb-1">
                           {product.category}
                         </p>
-                        <h3 className="font-heading text-xl font-light text-white mb-2">
+                        <h3 className="font-heading text-base sm:text-xl font-normal text-white mb-1 sm:mb-2">
                           {product.name}
                         </h3>
-                        <p className="text-white/50 text-sm line-clamp-1 mb-4">
+                        <p className="text-white/50 text-xs sm:text-sm line-clamp-1 mb-2 sm:mb-4">
                           {product.notes}
                         </p>
                         <div className="flex items-center justify-between">
                           <div>
                             {product.salePrice ? (
-                              <div className="flex items-center gap-2">
-                                <span className="text-white font-heading text-lg">
+                              <div className="flex items-center gap-1.5 sm:gap-2">
+                                <span className="text-white font-heading text-sm sm:text-lg">
                                   {formatEGP(product.salePrice)}
                                 </span>
-                                <span className="text-white/30 line-through text-sm">
+                                <span className="text-white/30 line-through text-xs sm:text-sm">
                                   {formatEGP(product.price)}
                                 </span>
                               </div>
                             ) : (
-                              <span className="text-white font-heading text-lg">
+                              <span className="text-white font-heading text-sm sm:text-lg">
                                 {formatEGP(product.price)}
                               </span>
                             )}
                           </div>
-                          <span className="text-white/40 group-hover:text-white transition-colors">
+                          <span className="text-white/40 group-hover:text-white transition-colors text-sm sm:text-base">
                             <HiArrowRight />
                           </span>
                         </div>
