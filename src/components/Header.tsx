@@ -47,7 +47,7 @@ export default function Header() {
   const [announcementText, setAnnouncementText] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/settings', { next: { revalidate: 60 } })
+    fetch('/api/admin/settings', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data: SiteSettings) => setAnnouncementText(data.announcementText))
       .catch(() => setAnnouncementText(''));

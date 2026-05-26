@@ -27,11 +27,7 @@ const DEFAULTS: SiteSettings = {
 export async function GET() {
   const saved = await readJsonFile<Partial<SiteSettings>>(FILE, {});
   const settings = { ...DEFAULTS, ...saved };
-  return NextResponse.json(settings, {
-    headers: {
-      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
-    },
-  });
+  return NextResponse.json(settings);
 }
 
 export async function POST(request: Request) {

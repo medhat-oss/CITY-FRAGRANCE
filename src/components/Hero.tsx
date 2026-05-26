@@ -11,7 +11,7 @@ export default function Hero() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   useEffect(() => {
-    fetch('/api/admin/settings', { next: { revalidate: 60 } })
+    fetch('/api/admin/settings', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data: SiteSettings) => setSettings(data))
       .catch(() => setSettings(null));

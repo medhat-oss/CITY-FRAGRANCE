@@ -16,7 +16,7 @@ export default function Home() {
   const [moodSettings, setMoodSettings] = useState({ moodTitle: '', moodSubtitle: '', moodImage: '' });
 
   useEffect(() => {
-    fetch('/api/admin/settings', { next: { revalidate: 60 } })
+    fetch('/api/admin/settings', { cache: 'no-store' })
       .then((r) => r.json())
       .then((data: SiteSettings) => setMoodSettings({ moodTitle: data.moodTitle, moodSubtitle: data.moodSubtitle, moodImage: data.moodImage }))
       .catch(() => {});

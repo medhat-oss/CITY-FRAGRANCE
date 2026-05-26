@@ -22,8 +22,19 @@ async function readLocalFile(filePath: string): Promise<string | null> {
 
 async function readCloudinary(filename: string): Promise<string | null> {
   if (!cloudName) return null;
-  const url = `https://res.cloudinary.com/${cloudName}/raw/upload/city-fragrance-data/${filename}`;
   try {
+    const { v2: cloudinary } = await import('cloudinary');
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+      secure: true,
+    });
+    const result = await cloudinary.api.resource(`city-fragrance-data/${filename}`, {
+      resource_type: 'raw',
+    });
+    const url = (result as { secure_url: string }).secure_url;
+    if (!url) return null;
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return null;
     return await res.text();
