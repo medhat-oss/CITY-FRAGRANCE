@@ -251,7 +251,7 @@ export default function Header() {
           </h2>
           <button
             onClick={closeCart}
-            className="bg-transparent border-none cursor-pointer text-gray-400 p-2 transition-colors hover:text-gold leading-none"
+            className="bg-transparent border-none cursor-pointer text-gray-400 p-2 transition-colors hover:text-white leading-none"
             aria-label="Close cart"
           >
             <HiOutlineXMark className="text-lg" />
