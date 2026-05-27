@@ -699,7 +699,6 @@ export default function AdminPage() {
               <tr>
                 <th>Image</th>
                 <th>Product Name</th>
-                <th>Type</th>
                 <th>Category</th>
                 <th>Price</th>
                 <th>Sale Price</th>
@@ -721,12 +720,11 @@ export default function AdminPage() {
                       style={{ objectFit: 'cover', borderRadius: '4px' }}
                     />
                   </td>
-                  <td>
+                          <td>
                             <strong>{product.name}</strong>
                             <br />
                             <small style={{ color: '#64748b' }}>{product.notes}</small>
                           </td>
-                          <td>{product.type || '-'}</td>
                           <td>{product.category}</td>
                   <td>{fmt(product.price)}</td>
                   <td>

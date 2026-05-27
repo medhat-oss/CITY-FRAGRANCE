@@ -8,7 +8,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
     const [formData, setFormData] = useState({
         id: '',
         name: '',
-        type: 'Men',
+        type: 'Perfume',
         category: 'Men',
         collection: '',
         badge: '',
@@ -57,7 +57,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
             setFormData({
                 id: '',
                 name: '',
-                type: 'Men',
+                type: 'Perfume',
                 category: 'Men',
                 collection: '',
                 badge: '',
@@ -142,6 +142,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
         e.preventDefault();
         onSave({
             ...formData,
+            type: 'Perfume',
             id: formData.id || 'p' + Date.now(),
             price: parseFloat(formData.price),
             salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
@@ -165,21 +166,12 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                     </div>
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label>Product Type</label>
-                            <select name="type" value={formData.type} onChange={handleChange} required>
-                                <option value="Men">Men</option>
-                                <option value="Women">Women</option>
-                                <option value="Unisex">Unisex</option>
-                                <option value="Gift Sets">Gift Sets</option>
-                            </select>
-                        </div>
-                        <div className={styles.formGroup}>
                             <label>Category</label>
                             <select name="category" value={formData.category} onChange={handleChange} required>
                                 <option value="Men">Men</option>
                                 <option value="Women">Women</option>
                                 <option value="Oud">Oud</option>
-                                <option value="Sets">Sets</option>
+                                <option value="Unisex">Unisex</option>
                             </select>
                         </div>
                         <div className={styles.formGroup}>

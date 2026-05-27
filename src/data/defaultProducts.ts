@@ -168,7 +168,7 @@ export const defaultProducts: Product[] = [
     id: 'p14',
     type: '',
     name: 'Amber & Oud Gift Set',
-    category: 'Sets',
+    category: 'Unisex',
     notes: 'Amber • Oud • Musk — 3 x 35 ML',
     volume: '3 x 35 ML',
     price: 320.0,
