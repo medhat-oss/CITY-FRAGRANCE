@@ -381,8 +381,8 @@ export default function CheckoutPage() {
                 onClick={() => setSelectedPayment('vodafone')}
                 className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-200 ${
                   selectedPayment === 'vodafone'
-                    ? 'border-amber-500 bg-amber-500/10 text-white font-bold'
-                    : 'border-slate-700 bg-[#11224D] text-white hover:border-amber-500/50'
+                    ? 'border-white bg-white/10 text-white font-bold'
+                    : 'border-slate-700 bg-[#11224D] text-white hover:border-white/50'
                 }`}
               >
                 <span className="block text-base">Vodafone Cash</span>
@@ -393,8 +393,8 @@ export default function CheckoutPage() {
                 onClick={() => setSelectedPayment('instapay')}
                 className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-200 ${
                   selectedPayment === 'instapay'
-                    ? 'border-amber-500 bg-amber-500/10 text-white font-bold'
-                    : 'border-slate-700 bg-[#11224D] text-white hover:border-amber-500/50'
+                    ? 'border-white bg-white/10 text-white font-bold'
+                    : 'border-slate-700 bg-[#11224D] text-white hover:border-white/50'
                 }`}
               >
                 <span className="block text-base">InstaPay</span>
@@ -405,8 +405,8 @@ export default function CheckoutPage() {
                 onClick={() => setSelectedPayment('cod')}
                 className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-200 ${
                   selectedPayment === 'cod'
-                    ? 'border-amber-500 bg-amber-500/10 text-white font-bold'
-                    : 'border-slate-700 bg-[#11224D] text-white hover:border-amber-500/50'
+                    ? 'border-white bg-white/10 text-white font-bold'
+                    : 'border-slate-700 bg-[#11224D] text-white hover:border-white/50'
                 }`}
               >
                 <span className="block text-base">Cash on Delivery</span>
