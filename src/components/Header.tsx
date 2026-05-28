@@ -292,8 +292,8 @@ export default function Header() {
                       <span className="font-heading text-sm font-semibold text-gray-100 tracking-[0.03em] truncate">
                         {item.name}
                       </span>
-                      {item.notes && (
-                        <span className="font-body text-xs text-gray-400 italic">{item.notes}</span>
+                      {[item.topNotes, item.middleNotes, item.baseNotes].filter(Boolean).length > 0 && (
+                        <span className="font-body text-xs text-gray-400 italic">{[item.topNotes, item.middleNotes, item.baseNotes].filter(Boolean).join(' • ')}</span>
                       )}
                       <span className="font-heading text-sm font-bold text-white mt-0.5">
                         {formatEGP(price)}

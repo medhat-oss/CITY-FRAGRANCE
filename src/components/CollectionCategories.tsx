@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { HiArrowRight } from 'react-icons/hi2';
 import { useLocale } from '@/context/LocaleContext';
+import type { CollectionData } from '@/types';
 
 interface Collection {
   title: string;
@@ -14,38 +15,29 @@ interface Collection {
   image: string;
 }
 
-const COLLECTION_META: Omit<Collection, 'image'>[] = [
-  {
-    title: "Women's Collection",
-    subtitle: 'Elegant, enchanting, and unforgettable scents.',
-    href: '/collections/womens-collection',
-    slug: 'womens-collection',
-  },
-  {
-    title: "Men's Collection",
-    subtitle: 'Bold, confident, and distinguished fragrances.',
-    href: '/collections/mens-collection',
-    slug: 'mens-collection',
-  },
+const COLLECTION_META: Omit<Collection, 'image' | 'subtitle'>[] = [
+  { title: "Women's Collection", href: '/collections/womens-collection', slug: 'womens-collection' },
+  { title: "Men's Collection", href: '/collections/mens-collection', slug: 'mens-collection' },
 ];
 
 export default function CollectionCategories() {
   const { dir } = useLocale();
-  const [collectionImages, setCollectionImages] = useState<Record<string, string> | null>(null);
+  const [collectionData, setCollectionData] = useState<Record<string, CollectionData> | null>(null);
 
   useEffect(() => {
     fetch('/api/collections', { cache: 'no-store' })
       .then((res) => res.json())
-      .then((data: { images: Record<string, string> }) => setCollectionImages(data.images))
-      .catch(() => setCollectionImages({}));
+      .then((data: { images: Record<string, CollectionData> }) => setCollectionData(data.images))
+      .catch(() => setCollectionData({}));
   }, []);
 
   const collections: Collection[] = COLLECTION_META.map((meta) => ({
     ...meta,
-    image: collectionImages?.[meta.slug] || '',
+    subtitle: collectionData?.[meta.slug]?.description || '',
+    image: collectionData?.[meta.slug]?.image || '',
   }));
 
-  const loaded = collectionImages !== null;
+  const loaded = collectionData !== null;
 
   return (
     <section className="py-16 px-4 sm:px-8 bg-slate-50 dark:bg-[#09142E] border-b dark:border-slate-800" dir={dir}>

@@ -3,16 +3,15 @@ export interface Product {
   name: string;
   type: string;
   category: string;
-  notes: string;
-  volume: string;
+  topNotes: string;
+  middleNotes: string;
+  baseNotes: string;
   price: number;
   salePrice: number | null;
   images: string[];
   badge: string;
   collection?: string;
   description?: string;
-  orientation?: string;
-  concentration?: string;
 }
 
 export interface NavLink {
@@ -45,7 +44,12 @@ export interface Order {
 
 export type CollectionSlug = 'new-arrivals' | 'all-fragrances' | 'oud-collection' | 'mens-collection' | 'womens-collection' | 'gift-sets';
 
-export type CollectionImages = Record<CollectionSlug, string>;
+export interface CollectionData {
+  image: string;
+  description: string;
+}
+
+export type CollectionImages = Record<CollectionSlug, CollectionData>;
 
 export interface SiteSettings {
   heroTitle: string;

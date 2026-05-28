@@ -2,12 +2,13 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CollectionsGrid from '@/components/CollectionsGrid';
 import { readJsonFile } from '@/lib/dataFile';
+import type { CollectionData } from '@/types';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-async function getCollectionImages(): Promise<Record<string, string>> {
-  return readJsonFile<Record<string, string>>('collection-images.json', {});
+async function getCollectionImages(): Promise<Record<string, CollectionData>> {
+  return readJsonFile<Record<string, CollectionData>>('collection-images.json', {});
 }
 
 export default async function CollectionsPage() {

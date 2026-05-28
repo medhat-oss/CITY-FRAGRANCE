@@ -24,7 +24,7 @@ interface CartContextValue {
   openCart: () => void;
   closeCart: () => void;
   clearCart: () => void;
-  buyNow: (product: Product, quantity?: number, selectedVolume?: string) => void;
+  buyNow: (product: Product, quantity?: number) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -79,8 +79,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         name: giftSet.name,
         type: 'Gift Sets',
         category: 'Gift Set',
-        notes: '',
-        volume: '',
+        topNotes: '',
+        middleNotes: '',
+        baseNotes: '',
         price: giftSet.price,
         salePrice: null,
         images: giftSet.image ? [giftSet.image] : [],
@@ -114,11 +115,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const closeCart = useCallback(() => setIsCartOpen(false), []);
   const clearCart = useCallback(() => setCartItems([]), []);
 
-  const buyNow = useCallback((product: Product, quantity = 1, selectedVolume?: string) => {
+  const buyNow = useCallback((product: Product, quantity = 1) => {
     setCartItems([{
       ...product,
       quantity,
-      volume: selectedVolume || product.volume,
     }]);
     setIsCartOpen(false);
   }, []);

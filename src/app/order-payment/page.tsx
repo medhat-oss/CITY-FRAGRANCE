@@ -475,9 +475,9 @@ export default function CheckoutPage() {
                     <span className="font-heading text-sm font-medium text-navy dark:text-white truncate">
                       {item.name}
                     </span>
-                    {item.volume && (
-                      <span className="font-body text-xs text-ink-lighter dark:text-slate-300">
-                        {item.volume.split(',')[0].trim()}
+                    {[item.topNotes, item.middleNotes, item.baseNotes].filter(Boolean).length > 0 && (
+                      <span className="font-body text-xs text-ink-lighter dark:text-slate-300 italic">
+                        {[item.topNotes, item.middleNotes, item.baseNotes].filter(Boolean).join(' • ')}
                       </span>
                     )}
                   </div>

@@ -85,7 +85,7 @@ export default function AdminPage() {
                           <td>
                             <strong>{product.name}</strong>
                             <br />
-                            <small style={{ color: '#64748b' }}>{product.notes}</small>
+                            <small style={{ color: '#64748b' }}>{[product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).join(' • ')}</small>
                           </td>
                           <td>{product.category}</td>
                   <td>{fmt(product.price)}</td>

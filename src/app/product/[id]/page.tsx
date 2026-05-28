@@ -19,7 +19,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const router = useRouter();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [selectedVolume, setSelectedVolume] = useState('');
   const [notesOpen, setNotesOpen] = useState(false);
   const [descOpen, setDescOpen] = useState(false);
   const [imgError, setImgError] = useState<Record<number, boolean>>({});
@@ -35,16 +34,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const activeImage = imgError[activeImageIndex]
     ? '/placeholder.png'
     : productImages[activeImageIndex] || productImages[0];
-
-  const volumeOptions = (product?.volume || '100 ML')
-    .split(',')
-    .map((v) => v.trim())
-    .filter(Boolean);
-
-  const activeVol =
-    selectedVolume && volumeOptions.includes(selectedVolume)
-      ? selectedVolume
-      : volumeOptions[0];
 
   const goToPrev = useCallback(() => {
     setLightboxIndex((prev) => (prev === 0 ? productImages.length - 1 : prev - 1));
@@ -69,14 +58,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     };
   }, [lightboxOpen, goToPrev, goToNext]);
 
-  const notesList = product?.notes
-    ? product.notes.split('•').map((n) => n.trim()).filter(Boolean)
-    : [];
-
-  const third = Math.ceil(notesList.length / 3) || 1;
-  const topNotes = notesList.slice(0, third);
-  const middleNotes = notesList.slice(third, third * 2);
-  const baseNotesList = notesList.slice(third * 2);
+  const combinedNotes = [product?.topNotes, product?.middleNotes, product?.baseNotes]
+    .filter(Boolean)
+    .join(' | ');
 
   if (!isLoaded) {
     return <div className="h-screen bg-white dark:bg-[#09142E]" />;
@@ -196,7 +180,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             {/* Category Tags */}
             <p className="font-body text-sm tracking-widest text-ink-lighter dark:text-slate-300 uppercase mb-5">
-              {notesList.slice(0, 3).join(' | ') || product.category}
+              {combinedNotes || product.category}
             </p>
 
             {/* Pricing */}
@@ -222,56 +206,82 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             <div className="w-full h-px bg-gray-100 dark:bg-slate-800 my-5" />
 
-            {/* Attributes */}
-            <div className="flex flex-col gap-5">
-              {/* Concentration */}
-              <div className="flex flex-col gap-2">
-                <span className="font-heading text-[0.7rem] tracking-[0.15em] uppercase text-ink-light dark:text-slate-300 font-semibold">
-                  Concentration
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  <button className="px-5 py-2.5 border-2 border-navy bg-navy text-white font-heading text-xs uppercase tracking-wider rounded-sm transition-all duration-200 hover:bg-navy-light">
-                    {product.concentration || 'Eau De Parfum'}
-                  </button>
+            {/* Description Accordion */}
+            <div>
+              <button
+                onClick={() => setDescOpen(!descOpen)}
+                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-all duration-300 ease-in-out hover:text-white"
+              >
+                <span>Description</span>
+                <HiChevronDown
+                  className={`text-sm transition-transform duration-300 ease-in-out ${
+                    descOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              {descOpen && (
+                <div className="pt-2 pb-4 animate-fade-up">
+                  <p className="font-body text-sm leading-relaxed text-ink-light dark:text-slate-300 text-justify">
+                    {product.description || (
+                      <>
+                        Discover the essence of luxury with{' '}
+                        <strong className="text-navy dark:text-white">{product.name}</strong>.
+                        Carefully crafted with the finest ingredients, this exquisite{' '}
+                        {product.category.toLowerCase()} fragrance offers a long-lasting,
+                        unforgettable signature scent. A sophisticated composition of{' '}
+                        {combinedNotes || product.category} that captures the spirit of modern elegance and
+                        timeless Middle Eastern perfumery tradition.
+                      </>
+                    )}
+                  </p>
                 </div>
-              </div>
+              )}
+            </div>
 
-              {/* Orientation */}
-              {product.orientation && (
-                <div className="flex flex-col gap-2">
-                  <span className="font-heading text-[0.7rem] tracking-[0.15em] uppercase text-ink-light dark:text-slate-300 font-semibold">
-                    Orientation
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    <button className="px-5 py-2.5 border-2 border-navy bg-navy text-white font-heading text-xs uppercase tracking-wider rounded-sm transition-all duration-300 ease-in-out hover:bg-navy-light">
-                      {product.orientation}
-                    </button>
+            <div className="w-full h-px bg-gray-100 dark:bg-slate-800 my-5" />
+
+            {/* Perfume Notes Accordion */}
+            <div>
+              <button
+                onClick={() => setNotesOpen(!notesOpen)}
+                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-all duration-300 ease-in-out hover:text-white"
+              >
+                <span>Perfume Notes</span>
+                <HiChevronDown
+                  className={`text-sm transition-transform duration-300 ease-in-out ${
+                    notesOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+
+              {notesOpen && (
+                <div className="flex flex-col gap-3 pt-2 pb-4 animate-fade-up">
+                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-6">
+                    <span className="font-heading text-[0.7rem] tracking-[0.1em] uppercase text-ink-lighter dark:text-slate-400 font-semibold min-w-[110px] shrink-0">
+                      Top Notes
+                    </span>
+                    <span className="font-body text-sm text-ink-light dark:text-slate-300">
+                      {product.topNotes || '\u2014'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-6">
+                    <span className="font-heading text-[0.7rem] tracking-[0.1em] uppercase text-ink-lighter dark:text-slate-400 font-semibold min-w-[110px] shrink-0">
+                      Middle Notes
+                    </span>
+                    <span className="font-body text-sm text-ink-light dark:text-slate-300">
+                      {product.middleNotes || '\u2014'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-6">
+                    <span className="font-heading text-[0.7rem] tracking-[0.1em] uppercase text-ink-lighter dark:text-slate-400 font-semibold min-w-[110px] shrink-0">
+                      Base Notes
+                    </span>
+                    <span className="font-body text-sm text-ink-light dark:text-slate-300">
+                      {product.baseNotes || '\u2014'}
+                    </span>
                   </div>
                 </div>
               )}
-
-              {/* Volume */}
-              <div className="flex flex-col gap-2">
-                <span className="font-heading text-[0.7rem] tracking-[0.15em] uppercase text-ink-light dark:text-slate-300 font-semibold">
-                  Volume
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {volumeOptions.map((vol) => (
-                    <button
-                      key={vol}
-                      onClick={() => setSelectedVolume(vol)}
-                      className={`px-5 py-2.5 border-2 font-heading text-xs uppercase tracking-wider rounded-sm transition-all duration-300 ease-in-out ${
-                        activeVol === vol
-                          ? 'border-navy bg-navy text-white'
-                          : 'border-gray-200 text-ink-light dark:border-slate-700 dark:text-slate-200 hover:border-navy dark:hover:border-navy hover:text-navy dark:hover:text-white'
-                      }`}
-                    >
-                      {vol}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
             </div>
 
             <div className="w-full h-px bg-gray-100 dark:bg-slate-800 my-5" />
@@ -308,91 +318,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </button>
 
             <button
-              onClick={() => { buyNow(product, quantity, activeVol); router.push('/order-payment'); }}
+              onClick={() => { buyNow(product, quantity); router.push('/order-payment'); }}
               className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB]"
             >
               <HiBolt className="mr-2.5" /> Buy It Now
             </button>
-
-            <div className="w-full h-px bg-gray-100 dark:bg-slate-800 my-5" />
-
-            {/* Description Accordion */}
-            <div>
-              <button
-                onClick={() => setDescOpen(!descOpen)}
-                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-all duration-300 ease-in-out hover:text-white"
-              >
-                <span>Description</span>
-                <HiChevronDown
-                  className={`text-sm transition-transform duration-300 ease-in-out ${
-                    descOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              {descOpen && (
-                <div className="pt-2 pb-4 animate-fade-up">
-                  <p className="font-body text-sm leading-relaxed text-ink-light dark:text-slate-300 text-justify">
-                    {product.description || (
-                      <>
-                        Discover the essence of luxury with{' '}
-                        <strong className="text-navy dark:text-white">{product.name}</strong>.
-                        Carefully crafted with the finest ingredients, this exquisite{' '}
-                        {product.category.toLowerCase()} fragrance offers a long-lasting,
-                        unforgettable signature scent. A sophisticated composition of{' '}
-                        {product.notes} that captures the spirit of modern elegance and
-                        timeless Middle Eastern perfumery tradition.
-                      </>
-                    )}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="w-full h-px bg-gray-100 dark:bg-slate-800 my-5" />
-
-            {/* Perfume Notes Accordion */}
-            <div>
-              <button
-                onClick={() => setNotesOpen(!notesOpen)}
-                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-all duration-300 ease-in-out hover:text-white"
-              >
-                <span>Perfume Notes</span>
-                <HiChevronDown
-                  className={`text-sm transition-transform duration-300 ease-in-out ${
-                    notesOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-
-              {notesOpen && (
-                <div className="flex flex-col gap-3 pt-2 pb-4 animate-fade-up">
-                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-6">
-                    <span className="font-heading text-[0.7rem] tracking-[0.1em] uppercase text-ink-lighter dark:text-slate-400 font-semibold min-w-[110px] shrink-0">
-                      Top Notes
-                    </span>
-                    <span className="font-body text-sm text-ink-light dark:text-slate-300">
-                      {topNotes.join(', ') || '\u2014'}
-                    </span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-6">
-                    <span className="font-heading text-[0.7rem] tracking-[0.1em] uppercase text-ink-lighter dark:text-slate-400 font-semibold min-w-[110px] shrink-0">
-                      Middle Notes
-                    </span>
-                    <span className="font-body text-sm text-ink-light dark:text-slate-300">
-                      {middleNotes.join(', ') || '\u2014'}
-                    </span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-6">
-                    <span className="font-heading text-[0.7rem] tracking-[0.1em] uppercase text-ink-lighter dark:text-slate-400 font-semibold min-w-[110px] shrink-0">
-                      Base Notes
-                    </span>
-                    <span className="font-body text-sm text-ink-light dark:text-slate-300">
-                      {baseNotesList.join(', ') || '\u2014'}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </main>

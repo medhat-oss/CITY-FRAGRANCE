@@ -12,11 +12,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
         category: 'Men',
         collection: '',
         badge: '',
-        notes: '',
+        topNotes: '',
+        middleNotes: '',
+        baseNotes: '',
         description: '',
-        orientation: '',
-        concentration: 'Eau De Parfum',
-        volume: '100 ML',
         price: '',
         salePrice: '',
         images: []
@@ -44,11 +43,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                 category: productToEdit.category,
                 collection: productToEdit.collection || '',
                 badge: productToEdit.badge || '',
-                notes: productToEdit.notes,
+                topNotes: productToEdit.topNotes || '',
+                middleNotes: productToEdit.middleNotes || '',
+                baseNotes: productToEdit.baseNotes || '',
                 description: productToEdit.description || '',
-                orientation: productToEdit.orientation || '',
-                concentration: productToEdit.concentration || 'Eau De Parfum',
-                volume: productToEdit.volume || '100 ML',
                 price: productToEdit.price,
                 salePrice: productToEdit.salePrice || '',
                 images: productToEdit.images || (productToEdit.image ? [productToEdit.image] : [])
@@ -61,11 +59,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                 category: 'Men',
                 collection: '',
                 badge: '',
-                notes: '',
+                topNotes: '',
+                middleNotes: '',
+                baseNotes: '',
                 description: '',
-                orientation: '',
-                concentration: 'Eau De Parfum',
-                volume: '100 ML',
                 price: '',
                 salePrice: '',
                 images: []
@@ -115,7 +112,6 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
             }
 
             const json = await res.json();
-            // Append the new URL to the images array instead of replacing
             setFormData(prev => ({ ...prev, images: [...prev.images, json.secure_url] }));
         } catch (err) {
             if (err.name === 'AbortError') {
@@ -126,7 +122,6 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
         } finally {
             clearTimeout(timeout);
             setIsUploading(false);
-            // Reset the file input so the same file can be re-selected
             e.target.value = '';
         }
     };
@@ -193,10 +188,30 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                             <input type="text" name="badge" value={formData.badge} onChange={handleChange} placeholder="e.g. BEST SELLER, EID SALE" />
                         </div>
                         <div className={styles.formGroup}>
-                            <label>Fragrance Notes</label>
-                            <input type="text" name="notes" value={formData.notes} onChange={handleChange} placeholder="e.g. Oud • Rose • Amber" required />
+                            <label>Original Price ($)</label>
+                            <input type="number" name="price" value={formData.price} onChange={handleChange} step="0.01" required />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Sale Price ($)</label>
+                            <input type="number" name="salePrice" value={formData.salePrice} onChange={handleChange} step="0.01" placeholder="Optional" />
                         </div>
                     </div>
+
+                    <div className={styles.formRow}>
+                        <div className={styles.formGroup}>
+                            <label>Top Notes</label>
+                            <input type="text" name="topNotes" value={formData.topNotes} onChange={handleChange} placeholder="Top Notes / إفتتاحية العطر" />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Middle Notes</label>
+                            <input type="text" name="middleNotes" value={formData.middleNotes} onChange={handleChange} placeholder="Middle Notes / قلب العطر" />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Base Notes</label>
+                            <input type="text" name="baseNotes" value={formData.baseNotes} onChange={handleChange} placeholder="Base Notes / قاعدة العطر" />
+                        </div>
+                    </div>
+
                     <div className={styles.formGroup}>
                         <label>Description</label>
                         <textarea
@@ -221,34 +236,6 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                             onFocus={(e) => e.target.style.borderColor = '#ffffff'}
                             onBlur={(e) => e.target.style.borderColor = '#1d3573'}
                         />
-                    </div>
-                    <div className={styles.formGroup}>
-                        <label>Volumes (comma separated)</label>
-                        <input type="text" name="volume" value={formData.volume} onChange={handleChange} placeholder="e.g. 50 ML, 100 ML" required />
-                    </div>
-                    <div className={styles.formRow}>
-                        <div className={styles.formGroup}>
-                            <label>Fragrance Concentration</label>
-                            <select name="concentration" value={formData.concentration} onChange={handleChange} required>
-                                <option value="Eau De Parfum">Eau De Parfum</option>
-                                <option value="Eau De Toilette">Eau De Toilette</option>
-                                <option value="Parfum">Parfum</option>
-                                <option value="Extrait De Parfum">Extrait De Parfum</option>
-                                <option value="Cologne">Cologne</option>
-                            </select>
-                        </div>
-                        <div className={styles.formGroup}>
-                            <label>Orientation</label>
-                            <input type="text" name="orientation" value={formData.orientation} onChange={handleChange} placeholder="e.g. Pour Homme, Unisex" />
-                        </div>
-                        <div className={styles.formGroup}>
-                            <label>Original Price ($)</label>
-                            <input type="number" name="price" value={formData.price} onChange={handleChange} step="0.01" required />
-                        </div>
-                        <div className={styles.formGroup}>
-                            <label>Sale Price ($)</label>
-                            <input type="number" name="salePrice" value={formData.salePrice} onChange={handleChange} step="0.01" placeholder="Optional" />
-                        </div>
                     </div>
 
                     {/* Cloudinary Multi-Image Upload */}

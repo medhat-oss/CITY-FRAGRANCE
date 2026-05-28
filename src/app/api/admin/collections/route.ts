@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { v2 as cloudinary } from 'cloudinary';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
+import type { CollectionData } from '@/types';
 
 const FILE = 'collection-images.json';
 
@@ -12,8 +13,24 @@ cloudinary.config({
   secure: true,
 });
 
+function parseImages(raw: Record<string, unknown>): Record<string, CollectionData> {
+  const result: Record<string, CollectionData> = {};
+  for (const [slug, val] of Object.entries(raw)) {
+    if (typeof val === 'string') {
+      result[slug] = { image: val, description: '' };
+    } else if (val && typeof val === 'object' && 'image' in (val as any)) {
+      const v = val as Record<string, unknown>;
+      result[slug] = { image: String(v.image || ''), description: String(v.description || '') };
+    } else {
+      result[slug] = { image: '', description: '' };
+    }
+  }
+  return result;
+}
+
 export async function GET() {
-  const images = await readJsonFile<Record<string, string>>(FILE, {});
+  const raw = await readJsonFile<Record<string, unknown>>(FILE, {});
+  const images = parseImages(raw);
   return NextResponse.json({ images });
 }
 
@@ -22,7 +39,6 @@ export async function PUT(request: Request) {
     const contentType = request.headers.get('content-type') || '';
 
     if (contentType.includes('multipart/form-data')) {
-      // ── Upload + Save in one call ──
       const formData = await request.formData();
       const slug = formData.get('slug') as string | null;
       const file = formData.get('file') as File | null;
@@ -41,8 +57,12 @@ export async function PUT(request: Request) {
         resource_type: 'image',
       });
 
-      const images = await readJsonFile<Record<string, string>>(FILE, {});
-      images[slug] = result.secure_url;
+      const raw = await readJsonFile<Record<string, unknown>>(FILE, {});
+      const images = parseImages(raw);
+      images[slug] = {
+        image: result.secure_url,
+        description: images[slug]?.description || '',
+      };
       await writeJsonFile(FILE, images);
 
       revalidatePath('/');
@@ -52,10 +72,14 @@ export async function PUT(request: Request) {
       return NextResponse.json({ success: true, images, path: result.secure_url });
     }
 
-    // ── Legacy JSON-only save (URL already known) ──
-    const body = (await request.json()) as { slug: string; imageUrl: string };
-    const images = await readJsonFile<Record<string, string>>(FILE, {});
-    images[body.slug] = body.imageUrl;
+    const body = (await request.json()) as { slug: string; imageUrl?: string; description?: string };
+    const raw = await readJsonFile<Record<string, unknown>>(FILE, {});
+    const images = parseImages(raw);
+    const slug = body.slug;
+    images[slug] = {
+      image: body.imageUrl ?? images[slug]?.image ?? '',
+      description: body.description ?? images[slug]?.description ?? '',
+    };
     await writeJsonFile(FILE, images);
 
     revalidatePath('/');

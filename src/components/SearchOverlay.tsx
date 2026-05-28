@@ -37,7 +37,9 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
       (p: Product) =>
         p.name.toLowerCase().includes(q) ||
         p.category.toLowerCase().includes(q) ||
-        p.notes?.toLowerCase().includes(q)
+        p.topNotes?.toLowerCase().includes(q) ||
+        p.middleNotes?.toLowerCase().includes(q) ||
+        p.baseNotes?.toLowerCase().includes(q)
     );
   }, [query, products, isLoaded]);
 
@@ -124,7 +126,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                       {product.category}
                     </p>
                     <h3 className="text-white font-heading text-lg">{product.name}</h3>
-                    <p className="text-white/60 text-sm mt-1 line-clamp-1">{product.notes}</p>
+                    <p className="text-white/60 text-sm mt-1 line-clamp-1">{[product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).join(' • ')}</p>
                     <div className="mt-2">
                       {product.salePrice ? (
                         <div className="flex items-center gap-2">

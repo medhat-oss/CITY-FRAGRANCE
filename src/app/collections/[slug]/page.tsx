@@ -9,32 +9,15 @@ import Footer from '@/components/Footer';
 import { useProducts } from '@/hooks/useProducts';
 import { formatEGP } from '@/utils/currency';
 import { HiArrowRight } from 'react-icons/hi2';
+import type { CollectionData } from '@/types';
 
-const COLLECTION_META: Record<string, { title: string; description: string }> = {
-  'new-arrivals': {
-    title: 'NEW ARRIVALS',
-    description: 'Explore our latest exquisite scents — fresh, contemporary, and crafted for the modern connoisseur.',
-  },
-  'all-fragrances': {
-    title: 'ALL FRAGRANCES',
-    description: 'Browse our complete universe of Arabic and international perfumes, from bold ouds to delicate florals.',
-  },
-  'oud-collection': {
-    title: 'OUD COLLECTION',
-    description: 'Rich, smoky, and deeply luxurious — our Oud Collection honors centuries of tradition.',
-  },
-  'mens-collection': {
-    title: "MEN'S COLLECTION",
-    description: 'Bold, confident, and distinguished — fragrances that command attention and leave a lasting impression.',
-  },
-  'womens-collection': {
-    title: "WOMEN'S COLLECTION",
-    description: 'Elegant, enchanting, and unforgettable — a celebration of femininity in every bottle.',
-  },
-  'gift-sets': {
-    title: 'GIFT SETS',
-    description: 'Curated sets perfect for gifting — beautifully packaged, thoughtfully paired, and ready to impress.',
-  },
+const COLLECTION_TITLES: Record<string, string> = {
+  'new-arrivals': 'NEW ARRIVALS',
+  'all-fragrances': 'ALL FRAGRANCES',
+  'oud-collection': 'OUD COLLECTION',
+  'mens-collection': "MEN'S COLLECTION",
+  'womens-collection': "WOMEN'S COLLECTION",
+  'gift-sets': 'GIFT SETS',
 };
 
 const EMPTY_MESSAGES: Record<string, { line1: string; line2: string }> = {
@@ -59,19 +42,19 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
   const { slug } = use(params);
   const { getProductsByCollection, products } = useProducts();
   const [giftSets, setGiftSets] = useState<GiftSet[]>([]);
-  const [heroImage, setHeroImage] = useState<string | null>(null);
+  const [collectionInfo, setCollectionInfo] = useState<{ image: string; description: string } | null>(null);
 
   useEffect(() => {
     if (slug === 'gift-sets') {
       fetch('/api/gift-sets', { cache: 'no-store' }).then((r) => r.json()).then((d) => setGiftSets(d.giftSets || [])).catch(() => {});
     }
     fetch('/api/collections').then((r) => r.json()).then((d) => {
-      const img = d.images?.[slug];
-      if (img) setHeroImage(img);
+      const entry = d.images?.[slug] as CollectionData | undefined;
+      if (entry) setCollectionInfo({ image: entry.image, description: entry.description });
     }).catch(() => {});
   }, [slug]);
 
-  const meta = COLLECTION_META[slug];
+  const meta = { title: COLLECTION_TITLES[slug] || slug, description: collectionInfo?.description || '' };
   const emptyMsg = EMPTY_MESSAGES[slug] ?? { line1: 'Discovering new scents soon...', line2: '' };
 
   const collectionProducts =
@@ -101,7 +84,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
       <Header />
       <main>
         {/* Hero */}
-        <section className={`relative pt-32 pb-16 overflow-hidden ${heroImage ? 'bg-cover bg-center bg-no-repeat' : ''}`} style={heroImage ? { backgroundImage: `url('${heroImage}')` } : undefined}>
+        <section className={`relative pt-32 pb-16 overflow-hidden ${collectionInfo?.image ? 'bg-cover bg-center bg-no-repeat' : ''}`} style={collectionInfo?.image ? { backgroundImage: `url('${collectionInfo.image}')` } : undefined}>
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/60" />
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] via-transparent to-transparent mix-blend-overlay" />
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
@@ -206,7 +189,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                           {product.name}
                         </h3>
                         <p className="text-white/50 text-xs sm:text-sm line-clamp-1 mb-2 sm:mb-4">
-                          {product.notes}
+                          {[product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).join(' • ')}
                         </p>
                         <div className="flex items-center justify-between">
                           <div>

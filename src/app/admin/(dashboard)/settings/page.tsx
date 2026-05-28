@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from '../admin.module.css';
-import type { SiteSettings, CollectionSlug } from '@/types';
+import type { SiteSettings, CollectionSlug, CollectionData } from '@/types';
 import { FaCog, FaImage } from 'react-icons/fa';
 
 const COLLECTION_SLUGS: { slug: CollectionSlug; label: string }[] = [
@@ -56,7 +56,7 @@ export default function AdminSettingsPage() {
   const [heroUploadError, setHeroUploadError] = useState('');
   const [moodUploadError, setMoodUploadError] = useState('');
 
-  const [collectionImages, setCollectionImages] = useState<Record<string, string>>({});
+  const [collectionData, setCollectionData] = useState<Record<string, CollectionData>>({});
   const [collectionsLoaded, setCollectionsLoaded] = useState(false);
   const [uploadingSlug, setUploadingSlug] = useState<string | null>(null);
   const [collectionsSaving, setCollectionsSaving] = useState(false);
@@ -76,8 +76,8 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     fetch('/api/admin/collections')
       .then((res) => res.json())
-      .then((data: { images: Record<string, string> }) => {
-        setCollectionImages(data.images);
+      .then((data: { images: Record<string, CollectionData> }) => {
+        setCollectionData(data.images);
         setCollectionsLoaded(true);
       })
       .catch(() => setCollectionsLoaded(true));
@@ -118,7 +118,10 @@ export default function AdminSettingsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setCollectionImages((prev) => ({ ...prev, [slug]: data.path }));
+        setCollectionData((prev) => {
+          const existing = prev[slug]?.description || '';
+          return { ...prev, [slug]: { image: data.path, description: existing } };
+        });
       } else {
         setCollectionsUploadError(data.error || 'Upload failed');
       }
@@ -134,12 +137,12 @@ export default function AdminSettingsPage() {
     try {
       let success = true;
       for (const { slug } of COLLECTION_SLUGS) {
-        const url = collectionImages[slug];
-        if (!url) continue;
+        const entry = collectionData[slug];
+        if (!entry) continue;
         const res = await fetch('/api/admin/collections', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slug, imageUrl: url }),
+          body: JSON.stringify({ slug, imageUrl: entry.image, description: entry.description }),
         });
         const data = await res.json();
         if (!data.success) success = false;
@@ -460,11 +463,29 @@ export default function AdminSettingsPage() {
                 background: '#11224D',
               }}
             >
-              <label style={{ fontFamily: 'var(--font-heading)', fontSize: '0.85rem', fontWeight: 600, color: '#e2e8f0' }}>
+              <label style={{ fontFamily: 'var(--font-heading)', fontSize: '0.85rem', fontWeight: 600, color: '#e2f8f0' }}>
                 {label}
               </label>
 
-              {collectionImages[slug] && (
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Collection Subtitle / Description</label>
+                <input
+                  type="text"
+                  value={collectionData[slug]?.description || ''}
+                  onChange={(e) =>
+                    setCollectionData((prev) => ({
+                      ...prev,
+                      [slug]: { image: prev[slug]?.image || '', description: e.target.value },
+                    }))
+                  }
+                  placeholder="Enter the text that appears under the collection name..."
+                  style={inputStyle}
+                  onFocus={(e) => (e.target.style.borderColor = '#ffffff')}
+                  onBlur={(e) => (e.target.style.borderColor = '#1d3573')}
+                />
+              </div>
+
+              {collectionData[slug]?.image && (
                 <div
                   style={{
                   width: '100%',
@@ -478,7 +499,7 @@ export default function AdminSettingsPage() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={collectionImages[slug]}
+                    src={collectionData[slug].image}
                     alt={label}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />

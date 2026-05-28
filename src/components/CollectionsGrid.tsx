@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { HiArrowRight } from 'react-icons/hi2';
+import type { CollectionData } from '@/types';
 
 interface Collection {
   id: string;
@@ -13,47 +14,17 @@ interface Collection {
   image: string;
 }
 
-const COLLECTION_META: Omit<Collection, 'image'>[] = [
-  {
-    id: 'new-arrivals',
-    title: 'New Arrivals',
-    description: 'Explore our latest exquisite scents — fresh, contemporary, and crafted for the modern connoisseur.',
-    href: '/collections/new-arrivals',
-  },
-  {
-    id: 'all-fragrances',
-    title: 'All Fragrances',
-    description: 'Browse our complete universe of Arabic and international perfumes, from bold ouds to delicate florals.',
-    href: '/collections/all-fragrances',
-  },
-  {
-    id: 'oud-collection',
-    title: 'Oud Collection',
-    description: 'Rich, smoky, and deeply luxurious — our Oud Collection honors centuries of tradition.',
-    href: '/collections/oud-collection',
-  },
-  {
-    id: 'mens-collection',
-    title: "Men's Collection",
-    description: 'Bold, confident, and distinguished — fragrances that command attention and leave a lasting impression.',
-    href: '/collections/mens-collection',
-  },
-  {
-    id: 'womens-collection',
-    title: "Women's Collection",
-    description: 'Elegant, enchanting, and unforgettable — a celebration of femininity in every bottle.',
-    href: '/collections/womens-collection',
-  },
-  {
-    id: 'gift-sets',
-    title: 'Gift Sets',
-    description: 'Curated sets perfect for gifting — beautifully packaged, thoughtfully paired, and ready to impress.',
-    href: '/collections/gift-sets',
-  },
+const COLLECTION_META: { id: string; title: string; href: string }[] = [
+  { id: 'new-arrivals', title: 'New Arrivals', href: '/collections/new-arrivals' },
+  { id: 'all-fragrances', title: 'All Fragrances', href: '/collections/all-fragrances' },
+  { id: 'oud-collection', title: 'Oud Collection', href: '/collections/oud-collection' },
+  { id: 'mens-collection', title: "Men's Collection", href: '/collections/mens-collection' },
+  { id: 'womens-collection', title: "Women's Collection", href: '/collections/womens-collection' },
+  { id: 'gift-sets', title: 'Gift Sets', href: '/collections/gift-sets' },
 ];
 
-export default function CollectionsGrid({ initialImages = {} }: { initialImages?: Record<string, string> }) {
-  const [collectionImages, setCollectionImages] = useState<Record<string, string>>(initialImages);
+export default function CollectionsGrid({ initialImages = {} }: { initialImages?: Record<string, CollectionData> }) {
+  const [collectionData, setCollectionData] = useState<Record<string, CollectionData>>(initialImages);
   const fetched = useRef(false);
 
   useEffect(() => {
@@ -61,13 +32,14 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
     fetched.current = true;
     fetch('/api/collections', { cache: 'no-store' })
       .then((res) => res.json())
-      .then((data: { images: Record<string, string> }) => setCollectionImages(data.images))
+      .then((data: { images: Record<string, CollectionData> }) => setCollectionData(data.images))
       .catch(() => {});
   }, []);
 
   const collections: Collection[] = COLLECTION_META.map((meta) => ({
     ...meta,
-    image: collectionImages[meta.id] || '/images/product-placeholder.png',
+    description: collectionData[meta.id]?.description || '',
+    image: collectionData[meta.id]?.image || '/images/product-placeholder.png',
   }));
 
   return (

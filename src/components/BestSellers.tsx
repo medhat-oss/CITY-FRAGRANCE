@@ -94,9 +94,9 @@ export default function BestSellers({ products, title = 'Best Sellers' }: BestSe
                       {product.name}
                     </h3>
                   </Link>
-                  {product.notes && (
+                  {[product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).length > 0 && (
                     <p className="font-body text-sm text-ink-lighter italic mb-3">
-                      {product.notes}
+                      {[product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).join(' • ')}
                     </p>
                   )}
                   <div className="flex justify-center items-center gap-3 font-heading">
