@@ -4,12 +4,11 @@
   background-color: #09142E;
 }
 
-/* ─── Sidebar ─── */
+/* ─── Desktop Sidebar ─── */
 .adminSidebar {
   width: 250px;
   background-color: #11224D;
   color: #f8f9fa;
-  display: flex;
   flex-direction: column;
   padding: 2rem 1rem;
   position: fixed;
@@ -60,6 +59,148 @@
 .sidebarLink.active {
   background-color: #ffffff;
   color: #11224D;
+}
+
+/* ─── Mobile Top Header ─── */
+.mobileHeader {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background-color: #11224D;
+  border-bottom: 1px solid #1d3573;
+}
+
+.mobileHamburger {
+  background: none;
+  border: none;
+  color: #f8f9fa;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobileHamburger:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.mobileHeaderTitle {
+  font-family: var(--font-heading, 'Instrument Sans', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f8f9fa;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ─── Mobile Drawer Overlay ─── */
+.mobileDrawerOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 30;
+  animation: fadeIn 0.2s ease;
+}
+
+/* ─── Mobile Drawer Panel ─── */
+.mobileDrawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background-color: #11224D;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-right: 1px solid #1d3573;
+  overflow-y: auto;
+}
+
+.mobileDrawerOpen {
+  transform: translateX(0);
+}
+
+.mobileDrawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobileDrawerBrand h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.15rem;
+  letter-spacing: 0.1em;
+  color: #f8f9fa;
+}
+
+.mobileDrawerBrand span {
+  font-family: var(--font-heading, 'Instrument Sans', sans-serif);
+  font-size: 0.65rem;
+  color: #94a3b8;
+  letter-spacing: 0.2em;
+}
+
+.mobileDrawerClose {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobileDrawerClose:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.mobileDrawerNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  flex: 1;
+}
+
+.mobileDrawerLink {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.mobileDrawerLink:hover,
+.mobileDrawerLink.active {
+  background-color: #ffffff;
+  color: #11224D;
+}
+
+.mobileDrawerFooter {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* ─── Main Content ─── */
@@ -421,22 +562,24 @@
   opacity: 1;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
-  .adminLayout {
-    flex-direction: column;
-  }
-
-  .adminSidebar {
-    width: 100%;
-    height: auto;
-    position: static;
-    padding: 1rem;
+  .mobileHeader {
+    display: flex;
   }
 
   .adminMain {
     margin-left: 0;
     padding: 1rem;
+  }
+
+  .adminSidebar {
+    display: none;
   }
 
   .formRow {
