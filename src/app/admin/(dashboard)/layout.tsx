@@ -43,7 +43,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobile Top Header: visible on mobile, hidden on md+ */}
-      <header className="flex md:hidden h-16 w-full items-center justify-between px-4 bg-[#0a0a0b] border-b border-white/10 sticky top-0 z-20">
+      <header className="flex md:hidden fixed top-0 left-0 right-0 h-16 items-center justify-between px-4 bg-[#0a0a0b] border-b border-white/10 z-20">
         <button
           className="flex items-center justify-center p-2 text-white"
           onClick={() => setIsMobileSidebarOpen(true)}
