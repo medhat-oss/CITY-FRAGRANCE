@@ -129,7 +129,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
               <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-light text-white uppercase tracking-wide leading-tight mb-4">
                 {giftSet.name}
               </h1>
-              <div className="w-12 h-px bg-gold/50 mb-6" />
+              <div className="w-12 h-px bg-white/20 mb-6" />
 
               <p className="font-body text-base leading-relaxed text-white/60 mb-6">
                 {giftSet.description}

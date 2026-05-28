@@ -101,13 +101,13 @@ export default function Header() {
           </div>
 
           {/* Center: Logo */}
-          <Link href="/" className="bg-transparent flex items-center">
+          <Link href="/" className="flex items-center">
             <Image
               src="/images/logo.png"
               alt="City Fragrance"
               width={150}
               height={70}
-              className="h-14 w-auto object-contain bg-transparent mix-blend-screen transition-all duration-300"
+              className="h-14 w-auto object-contain mix-blend-screen"
               priority
             />
           </Link>
@@ -145,14 +145,15 @@ export default function Header() {
           }`}
           dir={dir}
         >
-          <div className="flex justify-between items-center px-4 pt-1.5 pb-0 shrink-0">
-            <Link href="/" className="bg-transparent leading-none" onClick={() => setMobileOpen(false)}>
+          <div className="flex items-center justify-between pt-4 pb-2 px-6 shrink-0">
+            <Link href="/" className="flex items-center" onClick={() => setMobileOpen(false)}>
               <Image
                 src="/images/checkout-logo.png"
                 alt="City Fragrance"
-                width={140}
+                width={150}
                 height={60}
-                className="w-[120px] sm:w-[140px] h-auto object-contain bg-transparent mix-blend-screen -my-1.5"
+                className="w-[140px] h-auto object-contain mix-blend-screen"
+                priority
               />
             </Link>
             <button
@@ -165,13 +166,13 @@ export default function Header() {
               </svg>
             </button>
           </div>
-          <nav className="flex-1 px-8 overflow-y-auto">
+          <nav className="flex-1 px-6 overflow-y-auto">
             <ul className="flex flex-col gap-1">
               <li>
                 <Link
                   href="/"
                   onClick={() => setMobileOpen(false)}
-                  className="block font-heading text-base text-white hover:bg-white hover:text-[#09142E] transition-colors py-2.5 px-3 rounded-sm border-b border-white/5"
+                  className="block font-heading text-base text-white hover:bg-white hover:text-[#09142E] transition-colors py-2.5 px-3 rounded-sm border-b border-white/10"
                 >
                   Home
                 </Link>
@@ -181,7 +182,7 @@ export default function Header() {
                   <Link
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="block font-heading text-base text-white hover:bg-white hover:text-[#09142E] transition-colors py-2.5 px-3 rounded-sm border-b border-white/5"
+                    className="block font-heading text-base text-white hover:bg-white hover:text-[#09142E] transition-colors py-2.5 px-3 rounded-sm border-b border-white/10"
                   >
                     {link.label}
                   </Link>

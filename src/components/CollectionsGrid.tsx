@@ -74,7 +74,7 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
     <div className="bg-[#09142E] min-h-screen">
       {/* ─── Hero ─── */}
       <section className="relative pt-32 pb-16 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.03] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] via-transparent to-transparent" />
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <p className="text-white/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
             City Fragrance
@@ -82,7 +82,7 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
           <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight mb-4">
             OUR COLLECTIONS
           </h1>
-          <div className="w-16 h-px bg-gold/50 mx-auto mt-6" />
+          <div className="w-16 h-px bg-white/20 mx-auto mt-6" />
           <p className="text-white/50 mt-8 max-w-2xl mx-auto text-lg leading-relaxed">
             Explore the world of City Fragrance — where tradition meets modernity, and every scent tells a story.
           </p>
@@ -126,7 +126,7 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
                 </div>
 
                 {/* Divider */}
-                <div className="w-8 sm:w-12 h-px bg-gold/40 mb-2 sm:mb-4 transition-all duration-500 group-hover:w-full group-hover:bg-gold/60" />
+                <div className="w-8 sm:w-12 h-px bg-white/20 mb-2 sm:mb-4 transition-all duration-500 group-hover:w-full group-hover:bg-white/40" />
 
                 {/* CTA */}
                 <span className="inline-flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs font-heading uppercase tracking-[0.1em] sm:tracking-[0.15em] text-white/70 transition-all duration-300 group-hover:text-white group-hover:gap-2 sm:group-hover:gap-3">

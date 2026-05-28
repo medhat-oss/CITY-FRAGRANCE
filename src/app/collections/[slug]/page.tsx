@@ -111,7 +111,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
             <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight mb-4">
               {meta.title}
             </h1>
-            <div className="w-16 h-px bg-gold/50 mx-auto mt-6" />
+            <div className="w-16 h-px bg-white/20 mx-auto mt-6" />
             <p className="text-white/50 mt-8 max-w-2xl mx-auto text-lg leading-relaxed">
               {meta.description}
             </p>

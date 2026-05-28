@@ -67,7 +67,7 @@ export default function StoresPage() {
             <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight mb-6 animate-fade-up">
               STORE LOCATOR
             </h1>
-            <div className="w-16 h-px bg-gold/60 mx-auto animate-fade-up" />
+            <div className="w-16 h-px bg-white/20 mx-auto animate-fade-up" />
           </div>
         </section>
 

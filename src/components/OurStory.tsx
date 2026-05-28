@@ -63,7 +63,7 @@ export default function OurStory() {
           <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight mb-6 animate-fade-up">
             OUR STORY
           </h1>
-          <div className="w-16 h-px bg-gold/60 mx-auto animate-fade-up" />
+          <div className="w-16 h-px bg-white/20 mx-auto animate-fade-up" />
         </div>
       </section>
 
@@ -75,7 +75,7 @@ export default function OurStory() {
               <h2 className="font-heading text-3xl sm:text-4xl font-light text-white mb-6">
                 Welcome to <span className="text-white">City Fragrance</span>
               </h2>
-              <div className="w-12 h-0.5 bg-gold/60 mb-8" />
+              <div className="w-12 h-0.5 bg-white/20 mb-8" />
             </div>
             <p className="text-white/70 text-lg leading-relaxed">
               We are an Egyptian brand specializing in offering a curated selection of premium Arabic
@@ -130,7 +130,7 @@ export default function OurStory() {
             <h2 className="font-heading text-3xl sm:text-4xl font-light text-white">
               Our Core Values
             </h2>
-            <div className="w-12 h-0.5 bg-gold/60 mx-auto mt-6" />
+            <div className="w-12 h-0.5 bg-white/20 mx-auto mt-6" />
           </div>
         </FadeInSection>
 

@@ -73,7 +73,7 @@ export default function PrivacyPolicy() {
           <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-light text-white leading-tight mb-4">
             PRIVACY & RETURNS
           </h1>
-          <div className="w-16 h-px bg-gold/50 mx-auto mt-6" />
+          <div className="w-16 h-px bg-white/20 mx-auto mt-6" />
           <p className="text-white/50 mt-8 max-w-2xl mx-auto text-base leading-relaxed">
             Our commitment to transparency, quality, and your satisfaction — outlined clearly.
           </p>
@@ -88,7 +88,7 @@ export default function PrivacyPolicy() {
               <h2 className="font-heading text-2xl sm:text-3xl font-light text-white mb-3">
                 {section.title}
               </h2>
-              <div className="w-10 h-0.5 bg-gold/60 mb-6" />
+              <div className="w-10 h-0.5 bg-white/20 mb-6" />
               {section.intro && (
                 <p className="text-white/70 text-base leading-relaxed mb-6">
                   {section.intro}
@@ -130,7 +130,7 @@ export default function PrivacyPolicy() {
               <h2 className="font-heading text-2xl sm:text-3xl font-light text-white mb-4">
                 Contact Customer Care
               </h2>
-              <div className="w-10 h-0.5 bg-gold/50 mx-auto" />
+              <div className="w-10 h-0.5 bg-white/20 mx-auto" />
             </div>
 
             <div className="max-w-md mx-auto text-center">
