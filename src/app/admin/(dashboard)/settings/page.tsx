@@ -195,7 +195,7 @@ export default function AdminSettingsPage() {
   if (!settingsLoaded || !collectionsLoaded) return null;
 
   return (
-    <div className={styles.adminContent} style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '900px' }}>
+    <div className={styles.adminContent} style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '900px', width: '100%' }}>
       {/* ─── Section 1: Site Customization ─── */}
       <div>
         <div className={styles.adminHeader} style={{ border: 'none', marginBottom: '1.5rem', padding: 0 }}>
@@ -207,13 +207,7 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '1.5rem',
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div style={fieldStyle}>
             <label style={labelStyle}>Hero Section Main Title</label>
             <input
@@ -334,7 +328,7 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div style={fieldStyle}>
             <label style={labelStyle}>Section Title</label>
             <input
@@ -449,7 +443,7 @@ export default function AdminSettingsPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
             gap: '1.5rem',
           }}
         >

@@ -43,16 +43,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobile Top Header: visible on mobile, hidden on md+ */}
-      <header className={styles.mobileHeader}>
+      <header className="flex md:hidden h-16 w-full items-center justify-between px-4 bg-[#0a0a0b] border-b border-white/10 sticky top-0 z-20">
         <button
-          className={styles.mobileHamburger}
+          className="flex items-center justify-center p-2 text-white"
           onClick={() => setIsMobileSidebarOpen(true)}
           aria-label="Open menu"
         >
-          <FaBars />
+          <FaBars className="text-lg" />
         </button>
-        <span className={styles.mobileHeaderTitle}>Admin Panel</span>
-        <div style={{ width: '2rem' }} />
+        <span className="font-heading text-sm font-semibold text-white tracking-[0.1em] uppercase">Admin Panel</span>
+        <div className="w-8" />
       </header>
 
       {/* Mobile Drawer Overlay */}
@@ -97,7 +97,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className={styles.adminMain}>{children}</main>
+      <main className={styles.adminMain}>
+        <div className="w-full max-w-full overflow-x-hidden">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }
