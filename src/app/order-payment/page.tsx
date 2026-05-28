@@ -336,7 +336,7 @@ export default function CheckoutPage() {
               Shipping method
             </h2>
             <label
-              className={`block border-2 rounded-sm p-4 cursor-pointer transition-all duration-200 ${
+              className={`block border-2 rounded-sm p-4 cursor-pointer transition-all duration-300 ease-in-out ${
                 form.shippingMethod === 'standard'
                   ? 'border-navy bg-navy/[0.02] dark:bg-navy/20'
                   : 'border-gray-100 dark:border-slate-700 hover:border-gray-200 dark:hover:border-slate-600'
@@ -379,7 +379,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setSelectedPayment('vodafone')}
-                className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-200 ${
+                className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-300 ease-in-out ${
                   selectedPayment === 'vodafone'
                     ? 'border-white bg-white/10 text-white font-bold'
                     : 'border-slate-700 bg-[#11224D] text-white hover:border-white/50'
@@ -391,7 +391,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setSelectedPayment('instapay')}
-                className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-200 ${
+                className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-300 ease-in-out ${
                   selectedPayment === 'instapay'
                     ? 'border-white bg-white/10 text-white font-bold'
                     : 'border-slate-700 bg-[#11224D] text-white hover:border-white/50'
@@ -403,7 +403,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setSelectedPayment('cod')}
-                className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-200 ${
+                className={`w-full text-left px-5 py-4 border-2 rounded-sm font-heading text-sm font-medium transition-all duration-300 ease-in-out ${
                   selectedPayment === 'cod'
                     ? 'border-white bg-white/10 text-white font-bold'
                     : 'border-slate-700 bg-[#11224D] text-white hover:border-white/50'
@@ -432,7 +432,7 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={isProcessing}
-            className="w-full py-4 bg-navy text-white font-heading text-sm font-semibold tracking-[0.15em] uppercase rounded-sm cursor-pointer transition-colors hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+             className="w-full py-4 bg-navy text-white font-heading text-sm font-semibold tracking-[0.15em] uppercase rounded-sm cursor-pointer transition-all duration-300 ease-in-out hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed mb-4"
           >
             {isProcessing ? 'Processing...' : 'Place Order'}
           </button>

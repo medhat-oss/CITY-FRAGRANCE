@@ -76,7 +76,7 @@ export default function StoresPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {STORES.map((store, i) => (
               <FadeInSection key={store.name} delay={i * 150}>
-                <div className="group relative h-full border border-white/10 rounded-2xl p-8 bg-white/[0.03] transition-all duration-500 hover:border-white/40 hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.06)]">
+                <div className="group relative h-full border border-white/10 rounded-2xl p-8 bg-white/[0.03] transition-all duration-500 ease-in-out hover:border-white/40 hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.06)]">
                   <div className="text-white/60 text-2xl mb-4 tracking-widest font-heading">
                     {store.name}
                   </div>

@@ -76,12 +76,12 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search products..."
-            className="w-full pl-14 pr-6 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 text-lg focus:outline-none focus:border-white focus:ring-1 focus:ring-white/50 transition-all"
+            className="w-full pl-14 pr-6 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 text-lg focus:outline-none focus:border-white focus:ring-1 focus:ring-white/50 transition-all duration-300 ease-in-out"
           />
         </div>
         <button
           onClick={onClose}
-          className="text-white/70 hover:text-white p-2 bg-transparent border-none cursor-pointer"
+          className="text-white/70 hover:text-white p-2 bg-transparent border-none cursor-pointer transition-all duration-300 ease-in-out"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -110,13 +110,13 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 onClick={onClose}
                 className="group block"
               >
-                <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-amber-400/50 transition-all">
+                <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 ease-in-out">
                   <div className="aspect-square relative">
                     <Image
                       src={product.images[0] || '/images/product-placeholder.png'}
                       alt={product.name}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
                   </div>
                   <div className="p-4">

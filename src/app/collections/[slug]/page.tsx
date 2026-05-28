@@ -135,9 +135,9 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                   const includedProducts = gs.productIds.map((pid) => products.find((p) => p.id === pid)).filter(Boolean) as typeof products;
                   return (
                     <Link key={gs.id} href={`/collections/gift-sets/${gs.id}`} className="group block">
-                      <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
+                      <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-700 ease-out hover:scale-[1.03] hover:border-white/40 hover:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
                         <div className="relative aspect-square overflow-hidden bg-transparent">
-                          <Image src={gs.image || '/images/product-placeholder.png'} alt={gs.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="(max-width: 640px) 50vw, 25vw" />
+                          <Image src={gs.image || '/images/product-placeholder.png'} alt={gs.name} fill className="object-cover transition-transform duration-700 ease-out group-hover:scale-110" sizes="(max-width: 640px) 50vw, 25vw" />
                         </div>
                       <div className="p-3 sm:p-6">
                         <span className="text-xs uppercase tracking-widest text-white/60 mb-1 block">Gift Set</span>
@@ -183,13 +183,13 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
                     className="group block"
                     prefetch={true}
                   >
-                    <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
+                    <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden transition-all duration-700 ease-out hover:scale-[1.03] hover:border-white/40 hover:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
                       <div className="relative aspect-square overflow-hidden bg-transparent">
                         <Image
                           src={imgSrc}
                           alt={product.name}
                           fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         />
                         {product.badge && (

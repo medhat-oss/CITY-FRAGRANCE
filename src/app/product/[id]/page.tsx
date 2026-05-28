@@ -127,7 +127,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <button
                   key={index}
                   onClick={() => { setActiveImageIndex(index); setImgError((prev) => ({ ...prev, [index]: false })); }}
-                  className={`w-16 h-20 sm:w-[80px] sm:h-[100px] shrink-0 overflow-hidden rounded-sm border-2 transition-all duration-300 ${
+                  className={`w-16 h-20 sm:w-[80px] sm:h-[100px] shrink-0 overflow-hidden rounded-sm border-2 transition-all duration-300 ease-in-out ${
                     index === activeImageIndex
                       ? 'border-white opacity-100 shadow-[0_0_12px_rgba(255,255,255,0.3)]'
                       : 'border-white/10 opacity-50 hover:opacity-80 hover:border-white/30'
@@ -243,7 +243,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     Orientation
                   </span>
                   <div className="flex flex-wrap gap-2">
-                    <button className="px-5 py-2.5 border-2 border-navy bg-navy text-white font-heading text-xs uppercase tracking-wider rounded-sm transition-all duration-200 hover:bg-navy-light">
+                    <button className="px-5 py-2.5 border-2 border-navy bg-navy text-white font-heading text-xs uppercase tracking-wider rounded-sm transition-all duration-300 ease-in-out hover:bg-navy-light">
                       {product.orientation}
                     </button>
                   </div>
@@ -260,7 +260,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     <button
                       key={vol}
                       onClick={() => setSelectedVolume(vol)}
-                      className={`px-5 py-2.5 border-2 font-heading text-xs uppercase tracking-wider rounded-sm transition-all duration-200 ${
+                      className={`px-5 py-2.5 border-2 font-heading text-xs uppercase tracking-wider rounded-sm transition-all duration-300 ease-in-out ${
                         activeVol === vol
                           ? 'border-navy bg-navy text-white'
                           : 'border-gray-200 text-ink-light dark:border-slate-700 dark:text-slate-200 hover:border-navy dark:hover:border-navy hover:text-navy dark:hover:text-white'
@@ -302,14 +302,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {/* Action Buttons */}
             <button
               onClick={() => { addToCart(product, quantity); openCart(); }}
-              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB] mb-3"
+              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB] mb-3"
             >
               <HiShoppingBag className="mr-2.5" /> Add to Cart
             </button>
 
             <button
               onClick={() => { buyNow(product, quantity, activeVol); router.push('/order-payment'); }}
-              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB]"
+              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB]"
             >
               <HiBolt className="mr-2.5" /> Buy It Now
             </button>
@@ -320,11 +320,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div>
               <button
                 onClick={() => setDescOpen(!descOpen)}
-                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-colors hover:text-white"
+                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-all duration-300 ease-in-out hover:text-white"
               >
                 <span>Description</span>
                 <HiChevronDown
-                  className={`text-sm transition-transform duration-300 ${
+                  className={`text-sm transition-transform duration-300 ease-in-out ${
                     descOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -354,11 +354,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div>
               <button
                 onClick={() => setNotesOpen(!notesOpen)}
-                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-colors hover:text-white"
+                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-3 font-heading text-xs tracking-[0.2em] uppercase text-navy dark:text-white font-semibold transition-all duration-300 ease-in-out hover:text-white"
               >
                 <span>Perfume Notes</span>
                 <HiChevronDown
-                  className={`text-sm transition-transform duration-300 ${
+                  className={`text-sm transition-transform duration-300 ease-in-out ${
                     notesOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -402,7 +402,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <div className="fixed inset-0 z-[999] bg-black/95 flex items-center justify-center">
           <button
             onClick={() => setLightboxOpen(false)}
-            className="absolute top-6 right-6 z-10 text-white/70 hover:text-white transition-colors"
+            className="absolute top-6 right-6 z-10 text-white/70 hover:text-white transition-all duration-300 ease-in-out hover:scale-110"
             aria-label="Close lightbox"
           >
             <HiXMark className="text-3xl" />
@@ -412,14 +412,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <>
               <button
                 onClick={goToPrev}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white/70 hover:text-white transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white/70 hover:text-white transition-all duration-300 ease-in-out hover:scale-110"
                 aria-label="Previous image"
               >
                 <HiChevronLeft className="text-4xl" />
               </button>
               <button
                 onClick={goToNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white/70 hover:text-white transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white/70 hover:text-white transition-all duration-300 ease-in-out hover:scale-110"
                 aria-label="Next image"
               >
                 <HiChevronRight className="text-4xl" />

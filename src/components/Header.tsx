@@ -91,7 +91,7 @@ export default function Header() {
           <div className="flex flex-1 items-center">
             <button
               onClick={handleMobileToggle}
-              className="text-white bg-transparent border-none cursor-pointer p-2"
+              className="text-white bg-transparent border-none cursor-pointer p-2 transition-all duration-300 ease-in-out hover:scale-110"
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-white hover:text-white transition-colors">
@@ -116,7 +116,7 @@ export default function Header() {
           <div className="flex flex-1 justify-end items-center gap-1">
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="p-2 text-white transition-colors hover:text-white bg-transparent border-none cursor-pointer"
+              className="p-2 text-white transition-all duration-300 ease-in-out hover:text-white bg-transparent border-none cursor-pointer hover:scale-110"
               aria-label="Search products"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -125,7 +125,7 @@ export default function Header() {
             </button>
             <button
               onClick={toggleCart}
-              className="relative p-2 text-white transition-colors hover:text-white bg-transparent border-none cursor-pointer"
+              className="relative p-2 text-white transition-all duration-300 ease-in-out hover:text-white bg-transparent border-none cursor-pointer hover:scale-110"
               aria-label={`Cart (${cartCount} items)`}
             >
               <HiOutlineShoppingBag className="w-6 h-6" />
@@ -168,21 +168,21 @@ export default function Header() {
           </div>
           <nav className="flex-1 px-6 overflow-y-auto">
             <ul className="flex flex-col gap-1">
-              <li>
+              <li className="animate-fade-up opacity-0" style={{ animationDelay: '0.1s' }}>
                 <Link
                   href="/"
                   onClick={() => setMobileOpen(false)}
-                  className="block font-heading text-base text-white hover:bg-white hover:text-[#09142E] transition-colors py-2.5 px-3 rounded-sm border-b border-white/10"
+                  className="block font-heading text-base text-white hover:bg-white hover:text-[#09142E] transition-all duration-300 ease-in-out py-2.5 px-3 rounded-sm border-b border-white/10"
                 >
                   Home
                 </Link>
               </li>
-              {NAV_LINKS.map((link) => (
-                <li key={link.href}>
+              {NAV_LINKS.map((link, idx) => (
+                <li key={link.href} className="animate-fade-up opacity-0" style={{ animationDelay: `${0.1 + (idx + 1) * 0.05}s` }}>
                   <Link
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="block font-heading text-base text-white hover:bg-white hover:text-[#09142E] transition-colors py-2.5 px-3 rounded-sm border-b border-white/10"
+                    className="block font-heading text-base text-white hover:bg-white hover:text-[#09142E] transition-all duration-300 ease-in-out py-2.5 px-3 rounded-sm border-b border-white/10"
                   >
                     {link.label}
                   </Link>
@@ -231,7 +231,7 @@ export default function Header() {
       {/* Cart Drawer Backdrop */}
       {isCartOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-[2999] animate-[fadeIn_0.2s_ease] cursor-pointer"
+          className="fixed inset-0 bg-black/60 z-[2999] animate-fade-in cursor-pointer"
           onClick={closeCart}
           aria-hidden="true"
         />

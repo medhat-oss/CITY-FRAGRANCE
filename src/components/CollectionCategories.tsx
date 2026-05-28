@@ -56,7 +56,7 @@ export default function CollectionCategories() {
               key={collection.title}
               href={collection.href}
               prefetch={true}
-              className="group relative overflow-hidden rounded-sm block h-[200px] sm:h-[360px] border border-amber-500/20 dark:border-brandDark-border dark:bg-brandDark-card"
+              className="group relative overflow-hidden rounded-sm block h-[200px] sm:h-[360px] border border-white/10 dark:border-brandDark-border dark:bg-brandDark-card transition-all duration-700 ease-out hover:scale-[1.02]"
             >
               {!loaded ? (
                 <div className="absolute inset-0 bg-slate-800/50 animate-pulse" />
@@ -66,7 +66,7 @@ export default function CollectionCategories() {
                   alt={collection.title}
                   fill
                   priority
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
               )}

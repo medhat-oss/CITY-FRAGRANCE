@@ -40,7 +40,7 @@
   .btn {
     @apply inline-flex items-center justify-center px-10 py-4
            font-heading text-sm font-semibold uppercase tracking-[0.15em]
-           transition-all duration-300 cursor-pointer;
+           transition-all duration-300 ease-in-out cursor-pointer;
   }
 
   .btn-primary {

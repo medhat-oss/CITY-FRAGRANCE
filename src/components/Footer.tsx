@@ -112,7 +112,7 @@ export default function Footer() {
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="px-6 bg-white text-[#09142E] border border-white font-heading font-semibold uppercase tracking-[0.1em] cursor-pointer transition-colors hover:bg-[#E5E7EB] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-r-sm flex items-center"
+                 className="px-6 bg-white text-[#09142E] border border-white font-heading font-semibold uppercase tracking-[0.1em] cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-r-sm flex items-center"
               >
                 {status === 'loading' ? (
                   <span className="inline-block w-4 h-4 border-2 border-navy/30 border-t-navy rounded-full animate-spin" />
@@ -154,7 +154,7 @@ export default function Footer() {
                 href="https://www.instagram.com/city_fragrance_?igsh=eGJzMnBxejB0NnY5&utm_source=qr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/50 text-xl transition-colors duration-300 hover:text-white"
+                className="text-white/50 text-xl transition-all duration-300 ease-in-out hover:text-white hover:scale-110"
                 aria-label="Instagram"
               >
                 <FaInstagram />
@@ -163,7 +163,7 @@ export default function Footer() {
                 href="https://www.tiktok.com/@city_fragrance?_r=1&_t=ZS-96bneau2lj2"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/50 text-xl transition-colors duration-300 hover:text-white"
+                className="text-white/50 text-xl transition-all duration-300 ease-in-out hover:text-white hover:scale-110"
                 aria-label="TikTok"
               >
                 <FaTiktok />

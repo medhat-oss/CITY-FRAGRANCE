@@ -45,6 +45,7 @@ const config = {
       },
       animation: {
         'fade-up': 'fadeUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
+        'fade-in': 'fadeIn 0.2s ease forwards',
         'slow-zoom': 'slowZoom 25s ease-in-out infinite alternate',
         'waft': 'waft 2.5s ease-in-out infinite',
       },
@@ -52,6 +53,10 @@ const config = {
         fadeUp: {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
         },
         slowZoom: {
           '0%': { transform: 'scale(1)' },

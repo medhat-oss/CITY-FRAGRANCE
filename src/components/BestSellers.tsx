@@ -52,7 +52,7 @@ export default function BestSellers({ products, title = 'Best Sellers' }: BestSe
                   : product.badge;
 
             return (
-              <div key={product.id} className="flex flex-col transition-transform duration-300 hover:-translate-y-1.5">
+              <div key={product.id} className="flex flex-col transition-all duration-700 ease-out hover:scale-[1.03]">
                 {/* Image Wrapper — perfect aspect-square, no padding gaps */}
                 <Link
                   href={`/product/${product.id}`}

@@ -14,7 +14,7 @@ export default function WhatsAppButton() {
         href="https://wa.me/201044415982"
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(37,211,102,0.4)] animate-waft"
+         className="flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-[0_0_30px_rgba(37,211,102,0.4)] animate-waft"
         aria-label="Chat with us on WhatsApp"
       >
         <FaWhatsapp className="w-7 h-7" />
