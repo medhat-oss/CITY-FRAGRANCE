@@ -1,13 +1,13 @@
 .adminLayout {
   display: flex;
   min-height: 100vh;
-  background-color: #f1f5f9;
+  background-color: #09142E;
 }
 
 /* ─── Sidebar ─── */
 .adminSidebar {
   width: 250px;
-  background-color: #16234d;
+  background-color: #11224D;
   color: #f8f9fa;
   display: flex;
   flex-direction: column;
@@ -16,6 +16,7 @@
   height: 100vh;
   overflow-y: auto;
   z-index: 10;
+  border-right: 1px solid #1d3573;
 }
 
 .sidebarBrand {
@@ -33,7 +34,7 @@
 .sidebarBrand span {
   font-family: var(--font-heading, 'Instrument Sans', sans-serif);
   font-size: 0.75rem;
-  color: #c5a059;
+  color: #94a3b8;
   letter-spacing: 0.2em;
 }
 
@@ -58,7 +59,7 @@
 .sidebarLink:hover,
 .sidebarLink.active {
   background-color: #ffffff;
-  color: #16234d;
+  color: #11224D;
 }
 
 /* ─── Main Content ─── */
@@ -76,22 +77,23 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(22, 35, 77, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .adminHeader h1 {
   font-size: 2rem;
-  color: #16234d;
+  color: #f8f9fa;
   font-weight: 400;
   font-family: var(--font-heading, 'Instrument Sans', sans-serif);
 }
 
 /* ─── Content Card ─── */
 .adminContent {
-  background-color: #ffffff;
+  background-color: #11224D;
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   padding: 2rem;
+  border: 1px solid #1d3573;
 }
 
 .tableContainer {
@@ -106,7 +108,7 @@
 }
 
 .adminTable thead tr {
-  background-color: #f8f4ef;
+  background-color: #09142E;
 }
 
 .adminTable th {
@@ -116,21 +118,21 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 700;
-  color: #1e293b;
-  border-bottom: 2px solid #c5a059;
+  color: #f8f9fa;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
   white-space: nowrap;
 }
 
 .adminTable td {
   padding: 1rem;
   vertical-align: middle;
-  color: #334155;
+  color: #e2e8f0;
   font-size: 0.9rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .adminTable tbody tr:hover {
-  background-color: #faf8f5;
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .adminTable tbody tr:last-child td {
@@ -168,13 +170,13 @@
 }
 
 .btnIcon.edit:hover {
-  color: #16234d;
-  background-color: #eef2ff;
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .btnIcon.delete:hover {
-  color: #dc2626;
-  background-color: #fef2f2;
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
 }
 
 /* ─── Modal ─── */
@@ -184,7 +186,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -200,16 +202,17 @@
 }
 
 .modalContent {
-  background-color: #ffffff;
+  background-color: #11224D;
   width: 90%;
   max-width: 600px;
   border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   transform: translateY(20px);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   max-height: 90vh;
   overflow-y: auto;
+  border: 1px solid #1d3573;
 }
 
 .modalOverlay.active .modalContent {
@@ -222,12 +225,12 @@
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(22, 35, 77, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modalHeader h3 {
   font-size: 1.5rem;
-  color: #16234d;
+  color: #f8f9fa;
   font-family: var(--font-heading, 'Instrument Sans', sans-serif);
 }
 
@@ -243,7 +246,7 @@
 }
 
 .btnClose:hover {
-  color: #16234d;
+  color: #ffffff;
 }
 
 .modalForm {
@@ -262,26 +265,26 @@
   font-family: var(--font-heading, 'Instrument Sans', sans-serif);
   font-size: 0.85rem;
   font-weight: 600;
-  color: #16234d;
+  color: #e2e8f0;
 }
 
 .formGroup input,
 .formGroup select {
   padding: 0.75rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #1d3573;
   border-radius: 4px;
   font-family: var(--font-body, 'Jost', sans-serif);
   font-size: 0.95rem;
-  color: #334155;
-  background-color: #ffffff;
+  color: #f8f9fa;
+  background-color: #09142E;
   transition: border-color 0.2s ease;
 }
 
 .formGroup input:focus,
 .formGroup select:focus {
   outline: none;
-  border-color: #c5a059;
-  box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.15);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
 }
 
 .formRow {
@@ -296,7 +299,7 @@
   gap: 1rem;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(22, 35, 77, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* ─── Image Upload ─── */
@@ -311,16 +314,16 @@
   justify-content: center;
   align-items: center;
   padding: 1.5rem;
-  border: 2px dashed #cbd5e1;
+  border: 2px dashed #1d3573;
   border-radius: 8px;
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease;
-  background-color: #fafafa;
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
 .uploadLabel:hover {
-  border-color: #c5a059;
-  background-color: #f5f0e8;
+  border-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .uploadPrompt {
@@ -336,7 +339,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #c5a059;
+  color: #ffffff;
   font-size: 0.95rem;
   font-weight: 500;
 }
@@ -355,7 +358,7 @@
 }
 
 .uploadError {
-  color: #dc2626;
+  color: #ef4444;
   font-size: 0.8rem;
   margin: 0;
 }
@@ -365,14 +368,14 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem;
-  background-color: #f8f8f8;
+  background-color: #09142E;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #1d3573;
 }
 
 .previewLabel {
   font-size: 0.85rem;
-  color: #16a34a;
+  color: #22c55e;
   font-weight: 500;
 }
 
@@ -387,12 +390,12 @@
   position: relative;
   border-radius: 6px;
   overflow: hidden;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #1d3573;
   transition: border-color 0.2s ease;
 }
 
 .thumbnailItem:hover {
-  border-color: #c5a059;
+  border-color: #ffffff;
 }
 
 .thumbnailRemove {

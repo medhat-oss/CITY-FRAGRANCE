@@ -80,7 +80,7 @@ function LoginFormInner({ email, setEmail, password, setPassword, error, loading
           <span style={{
             fontFamily: 'var(--font-heading, "Instrument Sans", sans-serif)',
             fontSize: '0.7rem',
-            color: '#C5A059',
+            color: '#94a3b8',
             letterSpacing: '0.25em',
             textTransform: 'uppercase',
           }}>
@@ -118,7 +118,7 @@ function LoginFormInner({ email, setEmail, password, setPassword, error, loading
                 transition: 'border-color 0.2s',
                 boxSizing: 'border-box',
               }}
-              onFocus={(e) => e.target.style.borderColor = '#C5A059'}
+              onFocus={(e) => e.target.style.borderColor = '#ffffff'}
               onBlur={(e) => e.target.style.borderColor = '#1d3573'}
             />
           </div>
@@ -152,7 +152,7 @@ function LoginFormInner({ email, setEmail, password, setPassword, error, loading
                 transition: 'border-color 0.2s',
                 boxSizing: 'border-box',
               }}
-              onFocus={(e) => e.target.style.borderColor = '#C5A059'}
+              onFocus={(e) => e.target.style.borderColor = '#ffffff'}
               onBlur={(e) => e.target.style.borderColor = '#1d3573'}
             />
           </div>
@@ -175,7 +175,7 @@ function LoginFormInner({ email, setEmail, password, setPassword, error, loading
             style={{
               width: '100%',
               padding: '0.85rem',
-              background: loading ? '#8a7029' : '#C5A059',
+              background: loading ? '#64748b' : '#ffffff',
               color: '#09142E',
               border: 'none',
               borderRadius: '8px',
@@ -184,11 +184,11 @@ function LoginFormInner({ email, setEmail, password, setPassword, error, loading
               fontWeight: 600,
               letterSpacing: '0.1em',
               cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'background 0.2s, transform 0.1s',
+              transition: 'all 0.2s',
               textTransform: 'uppercase',
             }}
-            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = '#D4AF37'; }}
-            onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = '#C5A059'; }}
+            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = '#e2e8f0'; }}
+            onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = '#ffffff'; }}
           >
             {loading ? 'Signing in...' : 'Login'}
           </button>
@@ -207,7 +207,7 @@ function LoginFormInner({ email, setEmail, password, setPassword, error, loading
             textDecoration: 'none',
             transition: 'color 0.2s',
           }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#C5A059'}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
             onMouseLeave={(e) => e.currentTarget.style.color = '#64748b'}
           >
             &larr; Back to Store

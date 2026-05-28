@@ -182,6 +182,7 @@ export default function Footer() {
                   <Link
                     href={link.href}
                     prefetch="auto"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     className="font-body text-sm text-white/70 transition-colors hover:text-white"
                   >
                     {link.label}

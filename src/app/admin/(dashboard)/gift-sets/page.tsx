@@ -110,8 +110,8 @@ export default function AdminGiftSetsPage() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <FaGift style={{ color: '#16234D', fontSize: '1.25rem' }} />
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#16234D', margin: 0 }}>
+          <FaGift style={{ color: '#ffffff', fontSize: '1.25rem' }} />
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
             Gift Sets Management
           </h2>
         </div>
@@ -138,11 +138,11 @@ export default function AdminGiftSetsPage() {
                   {gs.image ? (
                     <Image src={gs.image} alt={gs.name} width={50} height={50} style={{ objectFit: 'cover', borderRadius: '4px' }} />
                   ) : (
-                    <div style={{ width: 50, height: 50, background: '#f1f5f9', borderRadius: '4px' }} />
+                    <div style={{ width: 50, height: 50, background: '#1d3573', borderRadius: '4px' }} />
                   )}
                 </td>
-                <td style={{ fontWeight: 600, color: '#16234D' }}>{gs.name}</td>
-                <td style={{ fontFamily: 'var(--font-heading)', color: '#C5A059', fontWeight: 600 }}>{formatEGP(gs.price)}</td>
+                <td style={{ fontWeight: 600, color: '#e2e8f0' }}>{gs.name}</td>
+                <td style={{ fontFamily: 'var(--font-heading)', color: '#ffffff', fontWeight: 600 }}>{formatEGP(gs.price)}</td>
                 <td style={{ fontSize: '0.8rem', color: '#64748b' }}>{gs.productIds.length} products</td>
                 <td>
                   <div className={styles.actionBtns}>
@@ -175,7 +175,7 @@ export default function AdminGiftSetsPage() {
               </div>
               <div className={styles.formGroup}>
                 <label>Description</label>
-                <textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} rows={3} style={{ padding: '0.75rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: '#334155', backgroundColor: '#ffffff', width: '100%', boxSizing: 'border-box', resize: 'vertical' }} />
+                <textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} rows={3} style={{ padding: '0.75rem', border: '1px solid #1d3573', borderRadius: '4px', fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: '#e2e8f0', backgroundColor: '#09142E', width: '100%', boxSizing: 'border-box', resize: 'vertical' }} />
               </div>
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
@@ -187,7 +187,7 @@ export default function AdminGiftSetsPage() {
                   <div className={styles.uploadArea}>
                     {/* ─── Preview (local or server image) ─── */}
                     {(imagePreview || form.image) ? (
-                      <div style={{ position: 'relative', width: '100%', height: '180px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #e2e8f0', background: '#f8fafc' }}>
+                      <div style={{ position: 'relative', width: '100%', height: '180px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #1d3573', background: '#09142E' }}>
                         <Image
                           src={imagePreview || form.image}
                           alt="Preview"
@@ -198,7 +198,7 @@ export default function AdminGiftSetsPage() {
                         />
                         {isUploading && (
                           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <FaSpinner className={styles.spinIcon} style={{ color: '#C5A059', fontSize: '2rem' }} />
+                            <FaSpinner className={styles.spinIcon} style={{ color: '#ffffff', fontSize: '2rem' }} />
                           </div>
                         )}
                       </div>
@@ -213,7 +213,7 @@ export default function AdminGiftSetsPage() {
                     {/* Re-upload button */}
                     {(imagePreview || form.image) && (
                       <label htmlFor="gs-image-upload" className={styles.uploadLabel} style={{ padding: '0.5rem', borderStyle: 'solid', cursor: 'pointer' }}>
-                        <span style={{ fontSize: '0.8rem', color: '#16234D' }}>Change Image</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ffffff' }}>Change Image</span>
                       </label>
                     )}
                   </div>
@@ -221,17 +221,17 @@ export default function AdminGiftSetsPage() {
               </div>
               <div className={styles.formGroup}>
                 <label>Select Products</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '4px', background: '#fafafa' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', padding: '0.5rem', border: '1px solid #1d3573', borderRadius: '4px', background: '#09142E' }}>
                   {products.map((p) => (
-                    <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.6rem', background: form.productIds.includes(p.id) ? '#16234D' : '#fff', color: form.productIds.includes(p.id) ? '#fff' : '#334155', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', border: '1px solid', borderColor: form.productIds.includes(p.id) ? '#16234D' : '#e2e8f0', transition: 'all 0.2s' }}>
-                      <input type="checkbox" checked={form.productIds.includes(p.id)} onChange={() => toggleProduct(p.id)} style={{ accentColor: '#C5A059' }} />
+                    <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.6rem', background: form.productIds.includes(p.id) ? '#ffffff' : 'transparent', color: form.productIds.includes(p.id) ? '#09142E' : '#e2e8f0', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', border: '1px solid', borderColor: form.productIds.includes(p.id) ? '#ffffff' : 'rgba(255,255,255,0.2)', transition: 'all 0.2s' }}>
+                      <input type="checkbox" checked={form.productIds.includes(p.id)} onChange={() => toggleProduct(p.id)} style={{ accentColor: '#ffffff' }} />
                       {p.name}
                     </label>
                   ))}
                 </div>
               </div>
               <div className={styles.modalActions}>
-                <button type="button" className="btn btn-outline" style={{ color: '#666', borderColor: '#ccc' }} onClick={() => setModalOpen(false)}>Cancel</button>
+                <button type="button" className="btn btn-outline" style={{ color: '#e2e8f0', borderColor: 'rgba(255,255,255,0.3)' }} onClick={() => setModalOpen(false)}>Cancel</button>
                 <button type="button" className="btn btn-primary" onClick={handleSave}>{editing ? 'Update' : 'Save'}</button>
               </div>
             </div>

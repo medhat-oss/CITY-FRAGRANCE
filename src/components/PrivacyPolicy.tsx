@@ -65,7 +65,7 @@ export default function PrivacyPolicy() {
     <div className="bg-[#09142E] min-h-screen font-body text-white/80">
       {/* ─── Hero ─── */}
       <section className="relative pt-32 pb-16 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.02] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-transparent" />
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <p className="text-white/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
             City Fragrance
@@ -137,7 +137,7 @@ export default function PrivacyPolicy() {
               <p className="text-white/70 text-base leading-relaxed mb-6">
                 For any inquiries regarding exchanges, returns, or our policies, please do not hesitate to reach out to our Customer Care team.
               </p>
-              <div className="inline-flex items-center gap-3 border border-gold/30 rounded-xl px-6 py-4 bg-white/[0.02]">
+              <div className="inline-flex items-center gap-3 border border-white/10 rounded-xl px-6 py-4 bg-white/[0.02]">
                 <span className="text-white/80 font-heading text-sm tracking-wider">Phone / WhatsApp</span>
                 <span className="text-white font-heading text-lg">01044415982</span>
               </div>

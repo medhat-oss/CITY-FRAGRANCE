@@ -103,7 +103,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
         {/* Hero */}
         <section className={`relative pt-32 pb-16 overflow-hidden ${heroImage ? 'bg-cover bg-center bg-no-repeat' : ''}`} style={heroImage ? { backgroundImage: `url('${heroImage}')` } : undefined}>
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/60" />
-          <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.03] via-transparent to-transparent mix-blend-overlay" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] via-transparent to-transparent mix-blend-overlay" />
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
             <p className="text-white/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
               City Fragrance

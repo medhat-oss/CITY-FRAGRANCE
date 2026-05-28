@@ -16,11 +16,12 @@ const COLLECTION_SLUGS: { slug: CollectionSlug; label: string }[] = [
 
 const inputStyle = {
   padding: '0.7rem 0.85rem',
-  border: '1px solid #cbd5e1',
+  border: '1px solid #1d3573',
   borderRadius: '6px',
   fontFamily: 'var(--font-body)',
   fontSize: '0.9rem',
-  color: '#334155',
+  color: '#e2e8f0',
+  background: '#09142E',
   outline: 'none',
   transition: 'border-color 0.2s',
   width: '100%' as const,
@@ -30,7 +31,7 @@ const labelStyle = {
   fontFamily: 'var(--font-heading)',
   fontSize: '0.8rem',
   fontWeight: 600,
-  color: '#1e293b',
+  color: '#94a3b8',
 };
 
 const fieldStyle = {
@@ -199,8 +200,8 @@ export default function AdminSettingsPage() {
       <div>
         <div className={styles.adminHeader} style={{ border: 'none', marginBottom: '1.5rem', padding: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <FaCog style={{ color: '#16234D', fontSize: '1.1rem' }} />
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#16234D', margin: 0 }}>
+            <FaCog style={{ color: '#ffffff', fontSize: '1.1rem' }} />
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
               Site Customization
             </h2>
           </div>
@@ -221,8 +222,8 @@ export default function AdminSettingsPage() {
               onChange={(e) => handleSettingsChange('heroTitle', e.target.value)}
               placeholder="Celebrate in Luxury & Scent"
               style={inputStyle}
-              onFocus={(e) => (e.target.style.borderColor = '#16234D')}
-              onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+              onFocus={(e) => (e.target.style.borderColor = '#ffffff')}
+              onBlur={(e) => (e.target.style.borderColor = '#1d3573')}
             />
           </div>
           <div style={fieldStyle}>
@@ -233,8 +234,8 @@ export default function AdminSettingsPage() {
               onChange={(e) => handleSettingsChange('heroSubtitle', e.target.value)}
               placeholder="Eid Al Adha Special"
               style={inputStyle}
-              onFocus={(e) => (e.target.style.borderColor = '#16234D')}
-              onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+              onFocus={(e) => (e.target.style.borderColor = '#ffffff')}
+              onBlur={(e) => (e.target.style.borderColor = '#1d3573')}
             />
           </div>
           <div style={fieldStyle}>
@@ -244,10 +245,10 @@ export default function AdminSettingsPage() {
                 style={{
                   width: '100%',
                   height: '140px',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  border: '1px solid #e2e8f0',
-                  background: '#f8fafc',
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    border: '1px solid #1d3573',
+                    background: '#09142E',
                   position: 'relative',
                 }}
               >
@@ -265,15 +266,18 @@ export default function AdminSettingsPage() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.6rem 1.2rem',
-                background: '#16234D',
-                color: '#fff',
+                background: '#ffffff',
+                color: '#09142E',
                 borderRadius: '6px',
                 fontFamily: 'var(--font-body)',
                 fontSize: '0.85rem',
                 cursor: 'pointer',
                 border: 'none',
                 width: 'fit-content',
+                transition: 'opacity 0.2s',
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
             >
               Choose Image
               <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleHeroBgUpload} />
@@ -290,8 +294,8 @@ export default function AdminSettingsPage() {
               onChange={(e) => handleSettingsChange('announcementText', e.target.value)}
               placeholder="EID AL ADHA SALE UP TO 20% OFF ENDS SOON... SHOP NOW"
               style={inputStyle}
-              onFocus={(e) => (e.target.style.borderColor = '#16234D')}
-              onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+              onFocus={(e) => (e.target.style.borderColor = '#ffffff')}
+              onBlur={(e) => (e.target.style.borderColor = '#1d3573')}
             />
           </div>
         </div>
@@ -323,8 +327,8 @@ export default function AdminSettingsPage() {
       <div>
         <div className={styles.adminHeader} style={{ border: 'none', marginBottom: '1.5rem', padding: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <FaCog style={{ color: '#16234D', fontSize: '1.1rem' }} />
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#16234D', margin: 0 }}>
+            <FaCog style={{ color: '#ffffff', fontSize: '1.1rem' }} />
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
               Mood Section Settings
             </h2>
           </div>
@@ -339,8 +343,8 @@ export default function AdminSettingsPage() {
               onChange={(e) => handleSettingsChange('moodTitle', e.target.value)}
               placeholder="The Essence of Luxury & Elegance"
               style={inputStyle}
-              onFocus={(e) => (e.target.style.borderColor = '#16234D')}
-              onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+              onFocus={(e) => (e.target.style.borderColor = '#ffffff')}
+              onBlur={(e) => (e.target.style.borderColor = '#1d3573')}
             />
           </div>
           <div style={fieldStyle}>
@@ -352,8 +356,8 @@ export default function AdminSettingsPage() {
                   height: '140px',
                   borderRadius: '6px',
                   overflow: 'hidden',
-                  border: '1px solid #e2e8f0',
-                  background: '#f8fafc',
+                  border: '1px solid #1d3573',
+                  background: '#09142E',
                   position: 'relative',
                 }}
               >
@@ -371,15 +375,18 @@ export default function AdminSettingsPage() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.6rem 1.2rem',
-                background: '#16234D',
-                color: '#fff',
+                background: '#ffffff',
+                color: '#09142E',
                 borderRadius: '6px',
                 fontFamily: 'var(--font-body)',
                 fontSize: '0.85rem',
                 cursor: 'pointer',
                 border: 'none',
                 width: 'fit-content',
+                transition: 'opacity 0.2s',
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
             >
               Choose Image
               <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleMoodImageUpload} />
@@ -399,8 +406,8 @@ export default function AdminSettingsPage() {
                 ...inputStyle,
                 resize: 'vertical',
               }}
-              onFocus={(e) => (e.target.style.borderColor = '#16234D')}
-              onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+              onFocus={(e) => (e.target.style.borderColor = '#ffffff')}
+              onBlur={(e) => (e.target.style.borderColor = '#1d3573')}
             />
           </div>
         </div>
@@ -432,8 +439,8 @@ export default function AdminSettingsPage() {
       <div>
         <div className={styles.adminHeader} style={{ border: 'none', marginBottom: '1.5rem', padding: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <FaImage style={{ color: '#16234D', fontSize: '1.1rem' }} />
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#16234D', margin: 0 }}>
+            <FaImage style={{ color: '#ffffff', fontSize: '1.1rem' }} />
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
               Manage Collections
             </h2>
           </div>
@@ -454,24 +461,24 @@ export default function AdminSettingsPage() {
                 flexDirection: 'column',
                 gap: '0.5rem',
                 padding: '1rem',
-                border: '1px solid #e2e8f0',
+                border: '1px solid #1d3573',
                 borderRadius: '6px',
-                background: '#fafafa',
+                background: '#11224D',
               }}
             >
-              <label style={{ fontFamily: 'var(--font-heading)', fontSize: '0.85rem', fontWeight: 600, color: '#16234D' }}>
+              <label style={{ fontFamily: 'var(--font-heading)', fontSize: '0.85rem', fontWeight: 600, color: '#e2e8f0' }}>
                 {label}
               </label>
 
               {collectionImages[slug] && (
                 <div
                   style={{
-                    width: '100%',
-                    height: '120px',
-                    borderRadius: '6px',
-                    overflow: 'hidden',
-                    border: '1px solid #e2e8f0',
-                    background: '#f8fafc',
+                  width: '100%',
+                  height: '140px',
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  border: '1px solid #1d3573',
+                  background: '#09142E',
                     position: 'relative',
                   }}
                 >
@@ -490,14 +497,15 @@ export default function AdminSettingsPage() {
                   alignItems: 'center',
                   gap: '0.5rem',
                   padding: '0.5rem 1rem',
-                  background: '#16234D',
-                  color: '#fff',
+                  background: '#ffffff',
+                  color: '#09142E',
                   borderRadius: '6px',
                   fontFamily: 'var(--font-body)',
                   fontSize: '0.8rem',
                   cursor: 'pointer',
                   border: 'none',
                   width: 'fit-content',
+                  transition: 'opacity 0.2s',
                 }}
               >
                 {uploadingSlug === slug ? 'Uploading...' : 'Choose Image'}

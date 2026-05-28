@@ -69,12 +69,12 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-        <FaClipboardList style={{ color: '#16234D', fontSize: '1.25rem' }} />
-        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#16234D', margin: 0 }}>
-          Orders Management
-        </h2>
-      </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <FaClipboardList style={{ color: '#ffffff', fontSize: '1.25rem' }} />
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
+            Orders Management
+          </h2>
+        </div>
 
       {/* Revenue Badge */}
       <div
@@ -97,7 +97,7 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Orders Table */}
-      <div style={{ background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+      <div style={{ background: '#11224D', borderRadius: '8px', border: '1px solid #1d3573', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table
             style={{
@@ -109,7 +109,7 @@ export default function AdminOrdersPage() {
             }}
           >
             <thead>
-              <tr style={{ background: '#16234D', color: '#fff' }}>
+              <tr style={{ background: '#09142E', color: '#f8f9fa' }}>
                 <Th>Order ID</Th>
                 <Th>Customer</Th>
                 <Th>Phone</Th>
@@ -126,8 +126,8 @@ export default function AdminOrdersPage() {
               {orders.map((order) => (
                 <tr
                   key={order.orderId}
-                  style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', transition: 'background 0.2s' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = '')}
                 >
                   <Td>{order.orderId}</Td>
@@ -141,7 +141,7 @@ export default function AdminOrdersPage() {
                       </div>
                     ))}
                   </Td>
-                  <Td style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, color: '#16234D' }}>
+                  <Td style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, color: '#ffffff' }}>
                     {formatEGP(order.totalPrice)}
                   </Td>
                   <Td>{order.paymentMethod || '\u2014'}</Td>
@@ -158,21 +158,21 @@ export default function AdminOrdersPage() {
                         ))}
                       </select>
                       {updatingId === order.orderId && (
-                        <FaSpinner className="animate-spin" style={{ fontSize: '0.75rem', color: '#16234D' }} />
+                        <FaSpinner className="animate-spin" style={{ fontSize: '0.75rem', color: '#ffffff' }} />
                       )}
                     </div>
                   </Td>
-                  <Td style={{ color: '#64748b' }}>{order.date}</Td>
+                  <Td style={{ color: '#94a3b8' }}>{order.date}</Td>
                   <Td>
                     <button
                       onClick={() => setSelectedOrder(order)}
                       style={{
                         background: 'none',
-                        border: '1px solid #cbd5e1',
+                        border: '1px solid rgba(255,255,255,0.2)',
                         borderRadius: '4px',
                         padding: '0.4rem 0.6rem',
                         cursor: 'pointer',
-                        color: '#16234D',
+                        color: '#e2e8f0',
                         fontSize: '0.8rem',
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -180,14 +180,14 @@ export default function AdminOrdersPage() {
                         transition: 'all 0.2s',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#16234D';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.style.borderColor = '#16234D';
+                        e.currentTarget.style.background = '#ffffff';
+                        e.currentTarget.style.color = '#09142E';
+                        e.currentTarget.style.borderColor = '#ffffff';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.background = '';
-                        e.currentTarget.style.color = '#16234D';
-                        e.currentTarget.style.borderColor = '#cbd5e1';
+                        e.currentTarget.style.color = '#e2e8f0';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
                       }}
                     >
                       <FaEye /> View
@@ -197,7 +197,7 @@ export default function AdminOrdersPage() {
               ))}
               {orders.length === 0 && (
                 <tr>
-                  <td colSpan={10} style={{ textAlign: 'center', padding: '3rem 1rem', color: '#94a3b8' }}>
+                  <td colSpan={10} style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748b' }}>
                     No orders yet.
                   </td>
                 </tr>
@@ -224,20 +224,20 @@ export default function AdminOrdersPage() {
               <DetailRow label="Date" value={selectedOrder.date} />
               <DetailRow label="Status" value={selectedOrder.status} />
 
-              <div style={{ height: '1px', background: '#e2e8f0', margin: '0.25rem 0' }} />
+              <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.25rem 0' }} />
 
               {/* Customer Info */}
-              <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 600, color: '#16234D', margin: 0 }}>
+              <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 600, color: '#f8f9fa', margin: 0 }}>
                 Customer Information
               </h4>
               <DetailRow label="Name" value={selectedOrder.customerName} />
               <DetailRow label="Email" value={selectedOrder.email || '\u2014'} dir="ltr" />
               <DetailRow label="Phone" value={selectedOrder.phoneNumber} dir="ltr" />
 
-              <div style={{ height: '1px', background: '#e2e8f0', margin: '0.25rem 0' }} />
+              <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.25rem 0' }} />
 
               {/* Shipping Info */}
-              <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 600, color: '#16234D', margin: 0 }}>
+              <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 600, color: '#f8f9fa', margin: 0 }}>
                 Shipping Details
               </h4>
               <DetailRow label="City" value={selectedOrder.city} />
@@ -247,20 +247,20 @@ export default function AdminOrdersPage() {
                 <DetailRow label="Apartment" value={selectedOrder.apartment} />
               )}
 
-              <div style={{ height: '1px', background: '#e2e8f0', margin: '0.25rem 0' }} />
+              <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.25rem 0' }} />
 
               {/* Payment & Items */}
-              <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 600, color: '#16234D', margin: 0 }}>
+              <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', fontWeight: 600, color: '#f8f9fa', margin: 0 }}>
                 Payment & Items
               </h4>
               <DetailRow label="Payment Method" value={selectedOrder.paymentMethod || '\u2014'} />
               <DetailRow label="Total" value={formatEGP(selectedOrder.totalPrice)} />
               <div>
-                <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#16234D', display: 'block', marginBottom: '0.3rem' }}>
+                <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#f8f9fa', display: 'block', marginBottom: '0.3rem' }}>
                   Items
                 </span>
                 {selectedOrder.items.map((item, i) => (
-                  <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: '#334155', padding: '0.2rem 0', borderBottom: i < selectedOrder.items.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                  <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: '#e2e8f0', padding: '0.2rem 0', borderBottom: i < selectedOrder.items.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
                     {item.name} &times; {item.quantity} &mdash; {formatEGP(item.price * item.quantity)}
                   </div>
                 ))}
@@ -276,10 +276,10 @@ export default function AdminOrdersPage() {
 function DetailRow({ label, value, dir }: { label: string; value: string; dir?: string }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#64748b' }}>
+      <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8' }}>
         {label}
       </span>
-      <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: '#334155', textAlign: 'end', maxWidth: '60%', wordBreak: 'break-word' }} dir={dir}>
+      <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: '#e2e8f0', textAlign: 'end', maxWidth: '60%', wordBreak: 'break-word' }} dir={dir}>
         {value}
       </span>
     </div>
@@ -306,7 +306,7 @@ function Th({ children }: { children: React.ReactNode }) {
 
 function Td({ children, style: extraStyle }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <td style={{ padding: '0.85rem 1rem', color: '#334155', verticalAlign: 'top', ...extraStyle }}>
+    <td style={{ padding: '0.85rem 1rem', color: '#e2e8f0', verticalAlign: 'top', ...extraStyle }}>
       {children}
     </td>
   );

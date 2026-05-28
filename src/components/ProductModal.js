@@ -207,19 +207,19 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                             rows={3}
                             style={{
                                 padding: '0.75rem',
-                                border: '1px solid #cbd5e1',
+                                border: '1px solid #1d3573',
                                 borderRadius: '4px',
                                 fontFamily: 'var(--font-body, Jost, sans-serif)',
                                 fontSize: '0.95rem',
-                                color: '#334155',
-                                backgroundColor: '#ffffff',
+                                color: '#e2e8f0',
+                                backgroundColor: '#09142E',
                                 transition: 'border-color 0.2s ease',
                                 width: '100%',
                                 boxSizing: 'border-box',
                                 resize: 'vertical',
                             }}
-                            onFocus={(e) => e.target.style.borderColor = '#c5a059'}
-                            onBlur={(e) => e.target.style.borderColor = '#cbd5e1'}
+                            onFocus={(e) => e.target.style.borderColor = '#ffffff'}
+                            onBlur={(e) => e.target.style.borderColor = '#1d3573'}
                         />
                     </div>
                     <div className={styles.formGroup}>
@@ -300,7 +300,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                     </div>
 
                     <div className={styles.modalActions}>
-                        <button type="button" className="btn btn-outline" style={{color: '#666', borderColor: '#ccc'}} onClick={onClose}>Cancel</button>
+                        <button type="button" className="btn btn-outline" style={{color: '#e2e8f0', borderColor: 'rgba(255,255,255,0.3)'}} onClick={onClose}>Cancel</button>
                         <button type="submit" className="btn btn-primary" disabled={isUploading}>Save Product</button>
                     </div>
                 </form>

@@ -100,13 +100,13 @@ export default function OurStory() {
 
       {/* ─── Timeline / Date Badge ─── */}
       <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-gold/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5" />
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
           <FadeInSection>
             <p className="text-white/50 font-heading text-sm tracking-[0.3em] uppercase mb-6">
               Our Journey Began
             </p>
-            <div className="inline-flex items-center gap-6 border border-gold/30 rounded-2xl px-10 py-8 bg-[#09142E]/80 backdrop-blur-sm shadow-[0_0_40px_rgba(197,160,89,0.08)]">
+            <div className="inline-flex items-center gap-6 border border-white/10 rounded-2xl px-10 py-8 bg-[#09142E]/80 backdrop-blur-sm shadow-[0_0_40px_rgba(255,255,255,0.05)]">
               <div className="text-left">
                 <p className="text-white/60 text-sm font-heading tracking-wider mb-1">
                   Egypt Market Launch

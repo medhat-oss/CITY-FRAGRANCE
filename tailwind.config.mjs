@@ -15,14 +15,6 @@ const config = {
           DEFAULT: '#16234D',
           light: '#2A3B73',
         },
-        cream: {
-          DEFAULT: '#e7e5e3',
-        },
-        gold: {
-          DEFAULT: '#C5A059',
-          hover: '#D8B26A',
-          light: '#D4AF37',
-        },
         brandDark: {
           bg: '#09142E',
           card: '#11224D',

@@ -43,7 +43,7 @@ export default function AdminSidebarUser() {
     <div style={{
       marginTop: 'auto',
       paddingTop: '1rem',
-      borderTop: '1px solid rgba(197, 160, 89, 0.3)',
+      borderTop: '1px solid rgba(255, 255, 255, 0.15)',
     }}>
       {user && (
         <div style={{
@@ -61,9 +61,9 @@ export default function AdminSidebarUser() {
           width: '100%',
           padding: '0.6rem',
           background: 'transparent',
-          border: '1px solid rgba(197, 160, 89, 0.4)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
           borderRadius: '4px',
-          color: '#C5A059',
+          color: '#ffffff',
           fontFamily: 'var(--font-heading, "Instrument Sans", sans-serif)',
           fontSize: '0.75rem',
           letterSpacing: '0.1em',
@@ -71,8 +71,8 @@ export default function AdminSidebarUser() {
           transition: 'all 0.2s',
           textTransform: 'uppercase',
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(197, 160, 89, 0.15)'; e.currentTarget.style.borderColor = '#C5A059'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(197, 160, 89, 0.4)'; }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'; e.currentTarget.style.borderColor = '#ffffff'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)'; }}
       >
         Logout
       </button>
