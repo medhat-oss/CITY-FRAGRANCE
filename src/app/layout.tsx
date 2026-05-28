@@ -6,6 +6,7 @@ import { LocaleProvider } from '@/context/LocaleContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { ProductsProvider } from '@/hooks/useProducts';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const instrumentSans = Instrument_Sans({
   subsets: ['latin'],
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <ProductsProvider>
                 {children}
                 <WhatsAppButton />
+                <ScrollToTop />
               </ProductsProvider>
             </CartProvider>
           </LocaleProvider>
