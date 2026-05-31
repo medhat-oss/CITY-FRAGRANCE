@@ -102,13 +102,15 @@ export default function Header() {
 
           {/* Center: Logo */}
           <Link href="/" className="flex items-center">
-            <Image
-              src="/images/logo.png"
-              alt="City Fragrance"
-              width={150}
-              height={70}
-              className="h-14 w-auto object-contain mix-blend-screen"
-              priority
+            <video
+              src="/logo-animation.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="h-14 w-auto object-contain"
+              aria-label="City Fragrance"
             />
           </Link>
 
