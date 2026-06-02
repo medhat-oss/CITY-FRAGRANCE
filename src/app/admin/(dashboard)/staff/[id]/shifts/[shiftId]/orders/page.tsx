@@ -4,7 +4,7 @@ import { formatEGP } from '@/utils/currency';
 import { FaArrowLeft, FaShoppingBag, FaReceipt } from 'react-icons/fa';
 
 interface PageProps {
-  params: Promise<{ staffId: string; shiftId: string }>;
+  params: Promise<{ id: string; shiftId: string }>;
 }
 
 function formatTime(iso: Date) {
@@ -46,7 +46,7 @@ function statusBadge(status: string) {
 }
 
 export default async function ShiftOrdersPage({ params }: PageProps) {
-  const { staffId, shiftId } = await params;
+  const { id: staffId, shiftId } = await params;
 
   const shift = await prisma.shift.findUnique({
     where: { id: shiftId },
