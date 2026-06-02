@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { formatEGP } from '@/utils/currency';
@@ -36,17 +36,28 @@ interface User {
 }
 
 /* ── Helpers ── */
+const PLACEHOLDER = '/images/product-placeholder.png';
+
+/** Pick the first real image URL, skipping local placeholders.
+ *  Falls back to placeholder if no real image exists. */
+function bestImageUrl(images: string[] | string | undefined): string {
+  if (!images) return PLACEHOLDER;
+  const arr = Array.isArray(images) ? images : [images];
+  const real = arr.find((img) => img && img !== PLACEHOLDER && !img.startsWith('/uploads/'));
+  return real || arr[0] || PLACEHOLDER;
+}
+
 function toCatalog(products: Product[], giftSets: GiftSet[]): CatalogItem[] {
   const p: CatalogItem[] = products.map((x) => ({
     id: x.id, name: x.name,
     price: x.salePrice ?? x.price,
-    image: x.images?.[0] || '/images/product-placeholder.png',
+    image: bestImageUrl(x.images),
     kind: 'perfume',
     stock: x.stock,
   }));
   const g: CatalogItem[] = giftSets.map((x) => ({
     id: x.id, name: x.name, price: x.price,
-    image: x.image || '/images/product-placeholder.png',
+    image: x.image || PLACEHOLDER,
     kind: 'gift-set',
     stock: x.stock,
   }));
@@ -57,7 +68,7 @@ type Filter = 'all' | 'perfume' | 'gift-set';
 
 export default function CashierPage() {
   const router = useRouter();
-  
+
   /* ── Authentication ── */
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -65,14 +76,12 @@ export default function CashierPage() {
   /* ── Data ── */
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const shiftEnsured = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function boot() {
-      // Multiple attempts — absorbs transient server hiccups on refresh.
-      // The middleware has already confirmed at least one session cookie exists,
-      // so a 401 here is likely a temporary blip, not a missing login.
       let userData: User | null = null;
       for (let attempt = 1; attempt <= 3; attempt++) {
         try {
@@ -84,11 +93,9 @@ export default function CashierPage() {
               userData = data.user;
               break;
             }
-            // Authenticated but wrong role — redirect immediately
             if (!cancelled) router.replace('/cashier/login');
             return;
           }
-          // 401/403 / other errors — retry
           if (attempt === 3) break;
           await new Promise((r) => setTimeout(r, 500));
         } catch {
@@ -100,8 +107,6 @@ export default function CashierPage() {
       if (cancelled) return;
 
       if (!userData) {
-        // All retries exhausted — no valid session. The redirect URL includes
-        // a return path so the user lands back here after re-authenticating.
         if (!cancelled) router.replace('/cashier/login?redirect=/cashier');
         return;
       }
@@ -109,14 +114,18 @@ export default function CashierPage() {
       setCurrentUser(userData);
       setAuthLoading(false);
 
-      // Auto-ensure active shift exists on load
-      ensureActiveShift(userData.id);
+      // Auto-ensure active shift exists on load (only once per mount)
+      if (!shiftEnsured.current) {
+        shiftEnsured.current = true;
+        ensureActiveShift(userData.id);
+      }
 
-      // Fetch catalog items
+      // Fetch catalog items — always fresh from server
       try {
+        const ts = Date.now();
         const [pData, gData] = await Promise.all([
-          fetch('/api/products', { cache: 'no-store' }).then((r) => r.json()),
-          fetch('/api/gift-sets', { cache: 'no-store' }).then((r) => r.json()),
+          fetch(`/api/products?_t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
+          fetch(`/api/gift-sets?_t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
         ]);
         if (!cancelled) {
           setCatalog(toCatalog(pData.products || [], gData.giftSets || []));
@@ -136,11 +145,11 @@ export default function CashierPage() {
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
 
-  const visible = catalog.filter((c) => {
+  const visible = useMemo(() => catalog.filter((c) => {
     if (filter !== 'all' && c.kind !== filter) return false;
     if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
-  });
+  }), [catalog, filter, search]);
 
   /* ── Cart ── */
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -184,9 +193,9 @@ export default function CashierPage() {
     setCart((prev) => prev.filter((l) => l.item.id !== id));
   }, []);
 
-  const subtotal = cart.reduce((s, l) => s + l.item.price * l.qty, 0);
-  const discountAmt = Math.min(parseFloat(discount) || 0, subtotal);
-  const grandTotal = subtotal - discountAmt;
+  const subtotal = useMemo(() => cart.reduce((s, l) => s + l.item.price * l.qty, 0), [cart]);
+  const discountAmt = useMemo(() => Math.min(parseFloat(discount) || 0, subtotal), [discount, subtotal]);
+  const grandTotal = useMemo(() => subtotal - discountAmt, [subtotal, discountAmt]);
 
   /* ── Checkout modal ── */
   const [showCheckout, setShowCheckout] = useState(false);
@@ -699,7 +708,7 @@ export default function CashierPage() {
                     }}
                   >
                     <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: '#1e293b' }}>
-                      <Image src={item.image} alt={item.name} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" style={{ objectFit: 'cover' }} />
+                      <ImageWithFallback src={item.image} alt={item.name} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
                       {item.kind === 'gift-set' && (
                         <span className="absolute top-1 left-1 bg-[#c5a880] text-[#0a0a0b] text-[0.5rem] md:text-[0.55rem] font-bold px-1.5 py-0.5 rounded tracking-wider">GIFT</span>
                       )}
@@ -1081,7 +1090,7 @@ function CartPanel({ cart, subtotal, discount, setDiscount, grandTotal, discount
         {cart.map((line) => (
           <div key={line.item.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             <div style={{ width: 36, height: 36, borderRadius: 6, overflow: 'hidden', flexShrink: 0, position: 'relative', background: '#1e293b' }}>
-              <Image src={line.item.image} alt="" fill sizes="36px" style={{ objectFit: 'cover' }} />
+               <ImageWithFallback src={line.item.image} alt="" sizes="36px" />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ margin: 0, fontSize: '0.72rem', fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{line.item.name}</p>
@@ -1132,6 +1141,21 @@ function CartPanel({ cart, subtotal, discount, setDiscount, grandTotal, discount
         </button>
       </div>
     </>
+  );
+}
+
+/* ── Image with fallback on error ── */
+function ImageWithFallback({ src, alt, sizes }: { src: string; alt: string; sizes: string }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <Image
+      src={failed ? PLACEHOLDER : src}
+      alt={alt}
+      fill
+      sizes={sizes}
+      style={{ objectFit: 'cover' }}
+      onError={() => setFailed(true)}
+    />
   );
 }
 
