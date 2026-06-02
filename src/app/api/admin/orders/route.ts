@@ -149,6 +149,8 @@ export async function POST(request: Request) {
 
       // Revalidate cache to reflect new inventory values
       revalidatePath('/');
+      revalidatePath('/cashier');
+      revalidatePath('/admin/analytics');
       revalidatePath('/collections/gift-sets');
       revalidatePath('/collections/all-fragrances');
     } catch (stockErr) {
@@ -240,6 +242,8 @@ export async function PUT(request: Request) {
 
       // Revalidate cache to reflect restored inventory
       revalidatePath('/');
+      revalidatePath('/cashier');
+      revalidatePath('/admin/analytics');
       revalidatePath('/collections/gift-sets');
       revalidatePath('/collections/all-fragrances');
     }

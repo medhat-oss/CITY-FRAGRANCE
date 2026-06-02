@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { unstable_noStore as noStore } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 
 const FILE = 'gift-sets.json';
@@ -15,6 +16,7 @@ interface GiftSet {
 }
 
 export async function GET() {
+  noStore();
   const data = await readJsonFile<GiftSet[]>(FILE, []);
   return NextResponse.json({ giftSets: data });
 }
@@ -35,6 +37,8 @@ export async function POST(request: Request) {
     data.push(giftSet);
     await writeJsonFile(FILE, data);
     revalidatePath('/');
+    revalidatePath('/cashier');
+    revalidatePath('/admin/analytics');
     revalidatePath('/collections/gift-sets');
     revalidatePath('/collections/gift-sets', 'layout');
     return NextResponse.json({ success: true, giftSet });
@@ -58,6 +62,8 @@ export async function PUT(request: Request) {
     data[index] = { ...data[index], ...body, price: parseFloat(body.price) || data[index].price };
     await writeJsonFile(FILE, data);
     revalidatePath('/');
+    revalidatePath('/cashier');
+    revalidatePath('/admin/analytics');
     revalidatePath('/collections/gift-sets');
     revalidatePath('/collections/gift-sets', 'layout');
     return NextResponse.json({ success: true, giftSet: data[index] });
@@ -80,6 +86,8 @@ export async function DELETE(request: Request) {
     }
     await writeJsonFile(FILE, filtered);
     revalidatePath('/');
+    revalidatePath('/cashier');
+    revalidatePath('/admin/analytics');
     revalidatePath('/collections/gift-sets');
     revalidatePath('/collections/gift-sets', 'layout');
     return NextResponse.json({ success: true });

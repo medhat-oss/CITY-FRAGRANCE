@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { unstable_noStore as noStore } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 
 const FILE = 'products.json';
 
 export async function GET() {
+  noStore();
   const products = await readJsonFile<any[]>(FILE, []);
   return NextResponse.json({ products });
 }
@@ -16,6 +18,8 @@ export async function POST(request: Request) {
     products.push(product);
     await writeJsonFile(FILE, products);
     revalidatePath('/');
+    revalidatePath('/cashier');
+    revalidatePath('/admin/analytics');
     revalidatePath('/collections/all-fragrances');
     revalidatePath('/collections/mens-collection');
     revalidatePath('/collections/womens-collection');
@@ -44,6 +48,8 @@ export async function PUT(request: Request) {
     products[index] = updated;
     await writeJsonFile(FILE, products);
     revalidatePath('/');
+    revalidatePath('/cashier');
+    revalidatePath('/admin/analytics');
     revalidatePath('/collections/all-fragrances');
     revalidatePath('/collections/mens-collection');
     revalidatePath('/collections/womens-collection');
@@ -71,6 +77,8 @@ export async function DELETE(request: Request) {
     }
     await writeJsonFile(FILE, filtered);
     revalidatePath('/');
+    revalidatePath('/cashier');
+    revalidatePath('/admin/analytics');
     revalidatePath('/collections/all-fragrances');
     revalidatePath('/collections/mens-collection');
     revalidatePath('/collections/womens-collection');
