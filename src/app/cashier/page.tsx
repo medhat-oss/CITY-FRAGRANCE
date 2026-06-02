@@ -509,6 +509,10 @@ export default function CashierPage() {
     window.location.href = '/cashier/login';
   }
 
+  /* ── Mobile drawer state ── */
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
+
   /* ── Payment methods config ── */
   const PAY_METHODS = [
     { key: 'cash', label: 'Cash / كاش', icon: <FaMoneyBillWave /> },
@@ -530,259 +534,260 @@ export default function CashierPage() {
   }
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', height: '100vh',
-      background: '#0a0a0b', color: '#ffffff', overflow: 'hidden'
-    }}>
+    <div className="flex flex-col h-screen bg-[#0a0a0b] text-white overflow-hidden">
       {/* ── Header ── */}
-      <header style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0.8rem 1.5rem', background: '#111827',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)', flexShrink: 0
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <FaCashRegister style={{ color: '#c5a880', fontSize: '1.4rem' }} />
-          <h1 style={{
-            fontFamily: 'var(--font-heading, "Instrument Sans", sans-serif)',
-            fontSize: '1.25rem', fontWeight: 600, color: '#f8f9fa',
-            margin: 0, letterSpacing: '0.04em'
-          }}>
-            CITY FRAGRANCE POS <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 400 }}>/ نظام الكاشير</span>
+      <header className="flex items-center justify-between px-3 md:px-6 py-3 bg-[#111827] border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+          <FaCashRegister style={{ color: '#c5a880', fontSize: '1.2rem', flexShrink: 0 }} />
+          <h1 className="font-heading text-sm md:text-lg font-semibold text-[#f8f9fa] m-0 tracking-wider truncate">
+            CITY FRAGRANCE POS
           </h1>
+          <span className="hidden sm:inline text-xs md:text-sm text-[#64748b] font-normal">/ نظام الكاشير</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto' }}>
+        {/* ── Desktop right section ── */}
+        <div className="hidden md:flex items-center gap-2 lg:gap-3">
           {currentUser && (
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              background: 'rgba(255,255,255,0.05)', padding: '0.4rem 0.8rem',
-              borderRadius: '20px', fontSize: '0.8rem', color: '#cbd5e1'
-            }}>
+            <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full text-xs lg:text-sm text-[#cbd5e1]">
               <FaUser style={{ color: '#c5a880', fontSize: '0.75rem' }} />
-              <span>{currentUser.username} ({currentUser.role})</span>
+              <span className="truncate max-w-[120px]">{currentUser.username} ({currentUser.role})</span>
             </div>
           )}
-          
           <button
             onClick={() => { setShowPasswordModal(true); setPasswordValue(''); setPasswordError(''); }}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              background: 'transparent', border: '1px solid rgba(197, 168, 128, 0.5)',
-              borderRadius: '8px', color: '#c5a880', padding: '0.4rem 0.8rem',
-              fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-              transition: 'all 0.2s', fontFamily: 'var(--font-heading)',
-              letterSpacing: '0.04em',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(197, 168, 128, 0.12)';
-              e.currentTarget.style.borderColor = '#c5a880';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.borderColor = 'rgba(197, 168, 128, 0.5)';
-            }}
+            className="flex items-center gap-1.5 bg-transparent border border-[#c5a880]/50 rounded-lg text-[#c5a880] px-3 py-1.5 text-xs lg:text-sm font-semibold cursor-pointer transition-all font-heading tracking-wider whitespace-nowrap hover:bg-[#c5a880]/10 hover:border-[#c5a880]"
           >
-            <FaClipboardList />
-            <span>End Shift / تصفية الوردية</span>
+            <FaClipboardList style={{ flexShrink: 0 }} />
+            <span>End Shift</span>
           </button>
-          
           <button
             onClick={handleLogout}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              background: 'transparent', border: '1px solid rgba(239, 68, 68, 0.4)',
-              borderRadius: '8px', color: '#ef4444', padding: '0.4rem 0.8rem',
-              fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-              e.currentTarget.style.borderColor = '#ef4444';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-            }}
+            className="flex items-center gap-1.5 bg-transparent border border-red-500/40 rounded-lg text-red-500 px-3 py-1.5 text-xs lg:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap hover:bg-red-500/10 hover:border-red-500"
           >
-            <FaSignOutAlt />
-            <span>Logout / تسجيل خروج</span>
+            <FaSignOutAlt style={{ flexShrink: 0 }} />
+            <span>Logout</span>
+          </button>
+        </div>
+
+        {/* ── Mobile hamburger ── */}
+        <div className="flex md:hidden items-center gap-2">
+          {/* Mobile cart toggle badge */}
+          <button
+            onClick={() => setMobileCartOpen(!mobileCartOpen)}
+            className="relative flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs"
+          >
+            <span>Sale</span>
+            {cart.length > 0 && (
+              <span className="bg-[#c5a880] text-[#0a0a0b] text-[0.6rem] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {cart.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setMobileDrawerOpen(true)}
+            className="flex items-center justify-center bg-transparent border border-white/20 rounded-lg p-2 text-white cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </button>
         </div>
       </header>
 
-      {/* ── Split Layout ── */}
-      <div style={{
-        display: 'flex', flex: 1, gap: '1rem', overflow: 'hidden',
-        minHeight: 0, padding: '1rem'
-      }}>
+      {/* ── Mobile drawer overlay ── */}
+      {mobileDrawerOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          onClick={() => setMobileDrawerOpen(false)}
+        />
+      )}
+
+      {/* ── Mobile sidebar drawer ── */}
+      <aside
+        className={`fixed inset-y-0 right-0 z-50 w-64 bg-[#09142E] shadow-xl transform transition-transform duration-300 md:hidden ${mobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+      >
+        <div className="flex flex-col h-full p-5">
+          <div className="flex items-center justify-between mb-6">
+            <span className="font-heading text-sm text-[#c5a880] tracking-widest uppercase">Menu</span>
+            <button
+              onClick={() => setMobileDrawerOpen(false)}
+              className="text-[#64748b] cursor-pointer bg-transparent border-none p-1"
+            >
+              <FaTimes style={{ fontSize: '1.1rem' }} />
+            </button>
+          </div>
+
+          {currentUser && (
+            <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2.5 mb-4">
+              <FaUser style={{ color: '#c5a880', fontSize: '0.85rem', flexShrink: 0 }} />
+              <div className="min-w-0">
+                <div className="text-sm text-white font-semibold truncate">{currentUser.username}</div>
+                <div className="text-[0.6rem] text-[#94a3b8] uppercase tracking-wider">{currentUser.role}</div>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => { setMobileDrawerOpen(false); setShowPasswordModal(true); setPasswordValue(''); setPasswordError(''); }}
+            className="flex items-center gap-3 w-full bg-transparent border border-[#c5a880]/40 rounded-lg text-[#c5a880] px-4 py-3 text-sm font-semibold cursor-pointer transition-all mb-3 hover:bg-[#c5a880]/10"
+          >
+            <FaClipboardList style={{ flexShrink: 0 }} />
+            <span>End Shift / تصفية الوردية</span>
+          </button>
+
+          <button
+            onClick={() => { setMobileDrawerOpen(false); handleLogout(); }}
+            className="flex items-center gap-3 w-full bg-transparent border border-red-500/40 rounded-lg text-red-500 px-4 py-3 text-sm font-semibold cursor-pointer transition-all hover:bg-red-500/10"
+          >
+            <FaSignOutAlt style={{ flexShrink: 0 }} />
+            <span>Logout / تسجيل خروج</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Main Content: Catalog (desktop: side-by-side, mobile: stacked) ── */}
+      <div className="flex flex-col md:flex-row flex-1 gap-2 md:gap-4 overflow-hidden min-h-0 p-2 md:p-4">
 
         {/* ─── LEFT: Catalog ─── */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+        <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
           {/* Filters + search */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', flexShrink: 0 }}>
+          <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2 md:mb-3 flex-shrink-0">
             {([['all', 'All'], ['perfume', 'Perfumes'], ['gift-set', 'Gift Sets']] as [Filter, string][]).map(([key, label]) => (
               <button key={key} onClick={() => setFilter(key)}
+                className="text-[0.65rem] md:text-xs font-semibold font-heading tracking-wider cursor-pointer transition-all px-2.5 md:px-4 py-1.5 md:py-2 rounded-full border"
                 style={{
-                  padding: '0.4rem 1rem', borderRadius: '999px', border: '1px solid',
-                  fontFamily: 'var(--font-heading)', fontSize: '0.78rem', fontWeight: 600,
-                  letterSpacing: '0.06em', cursor: 'pointer', transition: 'all 0.2s',
                   background: filter === key ? '#c5a880' : 'transparent',
                   color: filter === key ? '#0a0a0b' : '#cbd5e1',
                   borderColor: filter === key ? '#c5a880' : 'rgba(255,255,255,0.15)',
                 }}
               >{label}</button>
             ))}
-            <div style={{ marginLeft: 'auto', position: 'relative' }}>
-              <FaSearch style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: '0.8rem' }} />
+            <div className="ml-auto relative">
+              <FaSearch style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: '0.7rem' }} />
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…"
-                style={{
-                  padding: '0.4rem 0.6rem 0.4rem 2rem', borderRadius: '6px',
-                  border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.04)',
-                  color: '#e2e8f0', fontSize: '0.85rem', width: 180, outline: 'none',
-                }}
+                className="text-xs md:text-sm text-[#e2e8f0] bg-white/5 border border-white/10 rounded-md outline-none pl-7 pr-2 py-1.5 md:py-2 w-28 md:w-44"
               />
             </div>
           </div>
 
-          {/* Product grid */}
-          <div style={{ flex: 1, overflowY: 'auto', paddingRight: 4 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
+          {/* Product grid: 2 cols mobile, 3 cols sm, 4 cols lg */}
+          <div className="flex-1 overflow-y-auto pr-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
               {visible.map((item) => {
                 const isOutOfStock = item.stock === 0;
                 return (
                   <button key={item.id} onClick={() => addToCart(item)}
                     disabled={isOutOfStock}
+                    className="flex flex-col overflow-hidden rounded-xl text-left transition-all cursor-pointer"
                     style={{
-                      background: '#111827', border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: '10px', padding: 0, cursor: isOutOfStock ? 'not-allowed' : 'pointer',
-                      overflow: 'hidden', textAlign: 'left', transition: 'all 0.2s',
-                      display: 'flex', flexDirection: 'column',
+                      background: '#111827',
+                      border: '1px solid rgba(255,255,255,0.08)',
                       opacity: isOutOfStock ? 0.45 : 1,
+                      cursor: isOutOfStock ? 'not-allowed' : 'pointer',
                     }}
-                    onMouseEnter={(e) => { 
+                    onMouseEnter={(e) => {
                       if (!isOutOfStock) {
-                        e.currentTarget.style.borderColor = '#c5a880'; 
-                        e.currentTarget.style.transform = 'translateY(-2px)'; 
+                        e.currentTarget.style.borderColor = '#c5a880';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
                       }
                     }}
-                    onMouseLeave={(e) => { 
+                    onMouseLeave={(e) => {
                       if (!isOutOfStock) {
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)'; 
-                        e.currentTarget.style.transform = 'none'; 
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                        e.currentTarget.style.transform = 'none';
                       }
                     }}
                   >
                     <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: '#1e293b' }}>
-                      <Image src={item.image} alt={item.name} fill sizes="180px" style={{ objectFit: 'cover' }} />
+                      <Image src={item.image} alt={item.name} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" style={{ objectFit: 'cover' }} />
                       {item.kind === 'gift-set' && (
-                        <span style={{ position: 'absolute', top: 6, left: 6, background: '#c5a880', color: '#0a0a0b', fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.05em' }}>GIFT SET</span>
+                        <span className="absolute top-1 left-1 bg-[#c5a880] text-[#0a0a0b] text-[0.5rem] md:text-[0.55rem] font-bold px-1.5 py-0.5 rounded tracking-wider">GIFT</span>
                       )}
                       {item.stock !== undefined && (
-                        <span style={{ 
-                          position: 'absolute', 
-                          top: 6, 
-                          right: 6, 
-                          background: isOutOfStock ? '#ef4444' : 'rgba(15, 23, 42, 0.85)', 
-                          color: '#e2e8f0', 
-                          fontSize: '0.6rem', 
-                          fontWeight: 700, 
-                          padding: '2px 6px', 
-                          borderRadius: '4px' 
-                        }}>
-                          {isOutOfStock ? 'OUT OF STOCK' : `Stock: ${item.stock}`}
+                        <span
+                          className="absolute top-1 right-1 text-[0.5rem] md:text-[0.55rem] font-bold px-1.5 py-0.5 rounded"
+                          style={{
+                            background: isOutOfStock ? '#ef4444' : 'rgba(15, 23, 42, 0.85)',
+                            color: '#e2e8f0',
+                          }}
+                        >
+                          {isOutOfStock ? 'OUT' : `${item.stock}`}
                         </span>
                       )}
                     </div>
-                    <div style={{ padding: '0.55rem 0.65rem' }}>
-                      <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</p>
-                      <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', fontWeight: 700, color: '#c5a880', fontFamily: 'var(--font-heading)' }}>{formatEGP(item.price)}</p>
+                    <div className="px-2 md:px-2.5 py-1.5 md:py-2">
+                      <p className="m-0 text-[0.65rem] md:text-xs font-semibold text-[#e2e8f0] truncate">{item.name}</p>
+                      <p className="m-0 pt-0.5 text-xs md:text-sm font-bold text-[#c5a880] font-heading">{formatEGP(item.price)}</p>
                     </div>
                   </button>
                 );
               })}
               {visible.length === 0 && (
-                <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem 0', color: '#475569' }}>No items found.</p>
+                <p className="col-span-full text-center py-8 md:py-12 text-[#475569] text-xs md:text-sm">No items found.</p>
               )}
             </div>
           </div>
         </div>
 
-        {/* ─── RIGHT: Cart / Receipt ─── */}
-        <div style={{
-          width: 340, flexShrink: 0, display: 'flex', flexDirection: 'column',
-          background: '#111827', border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '12px', overflow: 'hidden',
-        }}>
-          {/* Cart header */}
-          <div style={{ padding: '0.85rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.85rem', fontWeight: 600, color: '#e2e8f0', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              Current Sale
-            </span>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{cart.length} items</span>
-          </div>
+        {/* ─── RIGHT: Cart / Receipt (desktop sidebar / mobile bottom drawer) ─── */}
 
-          {/* Cart lines */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0.75rem' }}>
-            {cart.length === 0 && (
-              <p style={{ textAlign: 'center', color: '#475569', padding: '3rem 0', fontSize: '0.85rem' }}>
-                Tap a product to add it
-              </p>
-            )}
-            {cart.map((line) => (
-              <div key={line.item.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.55rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ width: 40, height: 40, borderRadius: 6, overflow: 'hidden', flexShrink: 0, position: 'relative', background: '#1e293b' }}>
-                  <Image src={line.item.image} alt="" fill sizes="40px" style={{ objectFit: 'cover' }} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{line.item.name}</p>
-                  <p style={{ margin: 0, fontSize: '0.72rem', color: '#94a3b8' }}>{formatEGP(line.item.price)}</p>
-                </div>
-                {/* Qty controls */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <button onClick={() => updateQty(line.item.id, -1)} style={qtyBtnStyle}><FaMinus style={{ fontSize: '0.55rem' }} /></button>
-                  <span style={{ minWidth: 22, textAlign: 'center', fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>{line.qty}</span>
-                  <button onClick={() => updateQty(line.item.id, 1)} style={qtyBtnStyle}><FaPlus style={{ fontSize: '0.55rem' }} /></button>
-                </div>
-                <span style={{ width: 70, textAlign: 'right', fontSize: '0.78rem', fontWeight: 700, color: '#c5a880', fontFamily: 'var(--font-heading)' }}>
-                  {formatEGP(line.item.price * line.qty)}
-                </span>
-                <button onClick={() => removeFromCart(line.item.id)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: 4, transition: 'color 0.2s' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#475569'; }}
-                ><FaTrash style={{ fontSize: '0.7rem' }} /></button>
-              </div>
-            ))}
-          </div>
-
-          {/* Totals + checkout */}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem 1rem', flexShrink: 0, background: '#0f172a' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#94a3b8', marginBottom: 4 }}>
-              <span>Subtotal</span><span style={{ color: '#e2e8f0', fontWeight: 600 }}>{formatEGP(subtotal)}</span>
-            </div>
-            {/* Discount */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <label style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>Discount (EGP)</label>
-              <input value={discount} onChange={(e) => setDiscount(e.target.value)} type="number" min="0" step="1"
-                style={{ flex: 1, padding: '0.3rem 0.5rem', borderRadius: 4, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.04)', color: '#e2e8f0', fontSize: '0.8rem', outline: 'none', width: '100%' }}
-              />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-heading)', padding: '0.4rem 0 0.6rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <span>Grand Total</span><span style={{ color: '#c5a880' }}>{formatEGP(grandTotal)}</span>
-            </div>
-            <button disabled={cart.length === 0} onClick={() => { setShowCheckout(true); setOrderSuccess(null); }}
-              style={{
-                width: '100%', padding: '0.7rem', borderRadius: 8, border: 'none',
-                background: cart.length > 0 ? 'linear-gradient(135deg, #c5a880, #9a7b56)' : '#1e293b',
-                color: cart.length > 0 ? '#0a0a0b' : '#475569', fontFamily: 'var(--font-heading)',
-                fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em',
-                cursor: cart.length > 0 ? 'pointer' : 'not-allowed',
-                transition: 'all 0.25s', textTransform: 'uppercase',
-              }}
-            >
-              Checkout / تأكيد البيع
-            </button>
-          </div>
+        {/* Desktop cart panel */}
+        <div className="hidden md:flex flex-col w-80 lg:w-88 flex-shrink-0 bg-[#111827] border border-white/10 rounded-xl overflow-hidden">
+          <CartPanel
+            cart={cart}
+            subtotal={subtotal}
+            discount={discount}
+            setDiscount={setDiscount}
+            grandTotal={grandTotal}
+            discountAmt={discountAmt}
+            qtyBtnStyle={qtyBtnStyle}
+            updateQty={updateQty}
+            removeFromCart={removeFromCart}
+            onCheckout={() => { setShowCheckout(true); setOrderSuccess(null); }}
+          />
         </div>
+      </div>
+
+      {/* ── Mobile cart bottom bar (always visible when cart has items) ── */}
+      <div className="md:hidden flex-shrink-0">
+        {/* Floating cart summary bar */}
+        <button
+          onClick={() => setMobileCartOpen(!mobileCartOpen)}
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-[#111827] border-t border-white/10"
+        >
+          <div className="flex items-center gap-2">
+            <span className="font-heading text-xs text-[#94a3b8] uppercase tracking-wider">Cart</span>
+            <span className="text-xs text-[#64748b]">({cart.length})</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="font-heading text-sm font-bold text-[#c5a880]">{formatEGP(grandTotal)}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`h-4 w-4 text-[#64748b] transition-transform ${mobileCartOpen ? 'rotate-180' : ''}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </button>
+
+        {/* Expandable cart panel on mobile */}
+        {mobileCartOpen && (
+          <div className="max-h-[50vh] overflow-y-auto bg-[#111827] border-t border-white/5 px-2 py-2">
+            <CartPanel
+              cart={cart}
+              subtotal={subtotal}
+              discount={discount}
+              setDiscount={setDiscount}
+              grandTotal={grandTotal}
+              discountAmt={discountAmt}
+              qtyBtnStyle={qtyBtnStyle}
+              updateQty={updateQty}
+              removeFromCart={removeFromCart}
+              onCheckout={() => { setShowCheckout(true); setOrderSuccess(null); }}
+            />
+          </div>
+        )}
       </div>
 
       {/* ── Shift Password Modal ── */}
@@ -1040,6 +1045,93 @@ export default function CashierPage() {
         </div>
       )}
     </div>
+  );
+}
+
+/* ── Shared Cart Panel Component (used in both desktop sidebar & mobile drawer) ── */
+function CartPanel({ cart, subtotal, discount, setDiscount, grandTotal, discountAmt, qtyBtnStyle, updateQty, removeFromCart, onCheckout }: {
+  cart: CartLine[];
+  subtotal: number;
+  discount: string;
+  setDiscount: (v: string) => void;
+  grandTotal: number;
+  discountAmt: number;
+  qtyBtnStyle: React.CSSProperties;
+  updateQty: (id: string, delta: number) => void;
+  removeFromCart: (id: string) => void;
+  onCheckout: () => void;
+}) {
+  return (
+    <>
+      {/* Cart header */}
+      <div style={{ padding: '0.85rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.85rem', fontWeight: 600, color: '#e2e8f0', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          Current Sale
+        </span>
+        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{cart.length} items</span>
+      </div>
+
+      {/* Cart lines */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0.75rem', minHeight: cart.length === 0 ? 0 : 'auto' }}>
+        {cart.length === 0 && (
+          <p style={{ textAlign: 'center', color: '#475569', padding: '2rem 0', fontSize: '0.8rem' }}>
+            Tap a product to add it
+          </p>
+        )}
+        {cart.map((line) => (
+          <div key={line.item.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ width: 36, height: 36, borderRadius: 6, overflow: 'hidden', flexShrink: 0, position: 'relative', background: '#1e293b' }}>
+              <Image src={line.item.image} alt="" fill sizes="36px" style={{ objectFit: 'cover' }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: '0.72rem', fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{line.item.name}</p>
+              <p style={{ margin: 0, fontSize: '0.65rem', color: '#94a3b8' }}>{formatEGP(line.item.price)}</p>
+            </div>
+            {/* Qty controls */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <button onClick={() => updateQty(line.item.id, -1)} style={qtyBtnStyle}><FaMinus style={{ fontSize: '0.5rem' }} /></button>
+              <span style={{ minWidth: 20, textAlign: 'center', fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>{line.qty}</span>
+              <button onClick={() => updateQty(line.item.id, 1)} style={qtyBtnStyle}><FaPlus style={{ fontSize: '0.5rem' }} /></button>
+            </div>
+            <span style={{ width: 65, textAlign: 'right', fontSize: '0.72rem', fontWeight: 700, color: '#c5a880', fontFamily: 'var(--font-heading)' }}>
+              {formatEGP(line.item.price * line.qty)}
+            </span>
+            <button onClick={() => removeFromCart(line.item.id)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: 2, transition: 'color 0.2s' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#475569'; }}
+            ><FaTrash style={{ fontSize: '0.65rem' }} /></button>
+          </div>
+        ))}
+      </div>
+
+      {/* Totals + checkout */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '0.65rem 1rem', flexShrink: 0, background: '#0f172a' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginBottom: 3 }}>
+          <span>Subtotal</span><span style={{ color: '#e2e8f0', fontWeight: 600 }}>{formatEGP(subtotal)}</span>
+        </div>
+        {/* Discount */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+          <label style={{ fontSize: '0.7rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>Discount</label>
+          <input value={discount} onChange={(e) => setDiscount(e.target.value)} type="number" min="0" step="1"
+            style={{ flex: 1, padding: '0.25rem 0.4rem', borderRadius: 4, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.04)', color: '#e2e8f0', fontSize: '0.75rem', outline: 'none', width: '100%' }}
+          />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-heading)', padding: '0.3rem 0 0.5rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <span>Grand Total</span><span style={{ color: '#c5a880' }}>{formatEGP(grandTotal)}</span>
+        </div>
+        <button disabled={cart.length === 0} onClick={onCheckout}
+          style={{
+            width: '100%', padding: '0.6rem', borderRadius: 8, border: 'none',
+            background: cart.length > 0 ? 'linear-gradient(135deg, #c5a880, #9a7b56)' : '#1e293b',
+            color: cart.length > 0 ? '#0a0a0b' : '#475569', fontFamily: 'var(--font-heading)',
+            fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.08em',
+            cursor: cart.length > 0 ? 'pointer' : 'not-allowed',
+          }}
+        >
+          Checkout / تأكيد البيع
+        </button>
+      </div>
+    </>
   );
 }
 
