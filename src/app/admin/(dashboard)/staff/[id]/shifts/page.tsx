@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { FaArrowLeft, FaSpinner, FaBan, FaCalendarAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaSpinner, FaBan, FaCalendarAlt, FaListAlt } from 'react-icons/fa';
 import styles from '../../../admin.module.css';
 
 interface ShiftRecord {
@@ -134,6 +134,7 @@ export default function StaffShiftsPage() {
                   <th style={{ textAlign: 'right' }}>Expected Total</th>
                   <th style={{ textAlign: 'right' }}>Actual Amount</th>
                   <th style={{ textAlign: 'right' }}>Discrepancy</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -202,6 +203,32 @@ export default function StaffShiftsPage() {
                         whiteSpace: 'nowrap',
                       }}>
                         {discrepancy >= 0 ? '+' : ''}{discrepancy.toFixed(2)}
+                      </td>
+                      <td>
+                        <Link
+                          href={`/admin/staff/${staffId}/shifts/${shift.id}/orders`}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                            padding: '0.35rem 0.7rem', borderRadius: '6px',
+                            background: 'transparent',
+                            border: '1px solid rgba(197,168,128,0.4)',
+                            color: '#c5a880', fontSize: '0.75rem', fontWeight: 600,
+                            textDecoration: 'none', transition: 'all 0.2s',
+                            fontFamily: 'var(--font-heading)',
+                            letterSpacing: '0.04em', whiteSpace: 'nowrap',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(197,168,128,0.1)';
+                            e.currentTarget.style.borderColor = '#c5a880';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.borderColor = 'rgba(197,168,128,0.4)';
+                          }}
+                        >
+                          <FaListAlt style={{ fontSize: '0.7rem' }} />
+                          عرض الطلبات
+                        </Link>
                       </td>
                     </tr>
                   );

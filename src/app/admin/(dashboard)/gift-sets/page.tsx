@@ -15,6 +15,7 @@ interface GiftSet {
   image: string;
   productIds: string[];
   createdAt: string;
+  stock?: number;
 }
 
 export default function AdminGiftSetsPage() {
@@ -23,7 +24,7 @@ export default function AdminGiftSetsPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<GiftSet | null>(null);
-  const [form, setForm] = useState<{ name: string; description: string; price: string; image: string; productIds: string[] }>({ name: '', description: '', price: '', image: '', productIds: [] });
+  const [form, setForm] = useState<{ name: string; description: string; price: string; image: string; productIds: string[]; stock: string }>({ name: '', description: '', price: '', image: '', productIds: [], stock: '' });
   const [isUploading, setIsUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -36,14 +37,14 @@ export default function AdminGiftSetsPage() {
 
   function openAdd() {
     setEditing(null);
-    setForm({ name: '', description: '', price: '', image: '', productIds: [] });
+    setForm({ name: '', description: '', price: '', image: '', productIds: [], stock: '' });
     setImagePreview(null);
     setModalOpen(true);
   }
 
   function openEdit(gs: GiftSet) {
     setEditing(gs);
-    setForm({ name: gs.name, description: gs.description, price: String(gs.price), image: gs.image, productIds: [...gs.productIds] });
+    setForm({ name: gs.name, description: gs.description, price: String(gs.price), image: gs.image, productIds: [...gs.productIds], stock: gs.stock !== undefined ? String(gs.stock) : '' });
     setImagePreview(null);
     setModalOpen(true);
   }
@@ -60,7 +61,7 @@ export default function AdminGiftSetsPage() {
   async function handleSave() {
     const url = '/api/admin/gift-sets';
     const method = editing ? 'PUT' : 'POST';
-    const body = editing ? { ...form, id: editing.id, price: form.price } : form;
+    const body = editing ? { ...form, id: editing.id, price: form.price, stock: form.stock !== '' ? parseInt(form.stock, 10) : 0 } : { ...form, price: form.price, stock: form.stock !== '' ? parseInt(form.stock, 10) : 0 };
     const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const data = await res.json();
     if (data.success) {
@@ -181,6 +182,10 @@ export default function AdminGiftSetsPage() {
                 <div className={styles.formGroup}>
                   <label>Price (EGP)</label>
                   <input type="number" value={form.price} onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))} step="0.01" required />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Stock Quantity / عدد المجموعات في المخزن</label>
+                  <input type="number" value={form.stock} onChange={(e) => setForm((p) => ({ ...p, stock: e.target.value }))} min="0" placeholder="e.g. 50" />
                 </div>
                 <div className={styles.formGroup}>
                   <label>Image</label>

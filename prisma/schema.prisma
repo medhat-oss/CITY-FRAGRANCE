@@ -24,6 +24,7 @@ model Order {
   source         String   @default("WEB")
   cashierId      String?
   shiftId        String?
+  shift          Shift?   @relation(fields: [shiftId], references: [id])
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -43,6 +44,7 @@ model Shift {
   expectedTotal     Float?
   discrepancy       Float?
   orderCount        Int      @default(0)
+  orders            Order[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

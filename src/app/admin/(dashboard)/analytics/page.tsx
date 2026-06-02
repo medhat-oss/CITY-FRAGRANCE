@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { formatEGP } from '@/utils/currency';
 import styles from '../admin.module.css';
@@ -8,6 +9,7 @@ import {
   FaChartLine, FaShoppingCart, FaCashRegister, FaGlobe,
   FaBoxes, FaTrophy, FaExclamationTriangle, FaSpinner,
   FaMoneyBillWave, FaReceipt, FaLayerGroup,
+  FaTrashAlt, FaTimes,
 } from 'react-icons/fa';
 
 interface Metrics {
@@ -25,6 +27,7 @@ interface CollPerf { name: string; productCount: number; estimatedSales: number;
 interface LowStock { id: string; name: string; image: string; stock: number; kind: string; }
 
 export default function AnalyticsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
@@ -33,6 +36,9 @@ export default function AnalyticsPage() {
   const [lowStock, setLowStock] = useState<LowStock[]>([]);
   const [payBreakdown, setPayBreakdown] = useState<Record<string, { count: number; revenue: number }>>({});
   const [monthlyRev, setMonthlyRev] = useState<Record<string, number>>({});
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [resetSubmitting, setResetSubmitting] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/analytics')
@@ -51,6 +57,25 @@ export default function AnalyticsPage() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  async function handleResetSales() {
+    if (resetConfirmText !== 'RESET') return;
+    setResetSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/reset-sales', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setResetModalOpen(false);
+        setResetConfirmText('');
+        router.refresh();
+      } else {
+        alert(data.error || 'Reset failed.');
+      }
+    } catch {
+      alert('Network error. Please try again.');
+    }
+    setResetSubmitting(false);
+  }
 
   if (loading) {
     return (
@@ -71,11 +96,29 @@ export default function AnalyticsPage() {
   return (
     <div>
       {/* Page Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem' }}>
-        <FaChartLine style={{ color: '#a78bfa', fontSize: '1.3rem' }} />
-        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
-          Analytics & Inventory <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 400 }}>/ الأرباح والمخازن</span>
-        </h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <FaChartLine style={{ color: '#a78bfa', fontSize: '1.3rem' }} />
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
+            Analytics & Inventory <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 400 }}>/ الأرباح والمخازن</span>
+          </h2>
+        </div>
+        <button
+          onClick={() => { setResetModalOpen(true); setResetConfirmText(''); }}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.45rem',
+            padding: '0.45rem 0.9rem', borderRadius: 8,
+            background: 'transparent', border: '1px solid rgba(239,68,68,0.3)',
+            color: '#f87171', fontSize: '0.78rem', fontWeight: 600,
+            fontFamily: 'var(--font-heading)', letterSpacing: '0.04em',
+            cursor: 'pointer', transition: 'all 0.2s',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.6)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)'; }}
+        >
+          <FaTrashAlt style={{ fontSize: '0.7rem' }} />
+          Reset Data / إعادة تعيين
+        </button>
       </div>
 
       {/* ═══ METRIC CARDS ═══ */}
@@ -278,6 +321,95 @@ export default function AnalyticsPage() {
           </table>
         </div>
       </div>
+
+      {/* ═══ Reset Confirmation Modal ═══ */}
+      {resetModalOpen && (
+        <div
+          onClick={() => { if (!resetSubmitting) { setResetModalOpen(false); setResetConfirmText(''); } }}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+            zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            animation: 'fadeIn 0.2s ease',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#0a0a0b', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 14,
+              width: '90%', maxWidth: 420, padding: '2rem',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.6)', textAlign: 'center',
+            }}
+          >
+            <FaExclamationTriangle style={{ color: '#ef4444', fontSize: '2rem', marginBottom: '0.75rem' }} />
+            <h3 style={{
+              fontFamily: 'var(--font-heading)', fontSize: '1.05rem', fontWeight: 600,
+              color: '#f8f9fa', margin: '0 0 0.5rem',
+            }}>
+              هل أنت متأكد من إعادة تعيين كافة المبيعات؟
+            </h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.82rem', margin: '0 0 0.25rem', lineHeight: 1.5 }}>
+              This will permanently clear all POS and Online revenue, order records, and shift summaries.
+            </p>
+            <p style={{ color: '#f87171', fontSize: '0.78rem', margin: '0 0 1.25rem' }}>
+              This action cannot be undone.
+            </p>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '0.4rem', fontWeight: 600 }}>
+                Type <span style={{ color: '#ef4444', fontFamily: 'monospace', fontWeight: 700 }}>RESET</span> to confirm
+              </label>
+              <input
+                type="text"
+                value={resetConfirmText}
+                onChange={(e) => setResetConfirmText(e.target.value)}
+                placeholder="RESET"
+                disabled={resetSubmitting}
+                autoFocus
+                style={{
+                  width: '100%', padding: '0.7rem 0.9rem', borderRadius: 6, boxSizing: 'border-box',
+                  border: '1px solid rgba(239,68,68,0.3)',
+                  background: 'rgba(239,68,68,0.04)',
+                  color: '#e2e8f0', fontSize: '0.95rem', outline: 'none', textAlign: 'center',
+                  fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.15em',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.65rem' }}>
+              <button
+                onClick={() => { setResetModalOpen(false); setResetConfirmText(''); }}
+                disabled={resetSubmitting}
+                style={{
+                  flex: 1, padding: '0.65rem', borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'transparent', color: '#94a3b8', fontWeight: 600, fontSize: '0.82rem',
+                  cursor: 'pointer', fontFamily: 'var(--font-heading)', letterSpacing: '0.06em',
+                }}
+              >
+                Cancel / إلغاء
+              </button>
+              <button
+                onClick={handleResetSales}
+                disabled={resetConfirmText !== 'RESET' || resetSubmitting}
+                style={{
+                  flex: 1, padding: '0.65rem', borderRadius: 8, border: 'none',
+                  background: resetConfirmText === 'RESET' && !resetSubmitting
+                    ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+                    : '#1e293b',
+                  color: resetConfirmText === 'RESET' && !resetSubmitting ? '#fff' : '#475569',
+                  fontWeight: 700, fontSize: '0.82rem',
+                  cursor: resetConfirmText === 'RESET' && !resetSubmitting ? 'pointer' : 'not-allowed',
+                  fontFamily: 'var(--font-heading)', letterSpacing: '0.06em',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                }}
+              >
+                {resetSubmitting ? <FaSpinner className={styles.spinIcon} style={{ fontSize: '0.9rem' }} />
+                  : <FaTrashAlt style={{ fontSize: '0.75rem' }} />}
+                <span>Confirm / تأكيد</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

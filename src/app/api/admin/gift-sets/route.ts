@@ -13,6 +13,7 @@ interface GiftSet {
   image: string;
   productIds: string[];
   createdAt: string;
+  stock?: number;
 }
 
 export async function GET() {
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
       price: parseFloat(body.price) || 0,
       image: body.image || '',
       productIds: body.productIds || [],
+      stock: typeof body.stock === 'number' ? body.stock : parseInt(body.stock) || 0,
       createdAt: new Date().toISOString(),
     };
     const data = await readJsonFile<GiftSet[]>(FILE, []);
