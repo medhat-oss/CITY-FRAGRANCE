@@ -45,8 +45,10 @@ function statusBadge(status: string) {
   );
 }
 
-export default async function ShiftOrdersPage({ params }: PageProps) {
-  const { id: staffId, shiftId } = await params;
+export default async function ShiftOrdersPage(props: PageProps) {
+  const resolvedParams = await props.params;
+  const staffId = resolvedParams.id;
+  const shiftId = resolvedParams.shiftId;
 
   const shift = await prisma.shift.findUnique({
     where: { id: shiftId },
@@ -71,10 +73,11 @@ export default async function ShiftOrdersPage({ params }: PageProps) {
       <div className="flex items-center justify-center min-h-[60vh]" style={{ background: '#0a0a0b', color: '#94a3b8' }}>
         <div className="text-center">
           <FaReceipt style={{ fontSize: '2.5rem', color: '#64748b', marginBottom: '1rem' }} />
-          <p style={{ fontSize: '1rem' }}>Shift not found.</p>
+          <p style={{ fontSize: '1rem', color: '#f87171', fontWeight: 600 }}>الشيفت أو بيانات الموظف غير موجودة</p>
+          <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>This shift record could not be found or was deleted.</p>
           <Link
             href={`/admin/staff/${staffId}/shifts`}
-            style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '0.85rem', marginTop: '0.75rem', display: 'inline-block' }}
+            style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '0.85rem', marginTop: '1rem', display: 'inline-block' }}
           >
             ← Back to Shift History
           </Link>
