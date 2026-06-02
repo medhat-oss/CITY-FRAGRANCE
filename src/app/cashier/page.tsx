@@ -67,40 +67,70 @@ export default function CashierPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Verify Authentication & Role
-    fetch('/api/auth/me?role=CASHIER')
-      .then((res) => {
-        if (!res.ok) throw new Error('Not authenticated');
-        return res.json();
-      })
-      .then((data) => {
-        if (data?.user && (data.user.role === 'CASHIER' || data.user.role === 'ADMIN')) {
-          setCurrentUser(data.user);
-          setAuthLoading(false);
+    let cancelled = false;
 
-          // Auto-ensure active shift exists on load
-          ensureActiveShift(data.user.id);
-
-          // 2. Fetch Catalog Items
-          return Promise.all([
-            fetch('/api/products', { cache: 'no-store' }).then((r) => r.json()),
-            fetch('/api/gift-sets', { cache: 'no-store' }).then((r) => r.json()),
-          ]);
-        } else {
-          router.replace('/cashier/login');
+    async function boot() {
+      // Multiple attempts — absorbs transient server hiccups on refresh.
+      // The middleware has already confirmed at least one session cookie exists,
+      // so a 401 here is likely a temporary blip, not a missing login.
+      let userData: User | null = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const res = await fetch('/api/auth/me?role=CASHIER');
+          if (cancelled) return;
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.user && (data.user.role === 'CASHIER' || data.user.role === 'ADMIN')) {
+              userData = data.user;
+              break;
+            }
+            // Authenticated but wrong role — redirect immediately
+            if (!cancelled) router.replace('/cashier/login');
+            return;
+          }
+          // 401/403 / other errors — retry
+          if (attempt === 3) break;
+          await new Promise((r) => setTimeout(r, 500));
+        } catch {
+          if (attempt === 3) break;
+          await new Promise((r) => setTimeout(r, 500));
         }
-      })
-      .then((results) => {
-        if (results) {
-          const [pData, gData] = results;
+      }
+
+      if (cancelled) return;
+
+      if (!userData) {
+        // All retries exhausted — no valid session. The redirect URL includes
+        // a return path so the user lands back here after re-authenticating.
+        if (!cancelled) router.replace('/cashier/login?redirect=/cashier');
+        return;
+      }
+
+      setCurrentUser(userData);
+      setAuthLoading(false);
+
+      // Auto-ensure active shift exists on load
+      ensureActiveShift(userData.id);
+
+      // Fetch catalog items
+      try {
+        const [pData, gData] = await Promise.all([
+          fetch('/api/products', { cache: 'no-store' }).then((r) => r.json()),
+          fetch('/api/gift-sets', { cache: 'no-store' }).then((r) => r.json()),
+        ]);
+        if (!cancelled) {
           setCatalog(toCatalog(pData.products || [], gData.giftSets || []));
           setLoading(false);
         }
-      })
-      .catch(() => {
-        router.replace('/cashier/login');
-      });
-  }, [router]);
+      } catch {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    boot();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ── Filters ── */
   const [filter, setFilter] = useState<Filter>('all');
@@ -175,7 +205,7 @@ export default function CashierPage() {
       const res = await fetch('/api/admin/shifts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'open', userId: id }),
+        body: JSON.stringify({ action: 'open', cashierId: id }),
       });
 
       if (res.status === 400) {

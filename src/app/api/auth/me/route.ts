@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { verifySession, verifyCashierSession } from '@/lib/auth';
+import { verifySession, verifySessionForPOS } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const roleFilter = searchParams.get('role');
 
     const session = roleFilter === 'CASHIER'
-      ? await verifyCashierSession()
+      ? await verifySessionForPOS()
       : await verifySession();
 
     if (!session) {

@@ -18,6 +18,7 @@ const cookieOptions = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   path: '/',
+  maxAge: 8 * 60 * 60, // 8 hours — matches JWT expiry
 };
 
 export async function createSession(payload: SessionPayload): Promise<string> {

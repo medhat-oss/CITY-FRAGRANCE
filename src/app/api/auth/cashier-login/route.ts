@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { readJsonFile } from '@/lib/dataFile';
-import { createSession, setCashierCookie, ADMIN_COOKIE } from '@/lib/auth';
+import { createSession, setCashierCookie } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 interface User {
@@ -72,8 +72,6 @@ export async function POST(request: Request) {
       user: { id: user.id, email: user.email, username: user.username, role: user.role } 
     });
 
-    // Clear any stale admin_session so verifySession() does not prefer it
-    response.cookies.set(ADMIN_COOKIE, '', { maxAge: 0, path: '/' });
     setCashierCookie(response, token);
 
     return response;

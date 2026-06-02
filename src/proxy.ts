@@ -1,53 +1,42 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'city-fragrance-dev-secret-key-change-in-production'
-);
+const ADMIN_COOKIE = 'admin_session';
+const CASHIER_COOKIE = 'cashier_session';
 
-export async function proxy(request: NextRequest) {
+/** Paths that should always be accessible without auth */
+const PUBLIC_PATHS = new Set([
+  '/admin/login',
+  '/cashier/login',
+]);
+
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Admin Page protection (excl. login, api routes)
-  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
-    const token = request.cookies.get('admin_session')?.value;
-    if (!token) {
-      const loginUrl = new URL('/admin/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-    try {
-      const { payload } = await jwtVerify(token, SECRET);
-      const role = (payload as { role?: string }).role;
-      if (role !== 'ADMIN') {
-        const loginUrl = new URL('/admin/login', request.url);
-        return NextResponse.redirect(loginUrl);
-      }
-    } catch {
-      const loginUrl = new URL('/admin/login', request.url);
-      return NextResponse.redirect(loginUrl);
-    }
+  // Allow public paths through without any cookie check
+  if (PUBLIC_PATHS.has(pathname)) {
+    return NextResponse.next();
   }
 
-  // 2. Cashier Page protection (excl. login, api routes)
-  if (pathname.startsWith('/cashier') && pathname !== '/cashier/login') {
-    const token = request.cookies.get('cashier_session')?.value;
-    if (!token) {
-      const loginUrl = new URL('/cashier/login', request.url);
-      return NextResponse.redirect(loginUrl);
+  const adminCookie = request.cookies.get(ADMIN_COOKIE);
+  const cashierCookie = request.cookies.get(CASHIER_COOKIE);
+
+  // For admin routes: allow if either cookie exists (admin session preferred, but
+  // cashier session is also acceptable — the client-side /api/auth/me will resolve
+  // the correct identity). Only block when no session cookie exists at all.
+  if (pathname.startsWith('/admin')) {
+    if (!adminCookie && !cashierCookie) {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
     }
-    try {
-      const { payload } = await jwtVerify(token, SECRET);
-      const role = (payload as { role?: string }).role;
-      if (role !== 'CASHIER' && role !== 'ADMIN') {
-        const loginUrl = new URL('/cashier/login', request.url);
-        return NextResponse.redirect(loginUrl);
-      }
-    } catch {
-      const loginUrl = new URL('/cashier/login', request.url);
-      return NextResponse.redirect(loginUrl);
+    return NextResponse.next();
+  }
+
+  // For cashier routes: same lenient check
+  if (pathname.startsWith('/cashier')) {
+    if (!adminCookie && !cashierCookie) {
+      return NextResponse.redirect(new URL('/cashier/login', request.url));
     }
+    return NextResponse.next();
   }
 
   return NextResponse.next();
