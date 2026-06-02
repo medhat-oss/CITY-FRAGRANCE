@@ -1,17 +1,27 @@
 import { NextResponse } from 'next/server';
-import { verifySession } from '@/lib/auth';
+import { verifySession, verifyCashierSession } from '@/lib/auth';
 
-export async function GET() {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const roleFilter = searchParams.get('role');
+
+    const session = roleFilter === 'CASHIER'
+      ? await verifyCashierSession()
+      : await verifySession();
+
+    if (!session) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+    return NextResponse.json({
+      user: {
+        id: session.id,
+        email: session.email,
+        username: session.username,
+        role: session.role,
+      },
+    });
+  } catch (err) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-  return NextResponse.json({
-    user: {
-      id: session.id,
-      email: session.email,
-      username: session.username,
-      role: session.role,
-    },
-  });
 }

@@ -290,38 +290,55 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="flex items-center gap-4 mb-4">
               <div className="flex items-center border-2 border-gray-200 dark:border-slate-700 rounded-sm overflow-hidden">
                 <button
+                  disabled={product.stock === 0}
                   onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="w-11 h-11 flex items-center justify-center bg-transparent dark:bg-slate-800 border-none cursor-pointer text-ink-light dark:text-slate-200 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
+                  className="w-11 h-11 flex items-center justify-center bg-transparent dark:bg-slate-800 border-none cursor-pointer text-ink-light dark:text-slate-200 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
                   aria-label="Decrease quantity"
                 >
                   <HiMinus />
                 </button>
                 <span className="w-12 text-center font-heading text-base font-medium text-navy dark:text-white border-x-2 border-gray-200 dark:border-slate-700 leading-[44px]">
-                  {quantity}
+                  {product.stock === 0 ? 0 : quantity}
                 </span>
                 <button
+                  disabled={product.stock === 0 || (product.stock !== undefined && quantity >= product.stock)}
                   onClick={() => setQuantity((prev) => prev + 1)}
-                  className="w-11 h-11 flex items-center justify-center bg-transparent dark:bg-slate-800 border-none cursor-pointer text-ink-light dark:text-slate-200 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
+                  className="w-11 h-11 flex items-center justify-center bg-transparent dark:bg-slate-800 border-none cursor-pointer text-ink-light dark:text-slate-200 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
                   aria-label="Increase quantity"
                 >
                   <HiPlus />
                 </button>
               </div>
+              {product.stock !== undefined && product.stock > 0 && product.stock < 10 && (
+                <span className="text-xs text-amber-500 font-semibold uppercase tracking-wider">
+                  Only {product.stock} items left in stock / المتبقي {product.stock} فقط
+                </span>
+              )}
             </div>
 
             {/* Action Buttons */}
             <button
+              disabled={product.stock === 0}
               onClick={() => { addToCart(product, quantity); openCart(); }}
-              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB] mb-3"
+              className={`w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out mb-3 ${
+                product.stock === 0
+                  ? 'border-gray-700 bg-gray-800 text-gray-400 cursor-not-allowed opacity-50'
+                  : 'border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer hover:bg-[#E5E7EB] hover:text-[#09142E] hover:border-[#E5E7EB]'
+              }`}
             >
-              <HiShoppingBag className="mr-2.5" /> Add to Cart
+              <HiShoppingBag className="mr-2.5" /> {product.stock === 0 ? 'Out of Stock / نفد من المخزن' : 'Add to Cart'}
             </button>
 
             <button
+              disabled={product.stock === 0}
               onClick={() => { buyNow(product, quantity); router.push('/order-payment'); }}
-              className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB]"
+              className={`w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out ${
+                product.stock === 0
+                  ? 'border-gray-700 bg-gray-800 text-gray-400 cursor-not-allowed opacity-50'
+                  : 'border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer hover:bg-[#E5E7EB] hover:text-[#09142E] hover:border-[#E5E7EB]'
+              }`}
             >
-              <HiBolt className="mr-2.5" /> Buy It Now
+              <HiBolt className="mr-2.5" /> {product.stock === 0 ? 'Out of Stock / نفد من المخزن' : 'Buy It Now'}
             </button>
           </div>
         </div>

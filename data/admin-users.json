@@ -7,6 +7,24 @@
       "password": "$2b$10$wQ5Dt1fYLA8X4MtiP0Ccc.oJ/Frj37TKgBCBLxjC7woPiAUHLUQC.",
       "role": "ADMIN",
       "createdAt": "2026-05-24T19:44:10.803Z"
+    },
+    {
+      "id": "staff_1780212310549",
+      "email": "ramy@gmail.com",
+      "username": "ramy",
+      "password": "$2b$10$gPcnDDsO.7ojrKGzohv6B.smusdtbLD2aI6QehSj0GHcP202DD/t2",
+      "role": "CASHIER",
+      "createdAt": "2026-05-31T07:25:10.549Z",
+      "shiftPassword": "123456"
+    },
+    {
+      "id": "staff_1780212355697",
+      "email": "cashier1@cityfragrance.com",
+      "username": "cashier1",
+      "password": "$2b$10$wQ5Dt1fYLA8X4MtiP0Ccc.oJ/Frj37TKgBCBLxjC7woPiAUHLUQC.",
+      "role": "CASHIER",
+      "createdAt": "2026-05-31T07:25:55.697Z",
+      "shiftPassword": "123456"
     }
   ]
 }

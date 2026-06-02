@@ -175,6 +175,7 @@ async function main() {
           status: o.status || 'Pending',
           date: o.date || new Date().toLocaleDateString('en-CA'),
           paymentMethod: o.paymentMethod || null,
+          source: o.source || 'WEB',
         },
       });
       console.log(`  Order: ${o.orderId}`);

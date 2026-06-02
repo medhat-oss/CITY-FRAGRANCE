@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatEGP } from '@/utils/currency';
 import type { Order } from '@/types';
@@ -18,25 +18,97 @@ const STATUS_COLORS: Record<string, string> = {
   'Cancelled': 'bg-red-100 text-red-800',
 };
 
+function playWebAudioChime() {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const playTone = (freq: number, startTime: number, duration: number, vol = 0.25) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(vol, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    };
+    const now = ctx.currentTime;
+    playTone(1046.50, now, 0.4, 0.3); // C6
+    playTone(1567.98, now + 0.08, 0.4, 0.25); // G6
+    playTone(2093.00, now + 0.16, 0.6, 0.2); // C7
+  } catch (e) {
+    console.error('Web Audio chime error:', e);
+  }
+}
+
+function playChime() {
+  try {
+    // Try to play using standard Audio element first (e.g. clean royalty-free chime)
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav');
+    audio.volume = 0.4;
+    audio.play().catch(() => {
+      // Fallback to Web Audio API if browser blocks external source or it fails
+      playWebAudioChime();
+    });
+  } catch {
+    playWebAudioChime();
+  }
+}
+
 export default function AdminOrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [latestOrder, setLatestOrder] = useState<Order | null>(null);
+  const [showAlert, setShowAlert] = useState(false);
+  // Tracks the orderId at position [0] from the PREVIOUS successful fetch.
+  // Using orderId (string) is deterministic — no timezone or date-parse ambiguity.
+  const lastTopOrderIdRef = useRef<string | null>(null);
 
-  const fetchOrders = useCallback(() => {
+  const fetchOrders = useCallback((isPolling = false) => {
     fetch('/api/admin/orders')
       .then((res) => res.json())
       .then((data) => {
-        setOrders(data.orders || []);
+        const ordersData = data?.orders;
+        const fetchedOrders: Order[] = Array.isArray(ordersData) ? ordersData : [];
+        setOrders(fetchedOrders);
         setLoading(false);
+
+        if (!fetchedOrders.length) return;
+
+        const topOrder = fetchedOrders[0];
+        if (!topOrder?.orderId) return;
+
+        const topId = topOrder.orderId;
+        const prevTopId = lastTopOrderIdRef.current;
+
+        // Only fire the alert after the initial load AND when the top order truly changed
+        if (isPolling && prevTopId !== null && topId !== prevTopId) {
+          setLatestOrder(topOrder);
+          setShowAlert(true);
+          playChime();
+        }
+
+        // Always advance the cursor to the current top
+        lastTopOrderIdRef.current = topId;
       })
       .catch(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     fetchOrders();
+  }, [fetchOrders]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrders(true);
+    }, 15000);
+    return () => clearInterval(interval);
   }, [fetchOrders]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
@@ -123,17 +195,39 @@ export default function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
-                <tr
-                  key={order.orderId}
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', transition: 'background 0.2s' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = '')}
-                >
-                  <Td>{order.orderId}</Td>
-                  <Td>{order.customerName}</Td>
-                  <Td><span dir="ltr">{order.phoneNumber}</span></Td>
-                  <Td>{order.governorate || '\u2014'}</Td>
+              {orders.map((order) => {
+                const isNew = order.status && order.status.toLowerCase() === 'pending';
+                return (
+                  <tr
+                    key={order.orderId}
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', transition: 'background 0.2s' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = '')}
+                  >
+                    <Td>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {isNew && (
+                          <span
+                            className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse mr-2 inline-block"
+                            style={{
+                              width: '10px',
+                              height: '10px',
+                              backgroundColor: '#ef4444',
+                              borderRadius: '50%',
+                              marginRight: '8px',
+                              display: 'inline-block',
+                              boxShadow: '0 0 8px #ef4444',
+                              flexShrink: 0,
+                            }}
+                            title="New Order"
+                          />
+                        )}
+                        <span>{order.orderId}</span>
+                      </div>
+                    </Td>
+                    <Td>{order.customerName}</Td>
+                    <Td><span dir="ltr">{order.phoneNumber}</span></Td>
+                    <Td>{order.governorate || '\u2014'}</Td>
                   <Td>
                     {order.items.map((item, i) => (
                       <div key={i} style={{ lineHeight: 1.6 }}>
@@ -150,8 +244,8 @@ export default function AdminOrdersPage() {
                       <select
                         value={order.status}
                         onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
-                        className={`text-xs font-semibold rounded-sm px-2 py-1 border-none cursor-pointer ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}
-                        disabled={updatingId === order.orderId}
+                        className={`text-xs font-semibold rounded-sm px-2 py-1 border-none ${order.status.toLowerCase() === 'cancelled' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}
+                        disabled={updatingId === order.orderId || order.status.toLowerCase() === 'cancelled'}
                       >
                         {STATUSES.map((s) => (
                           <option key={s} value={s}>{s}</option>
@@ -194,7 +288,7 @@ export default function AdminOrdersPage() {
                     </button>
                   </Td>
                 </tr>
-              ))}
+              ); })}
               {orders.length === 0 && (
                 <tr>
                   <td colSpan={10} style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748b' }}>
@@ -268,6 +362,85 @@ export default function AdminOrdersPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── New Order Alert — fires only when latestOrder is fully defined ── */}
+      {showAlert && latestOrder != null && latestOrder.orderId != null && (
+        <>
+          <style dangerouslySetInnerHTML={{ __html: `
+            @keyframes slideInRight {
+              from { transform: translateX(120%); opacity: 0; }
+              to   { transform: translateX(0);    opacity: 1; }
+            }
+          ` }} />
+          <div
+            style={{
+              position: 'fixed',
+              top: '24px',
+              right: '24px',
+              zIndex: 99999,
+              backgroundColor: '#000000',
+              border: '2px solid #c5a880',
+              color: '#ffffff',
+              padding: '1.25rem 1.5rem',
+              borderRadius: '0px',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.85)',
+              width: '380px',
+              maxWidth: '90vw',
+              animation: 'slideInRight 0.35s cubic-bezier(0.16,1,0.3,1) forwards',
+              fontFamily: 'var(--font-body)',
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+              <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#c5a880', fontSize: '1rem', letterSpacing: '0.05em' }}>
+                🔔 New Order Received!<br />
+                <span style={{ fontSize: '0.8rem', fontWeight: 500, opacity: 0.85 }}>تم استلام طلب جديد</span>
+              </div>
+            </div>
+
+            {/* Details */}
+            <div style={{ fontSize: '0.85rem', borderTop: '1px solid rgba(197,168,128,0.25)', paddingTop: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ marginBottom: '0.35rem' }}>
+                <span style={{ opacity: 0.7 }}>Customer / العميل:&nbsp;</span>
+                <strong style={{ color: '#ffffff' }}>{latestOrder?.customerName || '—'}</strong>
+              </div>
+              <div style={{ marginBottom: '0.35rem' }}>
+                <span style={{ opacity: 0.7 }}>Order ID:&nbsp;</span>
+                <strong style={{ color: '#ffffff' }}>{latestOrder?.orderId || '—'}</strong>
+              </div>
+              <div>
+                <span style={{ opacity: 0.7 }}>Total / الإجمالي:&nbsp;</span>
+                <strong style={{ color: '#c5a880', fontFamily: 'var(--font-heading)' }}>
+                  {typeof latestOrder?.totalPrice === 'number' ? formatEGP(latestOrder.totalPrice) : '—'}
+                </strong>
+              </div>
+            </div>
+
+            {/* Dismiss */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => { setShowAlert(false); setLatestOrder(null); }}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #c5a880',
+                  color: '#c5a880',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  padding: '0.4rem 1rem',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#c5a880'; e.currentTarget.style.color = '#000'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#c5a880'; }}
+              >
+                Dismiss / إغلاق
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

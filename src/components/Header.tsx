@@ -108,7 +108,8 @@ export default function Header() {
               loop
               muted
               playsInline
-              preload="auto"
+              preload="none"
+              poster="/images/logo-poster.png"
               className="h-14 w-auto object-contain"
               aria-label="City Fragrance"
             />

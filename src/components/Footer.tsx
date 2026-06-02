@@ -112,7 +112,7 @@ export default function Footer() {
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                 className="px-6 bg-white text-[#09142E] border border-white font-heading font-semibold uppercase tracking-[0.1em] cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-r-sm flex items-center"
+                className="px-6 bg-white text-[#09142E] border border-white font-heading font-semibold uppercase tracking-[0.1em] cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-r-sm flex items-center"
               >
                 {status === 'loading' ? (
                   <span className="inline-block w-4 h-4 border-2 border-navy/30 border-t-navy rounded-full animate-spin" />
@@ -207,10 +207,11 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="underline decoration-gray-600 transition-all duration-300 hover:text-white hover:decoration-amber-500"
               >
-                Medhat Elaraby <span className="inline-block">↗</span>
+                Code Craft <span className="inline-block">↗</span>
               </a>
             </p>
           </div>
+          <p>Powerd by Medhat Elaraby</p>
 
           <div className="flex items-center gap-4 text-xl text-white/30">
             <FaCcVisa />

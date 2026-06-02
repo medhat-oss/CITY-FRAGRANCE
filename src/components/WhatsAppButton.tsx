@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 export default function WhatsAppButton() {
   const pathname = usePathname();
 
-  if (pathname.startsWith('/admin')) return null;
+  if (pathname.startsWith('/admin') || pathname.startsWith('/cashier')) return null;
 
   return (
     <div className="group fixed bottom-6 right-6 z-50 flex items-center gap-3">

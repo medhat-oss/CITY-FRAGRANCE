@@ -18,7 +18,8 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
         description: '',
         price: '',
         salePrice: '',
-        images: []
+        images: [],
+        stock: ''
     });
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState('');
@@ -49,7 +50,8 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                 description: productToEdit.description || '',
                 price: productToEdit.price,
                 salePrice: productToEdit.salePrice || '',
-                images: productToEdit.images || (productToEdit.image ? [productToEdit.image] : [])
+                images: productToEdit.images || (productToEdit.image ? [productToEdit.image] : []),
+                stock: productToEdit.stock !== undefined ? productToEdit.stock : ''
             });
         } else {
             setFormData({
@@ -65,7 +67,8 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                 description: '',
                 price: '',
                 salePrice: '',
-                images: []
+                images: [],
+                stock: ''
             });
         }
         setUploadError('');
@@ -141,7 +144,8 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
             id: formData.id || 'p' + Date.now(),
             price: parseFloat(formData.price),
             salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
-            images: formData.images.length > 0 ? formData.images : ['/images/product-placeholder.png']
+            images: formData.images.length > 0 ? formData.images : ['/images/product-placeholder.png'],
+            stock: formData.stock !== '' ? parseInt(formData.stock, 10) : 0
         });
     };
 
@@ -187,6 +191,12 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
                             <label>Badge</label>
                             <input type="text" name="badge" value={formData.badge} onChange={handleChange} placeholder="e.g. BEST SELLER, EID SALE" />
                         </div>
+                        <div className={styles.formGroup}>
+                            <label>Stock Quantity / عدد المنتجات في المخزن</label>
+                            <input type="number" name="stock" value={formData.stock} onChange={handleChange} min="0" placeholder="e.g. 50" required />
+                        </div>
+                    </div>
+                    <div className={styles.formRow}>
                         <div className={styles.formGroup}>
                             <label>Original Price ($)</label>
                             <input type="number" name="price" value={formData.price} onChange={handleChange} step="0.01" required />

@@ -12,6 +12,7 @@ export interface Product {
   badge: string;
   collection?: string;
   description?: string;
+  stock?: number;
 }
 
 export interface NavLink {
@@ -40,6 +41,27 @@ export interface Order {
   status: string;
   date: string;
   paymentMethod?: string;
+  source?: string;
+  cashierId?: string;
+  createdAt?: string;
+}
+
+export interface Shift {
+  id: string;
+  cashierId: string;
+  cashierName: string;
+  startTime: string;
+  endTime?: string | null;
+  status: string;
+  totalCash: number;
+  totalInstaPay: number;
+  totalVodafoneCash: number;
+  totalVisa: number;
+  actualCash?: number | null;
+  expectedTotal?: number | null;
+  discrepancy?: number | null;
+  orderCount: number;
+  createdAt?: string;
 }
 
 export type CollectionSlug = 'new-arrivals' | 'all-fragrances' | 'oud-collection' | 'mens-collection' | 'womens-collection' | 'gift-sets';

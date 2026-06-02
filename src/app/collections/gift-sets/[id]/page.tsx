@@ -19,6 +19,7 @@ interface GiftSet {
   price: number;
   image: string;
   productIds: string[];
+  stock?: number;
 }
 
 export default function GiftSetDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -72,6 +73,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
       name: giftSet.name,
       price: giftSet.price,
       image: giftSet.image,
+      stock: giftSet.stock,
     });
     openCart();
   }
@@ -83,6 +85,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
       name: giftSet.name,
       price: giftSet.price,
       image: giftSet.image,
+      stock: giftSet.stock,
     });
     closeCart();
     router.push('/order-payment');
@@ -175,17 +178,32 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
               </div>
 
               {/* Actions */}
+              {giftSet.stock !== undefined && giftSet.stock > 0 && giftSet.stock < 10 && (
+                <p className="text-xs text-amber-500 font-semibold uppercase tracking-wider mb-4">
+                  Only {giftSet.stock} items left in stock / المتبقي {giftSet.stock} فقط
+                </p>
+              )}
               <button
+                disabled={giftSet.stock === 0}
                 onClick={handleAddToCart}
-                className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB] mb-3"
+                className={`w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out mb-3 ${
+                  giftSet.stock === 0
+                    ? 'border-gray-700 bg-gray-800 text-gray-400 cursor-not-allowed opacity-50'
+                    : 'border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer hover:bg-[#E5E7EB] hover:text-[#09142E] hover:border-[#E5E7EB]'
+                }`}
               >
-                <HiShoppingBag className="mr-2.5" /> Add to Cart
+                <HiShoppingBag className="mr-2.5" /> {giftSet.stock === 0 ? 'Out of Stock / نفد من المخزن' : 'Add to Cart'}
               </button>
               <button
+                disabled={giftSet.stock === 0}
                 onClick={handleBuyNow}
-                className="w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white hover:border-[#E5E7EB]"
+                className={`w-full py-4 font-heading text-sm font-semibold tracking-[0.2em] uppercase border-2 rounded-sm flex items-center justify-center transition-all duration-300 ease-in-out ${
+                  giftSet.stock === 0
+                    ? 'border-gray-700 bg-gray-800 text-gray-400 cursor-not-allowed opacity-50'
+                    : 'border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer hover:bg-[#E5E7EB] hover:text-[#09142E] hover:border-[#E5E7EB]'
+                }`}
               >
-                <HiBolt className="mr-2.5" /> Buy It Now
+                <HiBolt className="mr-2.5" /> {giftSet.stock === 0 ? 'Out of Stock / نفد من المخزن' : 'Buy It Now'}
               </button>
             </div>
           </div>

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 import styles from './admin.module.css';
 import Link from 'next/link';
-import { FaBoxOpen, FaStore, FaClipboardList, FaGift, FaCog, FaBars, FaTimes } from 'react-icons/fa';
+import { FaBoxOpen, FaStore, FaClipboardList, FaGift, FaCog, FaBars, FaTimes, FaUsers, FaChartLine } from 'react-icons/fa';
 import AdminSidebarUser from '@/components/AdminSidebarUser';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -33,6 +33,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </Link>
             <Link href="/admin/gift-sets" className={styles.sidebarLink} onClick={closeDrawer}>
               <FaGift /> Gift Sets
+            </Link>
+            <Link href="/admin/analytics" className={styles.sidebarLink} onClick={closeDrawer}>
+              <FaChartLine /> Analytics & Inventory
+            </Link>
+            <Link href="/admin/staff" className={styles.sidebarLink} onClick={closeDrawer}>
+              <FaUsers /> Manage Staff
             </Link>
             <Link href="/" className={styles.sidebarLink} onClick={closeDrawer}>
               <FaStore /> Back to Store
@@ -87,6 +93,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </Link>
           <Link href="/admin/gift-sets" className={styles.mobileDrawerLink} onClick={closeDrawer}>
             <FaGift /> Gift Sets
+          </Link>
+          <Link href="/admin/analytics" className={styles.mobileDrawerLink} onClick={closeDrawer}>
+            <FaChartLine /> Analytics & Inventory
+          </Link>
+          <Link href="/admin/staff" className={styles.mobileDrawerLink} onClick={closeDrawer}>
+            <FaUsers /> Manage Staff
           </Link>
           <Link href="/" className={styles.mobileDrawerLink} onClick={closeDrawer}>
             <FaStore /> Back to Store

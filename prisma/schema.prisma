@@ -21,8 +21,30 @@ model Order {
   status         String   @default("Pending")
   date           String
   paymentMethod  String?
+  source         String   @default("WEB")
+  cashierId      String?
+  shiftId        String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model Shift {
+  id                String   @id @default(cuid())
+  cashierId         String
+  cashierName       String
+  startTime         DateTime
+  endTime           DateTime?
+  status            String   @default("OPEN")
+  totalCash         Float    @default(0)
+  totalInstaPay     Float    @default(0)
+  totalVodafoneCash Float    @default(0)
+  totalVisa         Float    @default(0)
+  actualCash        Float?
+  expectedTotal     Float?
+  discrepancy       Float?
+  orderCount        Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Product {
@@ -40,6 +62,7 @@ model Product {
   price         Float
   salePrice     Float?
   images        Json     @default("[]")
+  stock         Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -62,11 +85,31 @@ model Subscriber {
 }
 
 model AdminUser {
-  id       String @id @default(cuid())
-  email    String @unique
-  password String
-  name     String @default("Admin")
-  role     String @default("ADMIN")
+  id            String @id @default(cuid())
+  email         String @unique
+  password      String
+  name          String @default("Admin")
+  role          String @default("ADMIN")
+  shiftPassword String @default("123456")
+}
+
+model ShiftLog {
+  id                String   @id @default(cuid())
+  userId            String
+  userName          String
+  shiftId           String?
+  shiftStartedAt    DateTime
+  shiftEndedAt      DateTime
+  ordersCount       Int      @default(0)
+  cashExpected      Float    @default(0)
+  instapayExpected  Float    @default(0)
+  vodafoneCashExpected Float @default(0)
+  visaExpected      Float    @default(0)
+  totalExpected     Float    @default(0)
+  actualCashInDrawer Float   @default(0)
+  createdAt         DateTime @default(now())
+
+  @@index([userId])
 }
 
 model SiteSetting {
