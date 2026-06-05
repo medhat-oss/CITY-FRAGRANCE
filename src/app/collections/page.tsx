@@ -4,9 +4,6 @@ import CollectionsGrid from '@/components/CollectionsGrid';
 import { readJsonFile } from '@/lib/dataFile';
 import type { CollectionData } from '@/types';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 async function getCollectionImages(): Promise<Record<string, CollectionData>> {
   return readJsonFile<Record<string, CollectionData>>('collection-images.json', {});
 }

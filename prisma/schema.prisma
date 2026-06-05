@@ -55,6 +55,8 @@ model Product {
   type          String   @default("")
   category      String   @default("")
   collection    String   @default("")
+  collections   Collection[]
+  isDraft       Boolean  @default(true)
   badge         String   @default("")
   notes         String   @default("")
   description   String   @default("")
@@ -64,9 +66,17 @@ model Product {
   price         Float
   salePrice     Float?
   images        Json     @default("[]")
+  videoUrl      String   @default("")
   stock         Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model Collection {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  products  Product[]
 }
 
 model GiftSet {
@@ -74,6 +84,7 @@ model GiftSet {
   name        String
   description String   @default("")
   price       Float
+  isDraft     Boolean  @default(true)
   image       String   @default("")
   productIds  Json     @default("[]")
   createdAt   DateTime @default(now())
@@ -115,16 +126,27 @@ model ShiftLog {
 }
 
 model SiteSetting {
-  id                String @id @default("default")
-  heroTitle         String @default("")
-  heroSubtitle      String @default("")
-  announcementText  String @default("")
-  heroBgImage       String @default("")
-  moodTitle         String @default("")
-  moodSubtitle      String @default("")
-  moodImage         String @default("")
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                      String @id @default("default")
+  heroTitle               String @default("")
+  heroSubtitle            String @default("")
+  heroDescription         String @default("")
+  announcementText        String @default("")
+  heroBgImage             String @default("")
+  heroBgImageDesktop      String @default("")
+  heroVideoUrl            String @default("")
+  moodTitle               String @default("")
+  moodSubtitle            String @default("")
+  moodImage               String @default("")
+  moodImageDesktop        String @default("")
+  moodVideoUrl            String @default("")
+  womenCollectionVideoUrl String @default("")
+  menCollectionVideoUrl   String @default("")
+  giftSetsVideoUrl        String @default("")
+  newArrivalsVideoUrl     String @default("")
+  allFragrancesVideoUrl   String @default("")
+  oudCollectionVideoUrl   String @default("")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 }
 
 model CollectionImage {

@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { unstable_noStore as noStore } from 'next/cache';
 import { readJsonFile } from '@/lib/dataFile';
 
+// Public storefront endpoint — only returns PUBLISHED gift sets
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  noStore();
-  const giftSets = await readJsonFile<any[]>('gift-sets.json', []);
-  return NextResponse.json({ giftSets });
+  const all = await readJsonFile<any[]>('gift-sets.json', []);
+  // filter out drafts; also accept missing isDraft field (treated as published for legacy data)
+  const published = all.filter((gs) => gs.isDraft !== true);
+  return NextResponse.json({ giftSets: published });
 }

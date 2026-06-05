@@ -1,152 +1,48 @@
 [
   {
-    "id": "p1",
-    "name": "Oud Supreme",
-    "type": "Perfume",
-    "category": "Oud",
-    "collection": "oud-collection",
-    "badge": "BEST SELLER",
-    "topNotes": "Oud",
-    "middleNotes": "Rose",
-    "baseNotes": "Amber",
-    "description": "test 23",
-    "price": 195,
-    "salePrice": null,
-    "images": [
-      "/images/product-placeholder.png",
-      "https://res.cloudinary.com/db31fu3ob/image/upload/v1779639294/upqfef4mlmkpnf91p0en.jpg"
-    ],
-    "stock": 35
-  },
-  {
-    "id": "p2",
-    "name": "Midnight Musk",
-    "type": "Perfume",
-    "category": "Men",
-    "collection": "",
-    "badge": "EID SALE",
-    "topNotes": "Musk",
-    "middleNotes": "Vanilla",
-    "baseNotes": "Sandalwood",
-    "description": "",
-    "price": 175,
-    "salePrice": 140,
-    "images": [
-      "/images/product-placeholder.png"
-    ],
-    "stock": 23
-  },
-  {
-    "id": "p3",
-    "name": "Royal Amber",
-    "category": "Women",
-    "topNotes": "Amber",
-    "middleNotes": "Patchouli",
-    "baseNotes": "Bergamot",
-    "price": 210,
-    "salePrice": null,
-    "images": [
-      "/images/product-placeholder.png"
-    ],
-    "badge": "",
-    "collection": "womens-collection",
-    "stock": 0
-  },
-  {
-    "id": "p4",
-    "name": "Desert Bloom",
-    "category": "Women",
-    "collection": "new-arrivals",
-    "badge": "NEW",
-    "topNotes": "Jasmine",
-    "middleNotes": "Saffron",
-    "baseNotes": "Cedar",
-    "price": 165,
-    "salePrice": null,
-    "images": [
-      "/images/product-placeholder.png"
-    ],
-    "stock": 0
-  },
-  {
-    "id": "p5",
-    "name": "Oud Wood",
-    "category": "Men",
-    "topNotes": "Oud",
-    "middleNotes": "Sandalwood",
-    "baseNotes": "Cardamom",
-    "price": 195,
-    "salePrice": null,
-    "images": [
-      "/images/product-placeholder.png"
-    ],
-    "badge": "NEW",
-    "collection": "oud-collection",
-    "stock": 0
-  },
-  {
-    "id": "p6",
-    "name": "Leather Reserve",
-    "category": "Men",
-    "topNotes": "Leather",
-    "middleNotes": "Oakmoss",
-    "baseNotes": "Vetiver",
-    "price": 150,
-    "salePrice": null,
-    "images": [
-      "/images/product-placeholder.png"
-    ],
-    "badge": "",
-    "collection": "",
-    "stock": 0
-  },
-  {
-    "id": "p7",
-    "name": "Aqua Vetiver",
-    "category": "Men",
-    "topNotes": "Vetiver",
-    "middleNotes": "Citrus",
-    "baseNotes": "Marine",
-    "price": 160,
-    "salePrice": 130,
-    "images": [
-      "/images/product-placeholder.png"
-    ],
-    "badge": "SALE",
-    "collection": "",
-    "stock": 0
-  },
-  {
     "id": "p8",
     "name": "Rose Petals",
+    "type": "Perfume",
     "category": "Women",
+    "collection": "new-arrivals",
+    "collections": [
+      "new-arrivals",
+      "gift-sets"
+    ],
+    "isDraft": true,
+    "badge": "BEST SELLER",
     "topNotes": "Damascus Rose",
     "middleNotes": "Peony",
     "baseNotes": "Musk",
+    "description": "",
     "price": 180,
     "salePrice": null,
     "images": [
       "/images/product-placeholder.png"
     ],
-    "badge": "BEST SELLER",
-    "collection": "",
+    "videoUrl": "",
     "stock": 0
   },
   {
     "id": "p9",
     "name": "Vanilla Bloom",
+    "type": "Perfume",
     "category": "Women",
+    "collection": "",
+    "collections": [],
+    "isDraft": false,
+    "badge": "",
     "topNotes": "Madagascar Vanilla",
     "middleNotes": "Orchid",
     "baseNotes": "",
+    "description": "",
     "price": 145,
     "salePrice": null,
     "images": [
       "/images/product-placeholder.png"
     ],
-    "badge": "",
-    "collection": "",
-    "stock": 0
+    "videoUrl": "",
+    "stock": 1
   },
   {
     "id": "p10",
@@ -162,22 +58,36 @@
     ],
     "badge": "BEST SELLER",
     "collection": "mens-collection",
-    "stock": 0
+    "stock": 0,
+    "isDraft": false,
+    "collections": [
+      "mens-collection",
+      "all-fragrances"
+    ]
   },
   {
     "id": "p11",
     "name": "Jasmine Serenade",
+    "type": "Perfume",
     "category": "Women",
+    "collection": "womens-collection",
+    "collections": [
+      "womens-collection",
+      "all-fragrances"
+    ],
+    "isDraft": false,
+    "badge": "NEW",
     "topNotes": "Jasmine",
     "middleNotes": "Musk",
     "baseNotes": "White Amber",
+    "description": "",
     "price": 190,
     "salePrice": 160,
     "images": [
       "/images/product-placeholder.png"
     ],
-    "badge": "NEW",
-    "collection": "womens-collection"
+    "videoUrl": "",
+    "stock": 1
   },
   {
     "id": "p12",
@@ -192,7 +102,13 @@
       "/images/product-placeholder.png"
     ],
     "badge": "BEST SELLER",
-    "collection": "oud-collection"
+    "collection": "oud-collection",
+    "isDraft": false,
+    "collections": [
+      "oud-collection",
+      "all-fragrances"
+    ],
+    "stock": 0
   },
   {
     "id": "p13",
@@ -207,7 +123,13 @@
       "/images/product-placeholder.png"
     ],
     "badge": "SALE",
-    "collection": "mens-collection"
+    "collection": "mens-collection",
+    "isDraft": false,
+    "collections": [
+      "mens-collection",
+      "all-fragrances"
+    ],
+    "stock": 0
   },
   {
     "id": "p14",
@@ -222,7 +144,12 @@
       "/images/product-placeholder.png"
     ],
     "badge": "BEST SELLER",
-    "collection": "gift-sets"
+    "collection": "gift-sets",
+    "isDraft": false,
+    "collections": [
+      "gift-sets"
+    ],
+    "stock": 0
   },
   {
     "id": "p15",
@@ -238,6 +165,11 @@
     ],
     "badge": "NEW",
     "collection": "new-arrivals",
-    "stock": 0
+    "stock": 0,
+    "isDraft": false,
+    "collections": [
+      "new-arrivals",
+      "all-fragrances"
+    ]
   }
 ]

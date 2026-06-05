@@ -1,33 +1,84 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
+import { prisma } from '@/lib/prisma';
 
 const FILE = 'site-settings.json';
 
 interface SiteSettings {
   heroTitle: string;
   heroSubtitle: string;
+  heroDescription: string;
   announcementText: string;
   heroBgImage: string;
+  heroBgImageDesktop: string;
+  heroVideoUrl: string;
   moodTitle: string;
   moodSubtitle: string;
   moodImage: string;
+  moodImageDesktop: string;
+  moodVideoUrl: string;
+  womenCollectionVideoUrl: string;
+  menCollectionVideoUrl: string;
+  giftSetsVideoUrl: string;
+  newArrivalsVideoUrl: string;
+  allFragrancesVideoUrl: string;
+  oudCollectionVideoUrl: string;
 }
+
+const ALL_KEYS: Array<keyof SiteSettings> = [
+  'heroTitle', 'heroSubtitle', 'heroDescription', 'announcementText',
+  'heroBgImage', 'heroBgImageDesktop', 'heroVideoUrl',
+  'moodTitle', 'moodSubtitle', 'moodImage', 'moodImageDesktop', 'moodVideoUrl',
+  'womenCollectionVideoUrl', 'menCollectionVideoUrl',
+  'giftSetsVideoUrl', 'newArrivalsVideoUrl', 'allFragrancesVideoUrl', 'oudCollectionVideoUrl',
+];
 
 const DEFAULTS: SiteSettings = {
   heroTitle: 'Celebrate in Luxury & Scent',
   heroSubtitle: 'Eid Al Adha Special',
+  heroDescription: 'Exclusive Eid collection — enjoy 20% off on all premium fragrances.',
   announcementText: 'EID AL ADHA SALE UP TO 20% OFF ENDS SOON... SHOP NOW',
   heroBgImage: '/images/hero-banner.png',
+  heroBgImageDesktop: '',
+  heroVideoUrl: '',
   moodTitle: 'The Essence of Luxury & Elegance',
   moodSubtitle: 'Discover timeless scents crafted for those who appreciate the finer things in life.',
   moodImage: '/images/hero-banner.png',
+  moodImageDesktop: '',
+  moodVideoUrl: '',
+  womenCollectionVideoUrl: '',
+  menCollectionVideoUrl: '',
+  giftSetsVideoUrl: '',
+  newArrivalsVideoUrl: '',
+  allFragrancesVideoUrl: '',
+  oudCollectionVideoUrl: '',
 };
 
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
+function applyRecord(target: SiteSettings, source: Record<string, any>): SiteSettings {
+  for (const key of ALL_KEYS) {
+    if (source[key] !== undefined && source[key] !== null) {
+      (target as any)[key] = source[key];
+    }
+  }
+  return target;
+}
+
 export async function GET() {
-  // 1. Try Cloudinary raw URL directly (source of truth)
+  // 1. Try database first as the primary source of truth
+  try {
+    const dbSettings = await prisma.siteSetting.findUnique({ where: { id: 'default' } });
+    if (dbSettings) {
+      const merged = applyRecord({ ...DEFAULTS }, dbSettings);
+      return NextResponse.json(merged);
+    }
+  } catch (err) {
+    console.error('SETTINGS GET DB ERROR:', err);
+  }
+
+  // 2. Try Cloudinary raw URL
   if (cloudName) {
     try {
       const url = `https://res.cloudinary.com/${cloudName}/raw/upload/city-fragrance-data/${FILE}`;
@@ -37,42 +88,91 @@ export async function GET() {
         return NextResponse.json({ ...DEFAULTS, ...saved });
       }
     } catch {
-      // Cloudinary not reachable — fall through
+      // Cloudinary not reachable
     }
   }
 
-  // 2. Fallback to local / build folder via readJsonFile
+  // 3. Fallback to local JSON
   const saved = await readJsonFile<Partial<SiteSettings>>(FILE, {});
-  const settings = { ...DEFAULTS, ...saved };
-  return NextResponse.json(settings);
+  return NextResponse.json({ ...DEFAULTS, ...saved });
 }
 
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<SiteSettings>;
-    const saved = await readJsonFile<Partial<SiteSettings>>(FILE, {});
-    const current = { ...DEFAULTS, ...saved };
-    const updated: SiteSettings = {
-      heroTitle: body.heroTitle ?? current.heroTitle,
-      heroSubtitle: body.heroSubtitle ?? current.heroSubtitle,
-      announcementText: body.announcementText ?? current.announcementText,
-      heroBgImage: body.heroBgImage ?? current.heroBgImage,
-      moodTitle: body.moodTitle ?? current.moodTitle,
-      moodSubtitle: body.moodSubtitle ?? current.moodSubtitle,
-      moodImage: body.moodImage ?? current.moodImage,
-    };
+
+    // Read current settings — DB first, then JSON fallback
+    let current: SiteSettings;
+    try {
+      const dbSettings = await prisma.siteSetting.findUnique({ where: { id: 'default' } });
+      if (dbSettings) {
+        current = applyRecord({ ...DEFAULTS }, dbSettings);
+      } else {
+        const savedJson = await readJsonFile<Partial<SiteSettings>>(FILE, {});
+        current = { ...DEFAULTS, ...savedJson };
+      }
+    } catch {
+      const savedJson = await readJsonFile<Partial<SiteSettings>>(FILE, {});
+      current = { ...DEFAULTS, ...savedJson };
+    }
+
+    // Merge: body field kept if !== undefined (preserves "", "HIDDEN", any value)
+    const updated: SiteSettings = { ...current };
+    for (const key of ALL_KEYS) {
+      if (body[key] !== undefined) {
+        updated[key] = body[key];
+      }
+    }
+
+    // Write to JSON file
     await writeJsonFile(FILE, updated);
-    console.log('SETTINGS SAVED to local and Cloudinary (if configured)');
-    revalidatePath('/');
-    revalidatePath('/collections');
-    revalidatePath('/stores');
+
+    // Sync to PostgreSQL — update payload MUST NOT include 'id' (Prisma rejects PK in update)
+    const createPayload: Record<string, any> = { id: 'default' };
+    const updatePayload: Record<string, any> = {};
+    for (const key of ALL_KEYS) {
+      createPayload[key] = updated[key];
+      updatePayload[key] = updated[key];
+    }
+
+    console.log('DB Payload (create):', JSON.stringify(createPayload));
+    console.log('DB Payload (update):', JSON.stringify(updatePayload));
+
+    try {
+      await prisma.siteSetting.upsert({
+        where: { id: 'default' },
+        update: updatePayload,
+        create: createPayload,
+      });
+    } catch (dbErr: any) {
+      console.error('PRISMA UPSERT ERROR:', dbErr?.message || dbErr);
+      return NextResponse.json({
+        success: false,
+        error: `Database error: ${dbErr?.message || 'Unknown Prisma error'}`,
+      }, { status: 500 });
+    }
+
+    console.log('SETTINGS SAVED to local JSON, Neon DB, and Cloudinary');
+    // Purge Next.js server cache for every page that renders hero/mood media
+    const pathsToRevalidate = [
+      '/',
+      '/collections',
+      '/collections/all-fragrances',
+      '/collections/mens-collection',
+      '/collections/womens-collection',
+      '/collections/oud-collection',
+      '/collections/new-arrivals',
+      '/collections/gift-sets',
+      '/admin/settings',
+      '/stores',
+    ];
+    for (const p of pathsToRevalidate) {
+      try { revalidatePath(p); } catch { /* non-fatal */ }
+    }
     return NextResponse.json({ success: true, settings: updated });
   } catch (err: any) {
     console.error('SETTINGS SAVE ERROR:', err);
     const message = err?.message || 'Failed to save settings';
-    return NextResponse.json(
-      { success: false, error: message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

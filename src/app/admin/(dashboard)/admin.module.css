@@ -280,6 +280,16 @@
   background-color: rgba(239, 68, 68, 0.1);
 }
 
+.btnIcon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.adminTable tbody tr {
+  will-change: opacity;
+}
+
 /* ─── Modal ─── */
 .modalOverlay {
   position: fixed;

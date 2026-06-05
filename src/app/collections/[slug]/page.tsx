@@ -1,5 +1,4 @@
 'use client';
-export const dynamic = 'force-dynamic';
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -38,19 +37,37 @@ interface GiftSet {
   productIds: string[];
 }
 
+const COLLECTION_VIDEO_KEYS: Record<string, string> = {
+  'womens-collection': 'womenCollectionVideoUrl',
+  'mens-collection': 'menCollectionVideoUrl',
+  'gift-sets': 'giftSetsVideoUrl',
+  'new-arrivals': 'newArrivalsVideoUrl',
+  'all-fragrances': 'allFragrancesVideoUrl',
+  'oud-collection': 'oudCollectionVideoUrl',
+};
+
 export default function CollectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { getProductsByCollection, products } = useProducts();
   const [giftSets, setGiftSets] = useState<GiftSet[]>([]);
   const [collectionInfo, setCollectionInfo] = useState<{ image: string; description: string } | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string>('');
 
   useEffect(() => {
     if (slug === 'gift-sets') {
-      fetch('/api/gift-sets', { cache: 'no-store' }).then((r) => r.json()).then((d) => setGiftSets(d.giftSets || [])).catch(() => {});
+      fetch('/api/gift-sets').then((r) => r.json()).then((d) => setGiftSets(d.giftSets || [])).catch(() => {});
     }
     fetch('/api/collections').then((r) => r.json()).then((d) => {
       const entry = d.images?.[slug] as CollectionData | undefined;
       if (entry) setCollectionInfo({ image: entry.image, description: entry.description });
+    }).catch(() => {});
+
+    // Fetch site settings to retrieve collection specific videos
+    fetch('/api/admin/settings').then((r) => r.json()).then((d) => {
+      const videoKey = COLLECTION_VIDEO_KEYS[slug];
+      if (videoKey && d[videoKey]) {
+        setVideoUrl(d[videoKey]);
+      }
     }).catch(() => {});
   }, [slug]);
 
@@ -83,22 +100,20 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
     <div className="bg-[#09142E] min-h-screen text-white">
       <Header />
       <main>
-        {/* Hero */}
-        <section className={`relative pt-32 pb-16 overflow-hidden ${collectionInfo?.image ? 'bg-cover bg-center bg-no-repeat' : ''}`} style={collectionInfo?.image ? { backgroundImage: `url('${collectionInfo.image}')` } : undefined}>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/60" />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] via-transparent to-transparent mix-blend-overlay" />
-          <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-            <p className="text-white/50 font-heading text-sm tracking-[0.3em] uppercase mb-4">
-              City Fragrance
-            </p>
-            <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight mb-4">
-              {meta.title}
-            </h1>
-            <div className="w-16 h-px bg-white/20 mx-auto mt-6" />
-            <p className="text-white/50 mt-8 max-w-2xl mx-auto text-lg leading-relaxed">
+        {/* Luxury Header Text Section */}
+        <section className="pt-36 pb-16 text-center px-6 max-w-4xl mx-auto relative z-10">
+          <p className="text-white/40 font-heading text-xs tracking-[0.45em] uppercase mb-4">
+            City Fragrance
+          </p>
+          <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-light text-white leading-tight mb-2 tracking-wide uppercase">
+            {meta.title}
+          </h1>
+          <div className="w-12 h-[2px] bg-white/20 mx-auto my-5" />
+          {meta.description && (
+            <p className="text-white/60 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed font-light">
               {meta.description}
             </p>
-          </div>
+          )}
         </section>
 
         {/* Grid */}

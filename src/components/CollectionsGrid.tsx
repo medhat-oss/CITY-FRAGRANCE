@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { HiArrowRight } from 'react-icons/hi2';
 import type { CollectionData } from '@/types';
+import { getOptimizedVideoUrl } from '@/lib/videoUtils';
 
 interface Collection {
   id: string;
@@ -12,6 +13,7 @@ interface Collection {
   description: string;
   href: string;
   image: string;
+  videoUrl: string;
 }
 
 const COLLECTION_META: { id: string; title: string; href: string }[] = [
@@ -22,6 +24,8 @@ const COLLECTION_META: { id: string; title: string; href: string }[] = [
   { id: 'womens-collection', title: "Women's Collection", href: '/collections/womens-collection' },
   { id: 'gift-sets', title: 'Gift Sets', href: '/collections/gift-sets' },
 ];
+
+
 
 export default function CollectionsGrid({ initialImages = {} }: { initialImages?: Record<string, CollectionData> }) {
   const [collectionData, setCollectionData] = useState<Record<string, CollectionData>>(initialImages);
@@ -40,6 +44,7 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
     ...meta,
     description: collectionData[meta.id]?.description || '',
     image: collectionData[meta.id]?.image || '/images/product-placeholder.png',
+    videoUrl: collectionData[meta.id]?.videoUrl || '',
   }));
 
   return (
@@ -71,20 +76,32 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
               prefetch={true}
               className="group relative block h-[280px] sm:h-[480px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_50px_rgba(255,255,255,0.08)]"
             >
-              {/* Background Image with Zoom */}
+              {/* Background: Video or Image */}
               <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-110">
-                <Image
-                  src={collection.image}
-                  alt={collection.title}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
-                />
+                {collection.videoUrl ? (
+                  <video
+                    src={getOptimizedVideoUrl(collection.videoUrl)}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="auto"
+                    className="w-full h-full object-cover object-center"
+                  />
+                ) : (
+                  <Image
+                    src={collection.image}
+                    alt={collection.title}
+                    fill
+                    priority
+                    className="object-cover"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                )}
               </div>
 
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#09142E] via-[#09142E]/60 to-[#09142E]/20 transition-opacity duration-500 group-hover:from-[#09142E]" />
+              {/* Overlay — deeper when video is active */}
+              <div className={`absolute inset-0 transition-opacity duration-500 ${collection.videoUrl ? 'bg-gradient-to-t from-black/75 via-black/25 to-black/10 group-hover:from-black/85' : 'bg-gradient-to-t from-[#09142E] via-[#09142E]/60 to-[#09142E]/20 group-hover:from-[#09142E]'}`} />
 
               {/* Content */}
               <div className="absolute inset-0 flex flex-col justify-end p-3 sm:p-8 z-10">
@@ -113,3 +130,4 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
     </div>
   );
 }
+

@@ -7,8 +7,9 @@
   },
   "scripts": {
     "postinstall": "prisma generate",
-    "dev": "next dev",
-    "build": "npx prisma generate && next build",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbopack",
+    "build": "npx prisma generate && next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },

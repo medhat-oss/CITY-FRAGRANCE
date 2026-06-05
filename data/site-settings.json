@@ -1,9 +1,20 @@
 {
-  "heroTitle": "Celebrate in Luxury & Scent",
-  "heroSubtitle": "Eid Al Adha Special",
+  "heroTitle": "HIDDEN",
+  "heroSubtitle": "HIDDEN",
+  "heroDescription": "HIDDEN",
   "announcementText": "EID AL ADHA SALE UP TO 20% OFF ENDS SOON... SHOP NOW",
-  "heroBgImage": "/uploads/hero-bg-1779470827737.png",
+  "heroBgImage": "https://res.cloudinary.com/db31fu3ob/image/upload/f_auto,q_auto/v1780645033/city-fragrance/bki0cbtf3t2tmdopgktb.jpg",
+  "heroBgImageDesktop": "",
+  "heroVideoUrl": "",
   "moodTitle": "The Essence of Luxury & Elegance",
   "moodSubtitle": "Discover timeless scents crafted for those who appreciate the finer things in life.",
-  "moodImage": "/images/hero-banner.png"
+  "moodImage": "https://res.cloudinary.com/db31fu3ob/image/upload/f_auto,q_auto:best/v1780668275/city-fragrance/xh41y1f7vormoig39ivo.jpg",
+  "moodImageDesktop": "",
+  "moodVideoUrl": "",
+  "womenCollectionVideoUrl": "",
+  "menCollectionVideoUrl": "https://res.cloudinary.com/db31fu3ob/video/upload/f_auto,q_auto/v1780645554/city-fragrance/bzkuskfe16nm3ll8r1az.mp4",
+  "giftSetsVideoUrl": "",
+  "newArrivalsVideoUrl": "",
+  "allFragrancesVideoUrl": "",
+  "oudCollectionVideoUrl": ""
 }

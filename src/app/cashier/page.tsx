@@ -199,6 +199,10 @@ export default function CashierPage() {
   const discountAmt = useMemo(() => Math.min(parseFloat(discount) || 0, subtotal), [discount, subtotal]);
   const grandTotal = useMemo(() => subtotal - discountAmt, [subtotal, discountAmt]);
 
+  /* ── Customer Info ── */
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+
   /* ── Checkout modal ── */
   const [showCheckout, setShowCheckout] = useState(false);
   const [payMethod, setPayMethod] = useState('cash');
@@ -254,8 +258,8 @@ export default function CashierPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customerName: 'POS Walk-in',
-          phoneNumber: '—',
+          customerName: customerName.trim() || 'POS Walk-in',
+          phoneNumber: customerPhone.trim() || '—',
           email: '',
           address: 'In-Store',
           apartment: '',
@@ -297,6 +301,8 @@ export default function CashierPage() {
   function closeSuccess() {
     setOrderSuccess(null);
     setShowCheckout(false);
+    setCustomerName('');
+    setCustomerPhone('');
   }
 
   /* ── Shift Management ── */
@@ -450,6 +456,8 @@ export default function CashierPage() {
     setShiftSubmitting(true);
     try {
       const actualCashValue = parseFloat(actualCash) || 0;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
       const res = await fetch('/api/admin/shifts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -459,7 +467,9 @@ export default function CashierPage() {
           shiftPassword,
           userId: currentUser.id,
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       if (res.status === 401) {
         console.error('FRONTEND AUTH ERROR: End Shift returned 401 — cashier_session cookie missing or invalid');
         router.replace('/cashier/login');
@@ -1022,10 +1032,40 @@ export default function CashierPage() {
                   <h3 style={{ color: '#f8f9fa', fontFamily: 'var(--font-heading)', fontSize: '1.1rem', margin: 0 }}>Complete Sale</h3>
                   <button onClick={() => setShowCheckout(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1.1rem' }}><FaTimes /></button>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0.8rem', background: 'rgba(197,168,128,0.08)', borderRadius: 8, marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0.8rem', background: 'rgba(197,168,128,0.08)', borderRadius: 8, marginBottom: '1rem' }}>
                   <span style={{ color: '#cbd5e1', fontSize: '0.85rem' }}>Total</span>
                   <span style={{ color: '#c5a880', fontWeight: 700, fontSize: '1.1rem', fontFamily: 'var(--font-heading)' }}>{formatEGP(grandTotal)}</span>
                 </div>
+
+                {/* ── Customer Info ── */}
+                <p style={{ color: '#94a3b8', fontSize: '0.78rem', marginBottom: '0.5rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Customer Info</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <input
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="اسم العميل / Customer Name"
+                    disabled={submitting}
+                    style={{
+                      width: '100%', padding: '0.6rem 0.8rem', borderRadius: 6,
+                      border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.04)',
+                      color: '#e2e8f0', fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box',
+                    }}
+                  />
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="رقم الهاتف / Phone Number"
+                    disabled={submitting}
+                    style={{
+                      width: '100%', padding: '0.6rem 0.8rem', borderRadius: 6,
+                      border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.04)',
+                      color: '#e2e8f0', fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
                 <p style={{ color: '#94a3b8', fontSize: '0.78rem', marginBottom: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Payment Method</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.25rem' }}>
                   {PAY_METHODS.map((m) => (

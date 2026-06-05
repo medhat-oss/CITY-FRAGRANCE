@@ -1,5 +1,4 @@
 'use client';
-export const dynamic = 'force-dynamic';
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -31,7 +30,7 @@ export default function GiftSetDetailPage({ params }: { params: Promise<{ id: st
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/gift-sets', { cache: 'no-store' })
+    fetch('/api/gift-sets')
       .then((r) => r.json())
       .then((d) => {
         const found = (d.giftSets || []).find((gs: GiftSet) => gs.id === id);

@@ -9,8 +9,11 @@ export interface Product {
   price: number;
   salePrice: number | null;
   images: string[];
+  videoUrl?: string;
   badge: string;
   collection?: string;
+  collections?: string[];
+  isDraft?: boolean;
   description?: string;
   stock?: number;
 }
@@ -69,6 +72,7 @@ export type CollectionSlug = 'new-arrivals' | 'all-fragrances' | 'oud-collection
 export interface CollectionData {
   image: string;
   description: string;
+  videoUrl?: string;
 }
 
 export type CollectionImages = Record<CollectionSlug, CollectionData>;
@@ -76,9 +80,20 @@ export type CollectionImages = Record<CollectionSlug, CollectionData>;
 export interface SiteSettings {
   heroTitle: string;
   heroSubtitle: string;
+  heroDescription: string;
   announcementText: string;
   heroBgImage: string;
+  heroBgImageDesktop: string;
+  heroVideoUrl: string;
   moodTitle: string;
   moodSubtitle: string;
   moodImage: string;
+  moodImageDesktop: string;
+  moodVideoUrl: string;
+  womenCollectionVideoUrl?: string;
+  menCollectionVideoUrl?: string;
+  giftSetsVideoUrl?: string;
+  newArrivalsVideoUrl?: string;
+  allFragrancesVideoUrl?: string;
+  oudCollectionVideoUrl?: string;
 }

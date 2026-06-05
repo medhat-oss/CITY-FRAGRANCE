@@ -7,15 +7,18 @@ import { HiArrowRight } from 'react-icons/hi2';
 import { useLocale } from '@/context/LocaleContext';
 import type { CollectionData } from '@/types';
 
+import { getOptimizedVideoUrl } from '@/lib/videoUtils';
+
 interface Collection {
   title: string;
   subtitle: string;
   href: string;
   slug: string;
   image: string;
+  videoUrl: string;
 }
 
-const COLLECTION_META: Omit<Collection, 'image' | 'subtitle'>[] = [
+const COLLECTION_META: Omit<Collection, 'image' | 'subtitle' | 'videoUrl'>[] = [
   { title: "Women's Collection", href: '/collections/womens-collection', slug: 'womens-collection' },
   { title: "Men's Collection", href: '/collections/mens-collection', slug: 'mens-collection' },
 ];
@@ -35,6 +38,7 @@ export default function CollectionCategories() {
     ...meta,
     subtitle: collectionData?.[meta.slug]?.description || '',
     image: collectionData?.[meta.slug]?.image || '',
+    videoUrl: collectionData?.[meta.slug]?.videoUrl || '',
   }));
 
   const loaded = collectionData !== null;
@@ -52,6 +56,16 @@ export default function CollectionCategories() {
             >
               {!loaded ? (
                 <div className="absolute inset-0 bg-slate-800/50 animate-pulse" />
+              ) : collection.videoUrl ? (
+                <video
+                  src={getOptimizedVideoUrl(collection.videoUrl)}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                />
               ) : (
                 <Image
                   src={collection.image || '/images/product-placeholder.png'}
@@ -62,7 +76,8 @@ export default function CollectionCategories() {
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/10 to-transparent flex flex-col justify-end p-3 md:p-6 text-white">
+              {/* Dark overlay for text contrast — stronger when video is playing */}
+              <div className={`absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/10 to-transparent flex flex-col justify-end p-3 md:p-6 text-white${collection.videoUrl ? ' from-black/70 via-black/20 to-transparent' : ''}`}>
                 <h3 className="font-heading text-sm sm:text-base md:text-2xl font-light mb-1 leading-tight">
                   {collection.title}
                 </h3>

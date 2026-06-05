@@ -34,10 +34,18 @@ export async function POST(request: Request) {
 
     const result = await cloudinary.uploader.upload(dataUri, {
       folder: 'city-fragrance',
-      resource_type: 'image',
+      resource_type: 'auto',
     });
 
-    return NextResponse.json({ success: true, path: result.secure_url });
+    let deliveryUrl = result.secure_url;
+    if (result.resource_type === 'video') {
+      // q_auto:best = highest Cloudinary quality preset — prevents luxury video from being over-compressed
+      deliveryUrl = deliveryUrl.replace('/video/upload/', '/video/upload/f_auto,q_auto:best/');
+    } else if (result.resource_type === 'image') {
+      deliveryUrl = deliveryUrl.replace('/image/upload/', '/image/upload/f_auto,q_auto:best/');
+    }
+
+    return NextResponse.json({ success: true, path: deliveryUrl });
   } catch (err: any) {
     console.error('UPLOAD ERROR DETAILS:', err);
     const message = err?.message || err?.error?.message || 'Upload failed';

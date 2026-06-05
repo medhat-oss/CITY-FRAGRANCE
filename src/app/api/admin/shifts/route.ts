@@ -238,32 +238,6 @@ export async function POST(request: Request) {
         },
       });
 
-      // Record in ShiftLog (non-blocking)
-      if (typeof prisma.shiftLog !== 'undefined' && prisma.shiftLog !== null) {
-        try {
-          await prisma.shiftLog.create({
-            data: {
-              userId: targetCashierId,
-              userName: cashier.username || activeShift.cashierName || 'Cashier',
-              shiftId: activeShift.id,
-              shiftStartedAt: activeShift.startTime,
-              shiftEndedAt: new Date(),
-              ordersCount: orderCount,
-              cashExpected: totalCash,
-              instapayExpected: totalInstaPay,
-              vodafoneCashExpected: totalVodafoneCash,
-              visaExpected: totalVisa,
-              totalExpected: expectedTotal,
-              actualCashInDrawer: actualCashValue,
-            },
-          });
-        } catch (logErr) {
-          console.error('ShiftLog creation failed (non-blocking):', logErr);
-        }
-      } else {
-        console.warn('prisma.shiftLog is not available — ShiftLog record skipped');
-      }
-
       return {
         orderCount,
         expectedTotal,
@@ -273,8 +247,33 @@ export async function POST(request: Request) {
         totalVisa,
         actualCash: actualCashValue,
         discrepancy,
+        shiftId: activeShift.id,
+        shiftStartedAt: activeShift.startTime,
+        cashierName: activeShift.cashierName || cashier?.username || 'Cashier',
       };
     });
+
+    // Record in ShiftLog OUTSIDE transaction to avoid blocking shift close
+    try {
+      await prisma.shiftLog.create({
+        data: {
+          userId: targetCashierId,
+          userName: result.cashierName,
+          shiftId: result.shiftId,
+          shiftStartedAt: result.shiftStartedAt,
+          shiftEndedAt: new Date(),
+          ordersCount: result.orderCount,
+          cashExpected: result.totalCash,
+          instapayExpected: result.totalInstaPay,
+          vodafoneCashExpected: result.totalVodafoneCash,
+          visaExpected: result.totalVisa,
+          totalExpected: result.expectedTotal,
+          actualCashInDrawer: result.actualCash,
+        },
+      });
+    } catch (logErr) {
+      console.error('ShiftLog creation failed (non-blocking):', logErr);
+    }
 
     return NextResponse.json({ success: true, ...result });
   } catch (err) {

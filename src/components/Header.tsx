@@ -47,7 +47,7 @@ export default function Header() {
   const [announcementText, setAnnouncementText] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/settings', { cache: 'no-store' })
+    fetch('/api/admin/settings')
       .then((res) => res.json())
       .then((data: SiteSettings) => setAnnouncementText(data.announcementText))
       .catch(() => setAnnouncementText(''));

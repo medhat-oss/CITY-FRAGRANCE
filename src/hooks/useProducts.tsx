@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
 import { defaultProducts } from '@/data/defaultProducts';
 import type { Product } from '@/types';
 
@@ -19,7 +20,7 @@ const ProductsContext = createContext<ProductsContextValue | null>(null);
 
 async function fetchProducts(): Promise<Product[]> {
   try {
-    const res = await fetch('/api/products', { cache: 'no-store' });
+    const res = await fetch('/api/products');
     const data = await res.json() as { products: Product[] };
     return data.products;
   } catch {
@@ -27,13 +28,41 @@ async function fetchProducts(): Promise<Product[]> {
   }
 }
 
+/** Returns true when the current route is an admin/cashier-only page */
+function useIsAdminRoute(): boolean {
+  const pathname = usePathname();
+  return (pathname?.startsWith('/admin') || pathname?.startsWith('/cashier')) ?? false;
+}
+
+/** Filter out drafts for storefront visitors; admins see everything */
+function useVisibleProducts(allProducts: Product[]): Product[] {
+  const isAdmin = useIsAdminRoute();
+  return useMemo(
+    () => (isAdmin ? allProducts : allProducts.filter((p) => p.isDraft !== true)),
+    [allProducts, isAdmin]
+  );
+}
+
+/** Multi-collection aware membership check */
+function inCollection(p: Product, collection: string): boolean {
+  if (Array.isArray(p.collections) && p.collections.length > 0) {
+    return p.collections.includes(collection);
+  }
+  return p.collection === collection;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Provider
+// ─────────────────────────────────────────────────────────────────────────────
 export function ProductsProvider({ children }: { children: React.ReactNode }) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  const products = useVisibleProducts(allProducts);
 
   useEffect(() => {
     fetchProducts().then((p) => {
-      setProducts(p);
+      setAllProducts(p);
       setIsLoaded(true);
     });
   }, []);
@@ -47,7 +76,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json() as { success: boolean; product?: Product };
       if (data.success && data.product) {
-        setProducts((prev) => [...prev, data.product!]);
+        setAllProducts((prev) => [...prev, data.product!]);
       }
     } catch {
       // ignore
@@ -63,7 +92,9 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json() as { success: boolean; product?: Product };
       if (data.success && data.product) {
-        setProducts((prev) => prev.map((p) => (p.id === data.product!.id ? data.product! : p)));
+        setAllProducts((prev) =>
+          prev.map((p) => (p.id === data.product!.id ? data.product! : p))
+        );
       }
     } catch {
       // ignore
@@ -79,23 +110,25 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json() as { success: boolean };
       if (data.success) {
-        setProducts((prev) => prev.filter((p) => p.id !== id));
+        setAllProducts((prev) => prev.filter((p) => p.id !== id));
       }
     } catch {
       // ignore
     }
   }, []);
 
-  const getBestSellers = useCallback((): Product[] => {
-    return products
-      .filter(
-        (p) =>
-          p.badge &&
-          (p.badge.toUpperCase().includes('BEST SELLER') ||
-            p.badge.toUpperCase().includes('SALE'))
-      )
-      .slice(0, 4);
-  }, [products]);
+  const getBestSellers = useCallback(
+    (): Product[] =>
+      products
+        .filter(
+          (p) =>
+            p.badge &&
+            (p.badge.toUpperCase().includes('BEST SELLER') ||
+              p.badge.toUpperCase().includes('SALE'))
+        )
+        .slice(0, 4),
+    [products]
+  );
 
   const getProductsByCategory = useCallback(
     (category: string): Product[] => products.filter((p) => p.category === category),
@@ -103,7 +136,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
   );
 
   const getProductsByCollection = useCallback(
-    (collection: string): Product[] => products.filter((p) => p.collection === collection),
+    (collection: string): Product[] => products.filter((p) => inCollection(p, collection)),
     [products]
   );
 
@@ -125,17 +158,22 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Hook (standalone fallback – runs when used outside the Provider tree)
+// ─────────────────────────────────────────────────────────────────────────────
 export function useProducts(): ProductsContextValue {
   const ctx = useContext(ProductsContext);
-  if (ctx) {
-    return ctx;
-  }
-  const [products, setProducts] = useState<Product[]>([]);
+  if (ctx) return ctx;
+
+  // Fallback (rare – only when used outside ProductsProvider)
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  const products = useVisibleProducts(allProducts);
 
   useEffect(() => {
     fetchProducts().then((p) => {
-      setProducts(p);
+      setAllProducts(p);
       setIsLoaded(true);
     });
   }, []);
@@ -149,11 +187,9 @@ export function useProducts(): ProductsContextValue {
       });
       const data = await res.json() as { success: boolean; product?: Product };
       if (data.success && data.product) {
-        setProducts((prev) => [...prev, data.product!]);
+        setAllProducts((prev) => [...prev, data.product!]);
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }, []);
 
   const updateProduct = useCallback(async (updated: Product) => {
@@ -165,11 +201,11 @@ export function useProducts(): ProductsContextValue {
       });
       const data = await res.json() as { success: boolean; product?: Product };
       if (data.success && data.product) {
-        setProducts((prev) => prev.map((p) => (p.id === data.product!.id ? data.product! : p)));
+        setAllProducts((prev) =>
+          prev.map((p) => (p.id === data.product!.id ? data.product! : p))
+        );
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }, []);
 
   const deleteProduct = useCallback(async (id: string) => {
@@ -181,11 +217,9 @@ export function useProducts(): ProductsContextValue {
       });
       const data = await res.json() as { success: boolean };
       if (data.success) {
-        setProducts((prev) => prev.filter((p) => p.id !== id));
+        setAllProducts((prev) => prev.filter((p) => p.id !== id));
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }, []);
 
   const getBestSellers = useCallback(
@@ -200,12 +234,14 @@ export function useProducts(): ProductsContextValue {
         .slice(0, 4),
     [products]
   );
+
   const getProductsByCategory = useCallback(
     (category: string): Product[] => products.filter((p) => p.category === category),
     [products]
   );
+
   const getProductsByCollection = useCallback(
-    (collection: string): Product[] => products.filter((p) => p.collection === collection),
+    (collection: string): Product[] => products.filter((p) => inCollection(p, collection)),
     [products]
   );
 

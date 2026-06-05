@@ -16,9 +16,10 @@ const styleInject = `
 `;
 
 export default function AnnouncementBar({
-  announcementText = 'EID AL ADHA SALE UP TO 20% OFF ENDS SOON... SHOP NOW',
+  announcementText = '',
 }) {
-  if (!announcementText) return null;
+  const isHidden = !announcementText || announcementText === 'HIDDEN' || announcementText.trim() === '';
+  if (isHidden) return null;
 
   const dots = `<span class="px-4 opacity-40" aria-hidden="true">&#8226;</span>`;
 
