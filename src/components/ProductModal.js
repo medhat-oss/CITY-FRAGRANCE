@@ -209,6 +209,10 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
       collections: formData.collections,
       collection: formData.collections[0] || formData.collection || '',
     });
+    // Reset form to prevent old images/data from persisting for the next add
+    setFormData(EMPTY_FORM);
+    setUploadError('');
+    setVideoUploadError('');
   };
 
   if (!isOpen) return null;

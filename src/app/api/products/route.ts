@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
 import { unstable_noStore as noStore } from 'next/cache';
-import { readJsonFile } from '@/lib/dataFile';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   noStore();
-  const products = await readJsonFile<any[]>('products.json', []);
-  return NextResponse.json({ products });
+  try {
+    const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
+    return NextResponse.json({ products });
+  } catch (err) {
+    console.error('PRODUCTS FETCH ERROR:', err);
+    return NextResponse.json({ products: [] });
+  }
 }

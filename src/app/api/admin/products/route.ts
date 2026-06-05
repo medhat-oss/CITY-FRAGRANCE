@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { unstable_noStore as noStore } from 'next/cache';
-import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import { prisma } from '@/lib/prisma';
-
-const FILE = 'products.json';
 
 /** All known collection slugs that exist in the DB */
 const KNOWN_SLUGS = [
@@ -16,16 +12,10 @@ const KNOWN_SLUGS = [
   'oud-collection',
 ];
 
-/**
- * Ensure every slug in the array exists as a Collection row, then return
- * an array of { id } objects ready for Prisma connect/set.
- */
 async function resolveCollectionIds(slugs: string[]): Promise<{ id: string }[]> {
   if (!slugs || slugs.length === 0) return [];
-
   const unique = [...new Set(slugs.filter((s) => KNOWN_SLUGS.includes(s)))];
   if (unique.length === 0) return [];
-
   const rows = await prisma.collection.findMany({
     where: { slug: { in: unique } },
     select: { id: true },
@@ -48,21 +38,19 @@ function revalidateAll() {
 }
 
 export async function GET() {
-  noStore();
-  const products = await readJsonFile<any[]>(FILE, []);
-  return NextResponse.json({ products });
+  try {
+    const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
+    return NextResponse.json({ products });
+  } catch (err) {
+    console.error('PRODUCTS GET ERROR:', err);
+    return NextResponse.json({ products: [] });
+  }
 }
 
 export async function POST(request: Request) {
   try {
     const product = await request.json();
 
-    // ── 1. persist to local JSON ──────────────────────────────────────────
-    const products = await readJsonFile<any[]>(FILE, []);
-    products.push(product);
-    await writeJsonFile(FILE, products);
-
-    // ── 2. sync to Prisma DB ─────────────────────────────────────────────
     const slugs: string[] = Array.isArray(product.collections)
       ? product.collections
       : product.collection
@@ -87,26 +75,19 @@ export async function POST(request: Request) {
       stock: product.stock !== undefined ? product.stock : 0,
     };
 
-    await prisma.product.upsert({
+    const created = await prisma.product.upsert({
       where: { id: product.id },
-      update: {
-        ...dbData,
-        collections: { set: collectionIds },
-      },
-      create: {
-        id: product.id,
-        ...dbData,
-        collections: { connect: collectionIds },
-      },
+      update: { ...dbData, collections: { set: collectionIds } },
+      create: { id: product.id, ...dbData, collections: { connect: collectionIds } },
     });
 
     revalidateAll();
-    return NextResponse.json({ success: true, product });
+    return NextResponse.json({ success: true, product: created });
   } catch (err) {
-    console.error('PRODUCT ADD DATABASE ERROR:', err);
+    console.error('PRODUCT ADD ERROR:', err);
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Failed to add product' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -115,16 +96,6 @@ export async function PUT(request: Request) {
   try {
     const updated = await request.json();
 
-    // ── 1. persist to local JSON ──────────────────────────────────────────
-    const products = await readJsonFile<any[]>(FILE, []);
-    const index = products.findIndex((p: { id: string }) => p.id === updated.id);
-    if (index === -1) {
-      return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
-    }
-    products[index] = updated;
-    await writeJsonFile(FILE, products);
-
-    // ── 2. sync to Prisma DB ─────────────────────────────────────────────
     const slugs: string[] = Array.isArray(updated.collections)
       ? updated.collections
       : updated.collection
@@ -149,56 +120,41 @@ export async function PUT(request: Request) {
       stock: updated.stock !== undefined ? updated.stock : 0,
     };
 
-    await prisma.product.upsert({
+    const saved = await prisma.product.upsert({
       where: { id: updated.id },
-      update: {
-        ...dbData,
-        collections: { set: collectionIds },
-      },
-      create: {
-        id: updated.id,
-        ...dbData,
-        collections: { connect: collectionIds },
-      },
+      update: { ...dbData, collections: { set: collectionIds } },
+      create: { id: updated.id, ...dbData, collections: { connect: collectionIds } },
     });
 
     revalidateAll();
-    return NextResponse.json({ success: true, product: updated });
+    return NextResponse.json({ success: true, product: saved });
   } catch (err) {
-    console.error('PRODUCT UPDATE DATABASE ERROR:', err);
+    console.error('PRODUCT UPDATE ERROR:', err);
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Failed to update product' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(request: Request) {
   try {
-    const { id } = await request.json() as { id: string };
+    const { id } = (await request.json()) as { id: string };
 
-    // ── 1. remove from local JSON ─────────────────────────────────────────
-    const products = await readJsonFile<any[]>(FILE, []);
-    const filtered = products.filter((p: { id: string }) => p.id !== id);
-    if (filtered.length === products.length) {
-      return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ success: false, error: 'Product not found in database' }, { status: 404 });
     }
-    await writeJsonFile(FILE, filtered);
 
-    // ── 2. remove from Prisma DB ─────────────────────────────────────────
-    try {
-      await prisma.product.delete({ where: { id } });
-    } catch (e) {
-      console.warn('Prisma product delete failed or did not exist:', e);
-    }
+    await prisma.product.delete({ where: { id } });
 
     revalidateAll();
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error('PRODUCT DELETE DATABASE ERROR:', err);
+    console.error('PRODUCT DELETE ERROR:', err);
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Failed to delete product' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
