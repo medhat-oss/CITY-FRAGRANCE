@@ -32,16 +32,6 @@ const nextConfig = {
     return config;
   },
 
-  // ─── Reduce the set of files Next.js traces for output bundling ──────────
-  // Prevents it from crawling all of node_modules on every cold start.
-  outputFileTracingExcludes: {
-    '*': [
-      'node_modules/@swc/**',
-      'node_modules/webpack/**',
-      'node_modules/terser/**',
-      'node_modules/next/dist/compiled/**',
-    ],
-  },
 
   // ─── Logging: show full revalidation + fetch cache activity in dev ────────
   logging: {
