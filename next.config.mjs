@@ -10,6 +10,10 @@ const nextConfig = {
     ],
   },
 
+  // ─── Required empty turbopack config so Next.js 16 doesn't error when
+  //     it finds a webpack config below while running in Turbo mode. ──────
+  turbopack: {},
+
   // ─── Webpack: faster incremental builds on Windows ────────────────────────
   webpack: (config, { dev, isServer }) => {
     if (dev) {
