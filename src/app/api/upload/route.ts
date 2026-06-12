@@ -5,11 +5,7 @@ const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const apiKey = process.env.CLOUDINARY_API_KEY;
 const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-console.log('CLOUDINARY CONFIG:', {
-  cloud_name: cloudName,
-  api_key: apiKey ? `set (${apiKey.length} chars)` : 'MISSING',
-  api_secret: apiSecret ? `set (${apiSecret.length} chars)` : 'MISSING',
-});
+
 
 cloudinary.config({
   cloud_name: cloudName,

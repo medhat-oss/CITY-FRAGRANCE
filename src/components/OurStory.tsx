@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 const values = [
@@ -54,7 +55,17 @@ export default function OurStory() {
     <div className="bg-[#09142E] text-white/80 font-body">
       {/* ─── Hero ─── */}
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/images/product-placeholder.png')] bg-cover bg-center opacity-5" />
+        {/* LCP image — priority + eager so the browser preloads it in the document head */}
+        <Image
+          src="/images/product-placeholder.png"
+          alt=""
+          fill
+          priority
+          loading="eager"
+          sizes="100vw"
+          style={{ objectFit: 'cover', opacity: 0.05 }}
+          aria-hidden="true"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-[#09142E]/60 via-[#09142E]/80 to-[#09142E]" />
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <p className="text-white/60 font-heading text-sm tracking-[0.3em] uppercase mb-6 animate-fade-up">

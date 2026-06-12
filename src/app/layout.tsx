@@ -106,7 +106,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" dir="ltr" className={`dark ${instrumentSans.variable} ${jost.variable}`}>
+    <html lang="en" dir="ltr" suppressHydrationWarning data-scroll-behavior="smooth" className={`dark ${instrumentSans.variable} ${jost.variable}`}>
       <body>
         <ThemeProvider>
           <LocaleProvider>

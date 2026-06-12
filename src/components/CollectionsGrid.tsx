@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { HiArrowRight } from 'react-icons/hi2';
 import type { CollectionData } from '@/types';
 import { getOptimizedVideoUrl } from '@/lib/videoUtils';
+import { dedupFetch } from '@/lib/dedupFetch';
 
 interface Collection {
   id: string;
@@ -34,9 +35,8 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
   useEffect(() => {
     if (fetched.current) return;
     fetched.current = true;
-    fetch('/api/collections', { cache: 'no-store' })
-      .then((res) => res.json())
-      .then((data: { images: Record<string, CollectionData> }) => setCollectionData(data.images))
+    dedupFetch<{ images: Record<string, CollectionData> }>('/api/collections')
+      .then((data) => setCollectionData(data.images))
       .catch(() => {});
   }, []);
 
@@ -67,60 +67,49 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
       </section>
 
       {/* ─── Grid ─── */}
-      <section className="max-w-7xl mx-auto px-6 pb-24">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
-          {collections.map((collection) => (
+      <section className="max-w-5xl mx-auto px-4 pb-24">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
+          {collections.map((collection, index) => (
             <Link
-              key={collection.id}
+              key={`${collection.id}-${index}`}
               href={collection.href}
               prefetch={true}
-              className="group relative block h-[280px] sm:h-[480px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-500 hover:border-white/40 hover:shadow-[0_0_50px_rgba(255,255,255,0.08)]"
+              className="relative group w-full mx-auto cursor-pointer rounded-2xl overflow-hidden aspect-square transition-transform duration-300 ease-out hover:scale-[1.03] transform-gpu backface-hidden translate-z-0 will-change-transform"
             >
-              {/* Background: Video or Image */}
-              <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-110">
-                {collection.videoUrl ? (
-                  <video
-                    src={getOptimizedVideoUrl(collection.videoUrl)}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="auto"
-                    className="w-full h-full object-cover object-center"
-                  />
-                ) : (
-                  <Image
-                    src={collection.image}
-                    alt={collection.title}
-                    fill
-                    priority
-                    className="object-cover"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                )}
-              </div>
+              {collection.videoUrl ? (
+                <video
+                  src={getOptimizedVideoUrl(collection.videoUrl)}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={collection.image}
+                  alt={collection.title}
+                  fill
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                  className="object-cover"
+                />
+              )}
 
-              {/* Overlay — deeper when video is active */}
-              <div className={`absolute inset-0 transition-opacity duration-500 ${collection.videoUrl ? 'bg-gradient-to-t from-black/75 via-black/25 to-black/10 group-hover:from-black/85' : 'bg-gradient-to-t from-[#09142E] via-[#09142E]/60 to-[#09142E]/20 group-hover:from-[#09142E]'}`} />
-
-              {/* Content */}
-              <div className="absolute inset-0 flex flex-col justify-end p-3 sm:p-8 z-10">
-                <div className="mb-2 sm:mb-5">
-                  <h3 className="font-heading text-base sm:text-3xl font-light text-white leading-tight sm:leading-normal">
-                    {collection.title}
-                  </h3>
-                  <p className="text-white/60 text-[10px] sm:text-sm leading-tight sm:leading-relaxed mt-1 sm:mt-0">
+              {/* Full-card Glassmorphic Overlay */}
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col items-center justify-center p-6 text-center opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out">
+                <h3 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-normal text-white leading-tight mb-3">
+                  {collection.title}
+                </h3>
+                {collection.description && (
+                  <p className="font-body text-white/90 text-sm sm:text-base leading-relaxed mb-5 sm:mb-6 max-w-[90%] drop-shadow-sm">
                     {collection.description}
                   </p>
-                </div>
-
-                {/* Divider */}
-                <div className="w-8 sm:w-12 h-px bg-white/20 mb-2 sm:mb-4 transition-all duration-500 group-hover:w-full group-hover:bg-white/40" />
-
-                {/* CTA */}
-                <span className="inline-flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs font-heading uppercase tracking-[0.1em] sm:tracking-[0.15em] text-white/70 transition-all duration-300 group-hover:text-white group-hover:gap-2 sm:group-hover:gap-3">
+                )}
+                <div className="w-12 sm:w-16 h-[2px] bg-white/40 mb-4 sm:mb-5 transition-all duration-500 group-hover:w-20 sm:group-hover:w-24" />
+                <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-heading font-semibold uppercase tracking-[0.2em] text-white transition-all duration-300 group-hover:gap-3">
                   Explore Collection
-                  <HiArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
+                  <HiArrowRight className="transition-transform duration-300 group-hover:translate-x-1.5" />
                 </span>
               </div>
             </Link>
@@ -130,4 +119,3 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
     </div>
   );
 }
-

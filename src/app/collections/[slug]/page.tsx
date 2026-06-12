@@ -9,6 +9,8 @@ import { useProducts } from '@/hooks/useProducts';
 import { formatEGP } from '@/utils/currency';
 import { HiArrowRight } from 'react-icons/hi2';
 import type { CollectionData } from '@/types';
+import { dedupFetch } from '@/lib/dedupFetch';
+import { fetchCachedSettings } from '@/lib/settingsCache';
 
 const COLLECTION_TITLES: Record<string, string> = {
   'new-arrivals': 'NEW ARRIVALS',
@@ -57,13 +59,13 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
     if (slug === 'gift-sets') {
       fetch('/api/gift-sets').then((r) => r.json()).then((d) => setGiftSets(d.giftSets || [])).catch(() => {});
     }
-    fetch('/api/collections').then((r) => r.json()).then((d) => {
-      const entry = d.images?.[slug] as CollectionData | undefined;
+    dedupFetch<{ images: Record<string, CollectionData> }>('/api/collections').then((d) => {
+      const entry = d.images?.[slug];
       if (entry) setCollectionInfo({ image: entry.image, description: entry.description });
     }).catch(() => {});
 
     // Fetch site settings to retrieve collection specific videos
-    fetch('/api/admin/settings').then((r) => r.json()).then((d) => {
+    fetchCachedSettings<any>().then((d) => {
       const videoKey = COLLECTION_VIDEO_KEYS[slug];
       if (videoKey && d[videoKey]) {
         setVideoUrl(d[videoKey]);

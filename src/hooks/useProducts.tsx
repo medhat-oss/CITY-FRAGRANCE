@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, createContext, useContext, useCallback, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { defaultProducts } from '@/data/defaultProducts';
 import type { Product } from '@/types';
@@ -34,6 +34,21 @@ function useIsAdminRoute(): boolean {
   return (pathname?.startsWith('/admin') || pathname?.startsWith('/cashier')) ?? false;
 }
 
+/**
+ * Routes that actually need product data fetched eagerly.
+ * Pages like /stores, /about, /privacy-policy, /order-payment do NOT render
+ * product cards, so we skip the DB round-trip there entirely.
+ */
+const PRODUCT_ROUTES = [
+  '/', '/collections', '/product', '/search',
+  '/admin', '/cashier',
+];
+
+function useNeedsProducts(): boolean {
+  const pathname = usePathname() ?? '';
+  return PRODUCT_ROUTES.some((prefix) => pathname === prefix || pathname.startsWith(prefix + '/') || pathname.startsWith(prefix + '?'));
+}
+
 /** Filter out drafts for storefront visitors; admins see everything */
 function useVisibleProducts(allProducts: Product[]): Product[] {
   const isAdmin = useIsAdminRoute();
@@ -57,14 +72,33 @@ function inCollection(p: Product, collection: string): boolean {
 export function ProductsProvider({ children }: { children: React.ReactNode }) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const needsProducts = useNeedsProducts();
+  // ── Fetch-lock ref: prevents the infinite loop caused by needsProducts
+  // changing on every client-side navigation (pathname changes → needsProducts
+  // recomputes → useEffect re-fires → /api/products hammered 4-5×/second).
+  // We capture the initial value once and never fetch again after first load.
+  const hasFetchedRef = useRef(false);
 
   const products = useVisibleProducts(allProducts);
 
   useEffect(() => {
+    // Already fetched (or explicitly skipped) — never re-run on navigation.
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+
+    // Skip the expensive /api/products call on routes that don't render product
+    // cards (e.g. /stores, /about, /privacy-policy, /order-payment).
+    if (!needsProducts) {
+      setIsLoaded(true);
+      return;
+    }
     fetchProducts().then((p) => {
       setAllProducts(p);
       setIsLoaded(true);
     });
+  // Intentionally omit needsProducts from deps — it must NOT re-trigger this
+  // effect on navigation. The initial value is captured via closure on mount.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addProduct = useCallback(async (product: Product) => {

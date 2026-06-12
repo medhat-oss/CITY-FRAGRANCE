@@ -68,17 +68,10 @@ export async function verifySession(): Promise<SessionPayload | null> {
  * is never overridden by an admin_session cookie from another tab.
  * Falls back to verifySession() (admin-preferred) when no cashier cookie exists.
  */
-export async function verifySessionForPOS(cashierId?: string): Promise<SessionPayload | null> {
+export async function verifySessionForPOS(): Promise<SessionPayload | null> {
   // 1. Check cashier_session FIRST (POS operations belong to the cashier, not the admin)
   const cashierSession = await verifyCashierSession();
   if (cashierSession) {
-    // If the caller provided a cashierId, validate it matches (security check)
-    if (cashierId && cashierSession.id !== cashierId) {
-      console.warn(
-        `[verifySessionForPOS] Mismatch: body.cashierId="${cashierId}" !== cashier_session.id="${cashierSession.id}". ` +
-        'Ignoring provided cashierId and using session identity.'
-      );
-    }
     return cashierSession;
   }
 

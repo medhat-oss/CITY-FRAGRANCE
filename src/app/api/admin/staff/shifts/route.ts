@@ -1,5 +1,8 @@
+// AI GUARDRAIL: This is an admin-only view of a specific cashier's shift history.
+// The `userId` query parameter selects which user to view — do NOT replace with session.id.
+
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import { verifySession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -7,7 +10,15 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const session = await verifySession();
-    if (!session || session.role !== 'ADMIN') {
+    if (!session?.id) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
+    // Verify admin role directly from DB
+    const rows = await prisma.$queryRaw<Array<{ role: string }>>`
+      SELECT role::text FROM "User" WHERE id = ${session.id} LIMIT 1
+    `;
+    if (rows.length === 0 || rows[0].role !== 'ADMIN') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 

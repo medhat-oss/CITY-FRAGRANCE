@@ -140,7 +140,7 @@ export default function CashierPage() {
 
     boot();
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ── Filters ── */
@@ -163,7 +163,7 @@ export default function CashierPage() {
       const idx = prev.findIndex((l) => l.item.id === item.id);
       const currentQty = idx >= 0 ? prev[idx].qty : 0;
       if (currentQty + 1 > stockLimit) {
-        alert(`عذراً، الكمية المتاحة في المخزن هي ${stockLimit} فقط\nSorry, only ${stockLimit} items left in stock`);
+        alert(`Sorry, only ${stockLimit} items left in stock`);
         return prev;
       }
       if (idx >= 0) {
@@ -182,7 +182,7 @@ export default function CashierPage() {
       const item = prev[idx].item;
       const stockLimit = item.stock !== undefined ? item.stock : 999;
       if (delta > 0 && prev[idx].qty + delta > stockLimit) {
-        alert(`عذراً، الكمية المتاحة في المخزن هي ${stockLimit} فقط\nSorry, only ${stockLimit} items left in stock`);
+        alert(`Sorry, only ${stockLimit} items left in stock`);
         return prev;
       }
       return prev.map((l) =>
@@ -207,7 +207,12 @@ export default function CashierPage() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [payMethod, setPayMethod] = useState('cash');
   const [submitting, setSubmitting] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState<string | null>(null);
+  const [orderData, setOrderData] = useState<{
+    orderId: string;
+    items: { name: string; quantity: number; price: number }[];
+    totalPrice: number;
+    cashierName?: string;
+  } | null>(null);
 
   /** Ensure an OPEN shift exists for the current cashier; creates one if needed */
   async function ensureActiveShift(userId?: string): Promise<boolean> {
@@ -224,15 +229,19 @@ export default function CashierPage() {
       });
 
       if (res.status === 400) {
-        // Read body once and inspect
-        const errText = await res.text().catch(() => '');
-        if (errText.includes('Active shift already exists')) {
-          // Cashier already has a valid open shift — this is a success, not an error
-          console.info('ensureActiveShift: shift already open for', id);
-          return true;
+        // Parse the structured error; the API returns { code: 'SHIFT_ALREADY_OPEN' }
+        // when the cashier already has an open shift — treat that as success.
+        try {
+          const errData = await res.json();
+          if (errData?.code === 'SHIFT_ALREADY_OPEN' || errData?.error?.includes('Active shift already exists')) {
+            console.info('ensureActiveShift: shift already open for', id);
+            return true;
+          }
+          console.error('ensureActiveShift 400:', errData);
+        } catch {
+          const errText = await res.text().catch(() => '');
+          console.error('ensureActiveShift 400 (unparseable):', errText);
         }
-        // Genuine 400 (unexpected)
-        console.error('ensureActiveShift 400:', errText);
         return false;
       }
 
@@ -286,7 +295,12 @@ export default function CashierPage() {
       }
       const data = await res.json();
       if (data.success) {
-        setOrderSuccess(data.order?.orderId || 'OK');
+        setOrderData({
+          orderId: data.order?.orderId || 'OK',
+          items: data.order?.items || [],
+          totalPrice: data.order?.totalPrice || grandTotal,
+          cashierName: currentUser?.username || 'Cashier',
+        });
         setCart([]);
         setDiscount('');
       } else {
@@ -299,7 +313,7 @@ export default function CashierPage() {
   }
 
   function closeSuccess() {
-    setOrderSuccess(null);
+    setOrderData(null);
     setShowCheckout(false);
     setCustomerName('');
     setCustomerPhone('');
@@ -396,7 +410,7 @@ export default function CashierPage() {
       const errMsg = err instanceof Error ? err.message : String(err);
       console.error("CRITICAL SHIFT OPEN ERROR:", err);
       setShiftError(`Failed to load shift data: ${errMsg}`);
-      alert(`حدث خطأ أثناء تحميل الوردية: ${errMsg}`);
+      alert(`Error loading shift: ${errMsg}`);
     } finally {
       setShiftLoading(false);
     }
@@ -417,7 +431,7 @@ export default function CashierPage() {
         let errorMessage = 'Authentication failed';
         try {
           const errData = JSON.parse(errorText);
-          errorMessage = errData?.error === 'Incorrect shift password' ? 'Incorrect shift password / كلمة المرور غير صحيحة' : (errData?.error || errorMessage);
+          errorMessage = errData?.error === 'Incorrect shift password' ? 'Incorrect shift password' : (errData?.error || errorMessage);
         } catch {
           console.error('Non-JSON 401 response:', errorText.slice(0, 300));
         }
@@ -504,7 +518,7 @@ export default function CashierPage() {
       }
     } catch (err: any) {
       console.error("CRITICAL SHIFT CHECKOUT ERROR:", err);
-      alert("حدث خطأ أثناء التصفية: " + (err?.message || String(err)));
+      alert("Error closing shift: " + (err?.message || String(err)));
       setShiftSubmitting(false);
     }
   }
@@ -536,7 +550,7 @@ export default function CashierPage() {
 
   /* ── Payment methods config ── */
   const PAY_METHODS = [
-    { key: 'cash', label: 'Cash / كاش', icon: <FaMoneyBillWave /> },
+    { key: 'cash', label: 'Cash', icon: <FaMoneyBillWave /> },
     { key: 'vodafone', label: 'Vodafone Cash', icon: <FaMobileAlt /> },
     { key: 'instapay', label: 'InstaPay', icon: <FaExchangeAlt /> },
     { key: 'visa', label: 'Visa / Card', icon: <FaCreditCard /> },
@@ -547,7 +561,7 @@ export default function CashierPage() {
     return (
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        height: '100vh', background: '#0a0a0b', color: '#c5a880'
+        height: '100vh', background: '#16234D', color: '#ffffff'
       }}>
         <FaSpinner className="animate-spin" style={{ fontSize: '2.5rem' }} />
       </div>
@@ -555,28 +569,28 @@ export default function CashierPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#0a0a0b] text-white overflow-hidden">
+    <div dir="ltr" className="flex flex-col h-screen bg-[#16234D] text-white overflow-hidden">
       {/* ── Header ── */}
-      <header className="flex items-center justify-between px-3 md:px-6 py-3 bg-[#111827] border-b border-white/10 flex-shrink-0">
+      <header className="flex items-center justify-between px-3 md:px-6 py-3 bg-[#111B3D] border-b border-white/10 flex-shrink-0">
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
-          <FaCashRegister style={{ color: '#c5a880', fontSize: '1.2rem', flexShrink: 0 }} />
+          <FaCashRegister style={{ color: '#ffffff', fontSize: '1.2rem', flexShrink: 0 }} />
           <h1 className="font-heading text-sm md:text-lg font-semibold text-[#f8f9fa] m-0 tracking-wider truncate">
             CITY FRAGRANCE POS
           </h1>
-          <span className="hidden sm:inline text-xs md:text-sm text-[#64748b] font-normal">/ نظام الكاشير</span>
+          <span className="hidden sm:inline text-xs md:text-sm text-[#64748b] font-normal">POS System</span>
         </div>
 
         {/* ── Desktop right section ── */}
         <div className="hidden md:flex items-center gap-2 lg:gap-3">
           {currentUser && (
             <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full text-xs lg:text-sm text-[#cbd5e1]">
-              <FaUser style={{ color: '#c5a880', fontSize: '0.75rem' }} />
+              <FaUser style={{ color: '#ffffff', fontSize: '0.75rem' }} />
               <span className="truncate max-w-[120px]">{currentUser.username} ({currentUser.role})</span>
             </div>
           )}
           <button
             onClick={() => { setShowPasswordModal(true); setPasswordValue(''); setPasswordError(''); }}
-            className="flex items-center gap-1.5 bg-transparent border border-[#c5a880]/50 rounded-lg text-[#c5a880] px-3 py-1.5 text-xs lg:text-sm font-semibold cursor-pointer transition-all font-heading tracking-wider whitespace-nowrap hover:bg-[#c5a880]/10 hover:border-[#c5a880]"
+            className="flex items-center gap-1.5 bg-transparent border border-white/50 rounded-lg text-white px-3 py-1.5 text-xs lg:text-sm font-semibold cursor-pointer transition-all font-heading tracking-wider whitespace-nowrap hover:bg-white/10 hover:border-white"
           >
             <FaClipboardList style={{ flexShrink: 0 }} />
             <span>End Shift</span>
@@ -599,7 +613,7 @@ export default function CashierPage() {
           >
             <span>Sale</span>
             {cart.length > 0 && (
-              <span className="bg-[#c5a880] text-[#0a0a0b] text-[0.6rem] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="bg-white text-[#16234D] text-[0.6rem] font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {cart.length}
               </span>
             )}
@@ -625,11 +639,11 @@ export default function CashierPage() {
 
       {/* ── Mobile sidebar drawer ── */}
       <aside
-        className={`fixed inset-y-0 right-0 z-50 w-64 bg-[#09142E] shadow-xl transform transition-transform duration-300 md:hidden ${mobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed inset-y-0 right-0 z-50 w-64 bg-[#111B3D] shadow-xl transform transition-transform duration-300 md:hidden ${mobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <div className="flex flex-col h-full p-5">
           <div className="flex items-center justify-between mb-6">
-            <span className="font-heading text-sm text-[#c5a880] tracking-widest uppercase">Menu</span>
+            <span className="font-heading text-sm text-white tracking-widest uppercase">Menu</span>
             <button
               onClick={() => setMobileDrawerOpen(false)}
               className="text-[#64748b] cursor-pointer bg-transparent border-none p-1"
@@ -640,7 +654,7 @@ export default function CashierPage() {
 
           {currentUser && (
             <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2.5 mb-4">
-              <FaUser style={{ color: '#c5a880', fontSize: '0.85rem', flexShrink: 0 }} />
+              <FaUser style={{ color: '#ffffff', fontSize: '0.85rem', flexShrink: 0 }} />
               <div className="min-w-0">
                 <div className="text-sm text-white font-semibold truncate">{currentUser.username}</div>
                 <div className="text-[0.6rem] text-[#94a3b8] uppercase tracking-wider">{currentUser.role}</div>
@@ -650,10 +664,10 @@ export default function CashierPage() {
 
           <button
             onClick={() => { setMobileDrawerOpen(false); setShowPasswordModal(true); setPasswordValue(''); setPasswordError(''); }}
-            className="flex items-center gap-3 w-full bg-transparent border border-[#c5a880]/40 rounded-lg text-[#c5a880] px-4 py-3 text-sm font-semibold cursor-pointer transition-all mb-3 hover:bg-[#c5a880]/10"
+            className="flex items-center gap-3 w-full bg-transparent border border-white/40 rounded-lg text-white px-4 py-3 text-sm font-semibold cursor-pointer transition-all mb-3 hover:bg-white/10"
           >
             <FaClipboardList style={{ flexShrink: 0 }} />
-            <span>End Shift / تصفية الوردية</span>
+            <span>End Shift</span>
           </button>
 
           <button
@@ -661,7 +675,7 @@ export default function CashierPage() {
             className="flex items-center gap-3 w-full bg-transparent border border-red-500/40 rounded-lg text-red-500 px-4 py-3 text-sm font-semibold cursor-pointer transition-all hover:bg-red-500/10"
           >
             <FaSignOutAlt style={{ flexShrink: 0 }} />
-            <span>Logout / تسجيل خروج</span>
+            <span>Logout</span>
           </button>
         </div>
       </aside>
@@ -677,9 +691,9 @@ export default function CashierPage() {
               <button key={key} onClick={() => setFilter(key)}
                 className="text-[0.65rem] md:text-xs font-semibold font-heading tracking-wider cursor-pointer transition-all px-2.5 md:px-4 py-1.5 md:py-2 rounded-full border"
                 style={{
-                  background: filter === key ? '#c5a880' : 'transparent',
-                  color: filter === key ? '#0a0a0b' : '#cbd5e1',
-                  borderColor: filter === key ? '#c5a880' : 'rgba(255,255,255,0.15)',
+                  background: filter === key ? '#ffffff' : 'transparent',
+                  color: filter === key ? '#16234D' : '#cbd5e1',
+                  borderColor: filter === key ? '#ffffff' : 'rgba(255,255,255,0.15)',
                 }}
               >{label}</button>
             ))}
@@ -708,7 +722,7 @@ export default function CashierPage() {
                     }}
                     onMouseEnter={(e) => {
                       if (!isOutOfStock) {
-                        e.currentTarget.style.borderColor = '#c5a880';
+                        e.currentTarget.style.borderColor = '#ffffff';
                         e.currentTarget.style.transform = 'translateY(-2px)';
                       }
                     }}
@@ -722,7 +736,7 @@ export default function CashierPage() {
                     <div style={{ position: 'relative', width: '100%', aspectRatio: '1', background: '#1e293b' }}>
                       <ImageWithFallback src={item.image} alt={item.name} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
                       {item.kind === 'gift-set' && (
-                        <span className="absolute top-1 left-1 bg-[#c5a880] text-[#0a0a0b] text-[0.5rem] md:text-[0.55rem] font-bold px-1.5 py-0.5 rounded tracking-wider">GIFT</span>
+                        <span className="absolute top-1 left-1 bg-white text-[#16234D] text-[0.5rem] md:text-[0.55rem] font-bold px-1.5 py-0.5 rounded tracking-wider">GIFT</span>
                       )}
                       {item.stock !== undefined && (
                         <span
@@ -738,7 +752,7 @@ export default function CashierPage() {
                     </div>
                     <div className="px-2 md:px-2.5 py-1.5 md:py-2">
                       <p className="m-0 text-[0.65rem] md:text-xs font-semibold text-[#e2e8f0] truncate">{item.name}</p>
-                      <p className="m-0 pt-0.5 text-xs md:text-sm font-bold text-[#c5a880] font-heading">{formatEGP(item.price)}</p>
+                      <p className="m-0 pt-0.5 text-xs md:text-sm font-bold text-white font-heading">{formatEGP(item.price)}</p>
                     </div>
                   </button>
                 );
@@ -753,7 +767,7 @@ export default function CashierPage() {
         {/* ─── RIGHT: Cart / Receipt (desktop sidebar / mobile bottom drawer) ─── */}
 
         {/* Desktop cart panel */}
-        <div className="hidden md:flex flex-col w-80 lg:w-88 flex-shrink-0 bg-[#111827] border border-white/10 rounded-xl overflow-hidden">
+        <div className="hidden md:flex flex-col w-80 lg:w-88 flex-shrink-0 bg-[#111B3D] border border-white/10 rounded-xl overflow-hidden">
           <CartPanel
             cart={cart}
             subtotal={subtotal}
@@ -764,7 +778,7 @@ export default function CashierPage() {
             qtyBtnStyle={qtyBtnStyle}
             updateQty={updateQty}
             removeFromCart={removeFromCart}
-            onCheckout={() => { setShowCheckout(true); setOrderSuccess(null); }}
+            onCheckout={() => { setShowCheckout(true); setOrderData(null); }}
           />
         </div>
       </div>
@@ -774,14 +788,14 @@ export default function CashierPage() {
         {/* Floating cart summary bar */}
         <button
           onClick={() => setMobileCartOpen(!mobileCartOpen)}
-          className="w-full flex items-center justify-between px-4 py-2.5 bg-[#111827] border-t border-white/10"
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-[#111B3D] border-t border-white/10"
         >
           <div className="flex items-center gap-2">
             <span className="font-heading text-xs text-[#94a3b8] uppercase tracking-wider">Cart</span>
             <span className="text-xs text-[#64748b]">({cart.length})</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="font-heading text-sm font-bold text-[#c5a880]">{formatEGP(grandTotal)}</span>
+            <span className="font-heading text-sm font-bold text-white">{formatEGP(grandTotal)}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className={`h-4 w-4 text-[#64748b] transition-transform ${mobileCartOpen ? 'rotate-180' : ''}`}
@@ -794,7 +808,7 @@ export default function CashierPage() {
 
         {/* Expandable cart panel on mobile */}
         {mobileCartOpen && (
-          <div className="max-h-[50vh] overflow-y-auto bg-[#111827] border-t border-white/5 px-2 py-2">
+          <div className="max-h-[50vh] overflow-y-auto bg-[#111B3D] border-t border-white/5 px-2 py-2">
             <CartPanel
               cart={cart}
               subtotal={subtotal}
@@ -805,7 +819,7 @@ export default function CashierPage() {
               qtyBtnStyle={qtyBtnStyle}
               updateQty={updateQty}
               removeFromCart={removeFromCart}
-              onCheckout={() => { setShowCheckout(true); setOrderSuccess(null); }}
+              onCheckout={() => { setShowCheckout(true); setOrderData(null); }}
             />
           </div>
         )}
@@ -814,14 +828,14 @@ export default function CashierPage() {
       {/* ── Shift Password Modal ── */}
       {showPasswordModal && (
         <div onClick={() => { if (!passwordVerifying) setShowPasswordModal(false); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn 0.2s ease' }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: '#0a0a0b', border: '1px solid rgba(197,168,128,0.25)', borderRadius: 14, width: '90%', maxWidth: 380, padding: '2rem', boxShadow: '0 20px 60px rgba(0,0,0,0.6)', textAlign: 'center' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#111B3D', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 14, width: '90%', maxWidth: 380, padding: '2rem', boxShadow: '0 20px 60px rgba(0,0,0,0.6)', textAlign: 'center' }}>
             <div style={{ marginBottom: '1.25rem' }}>
-              <FaClipboardList style={{ color: '#c5a880', fontSize: '1.5rem', marginBottom: '0.5rem' }} />
+              <FaClipboardList style={{ color: '#ffffff', fontSize: '1.5rem', marginBottom: '0.5rem' }} />
               <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.05rem', fontWeight: 600, color: '#f8f9fa', margin: 0 }}>
                 Enter Shift Password
               </h3>
               <p style={{ color: '#94a3b8', fontSize: '0.78rem', margin: '0.35rem 0 0' }}>
-                أدخل كلمة مرور الوردية للمتابعة
+                Enter the shift password to continue
               </p>
             </div>
 
@@ -830,7 +844,7 @@ export default function CashierPage() {
                 type="password"
                 value={passwordValue}
                 onChange={(e) => { setPasswordValue(e.target.value); setPasswordError(''); }}
-                placeholder="Shift Password / كلمة المرور"
+                placeholder="Shift Password"
                 disabled={passwordVerifying}
                 autoFocus
                 autoComplete="off"
@@ -860,22 +874,22 @@ export default function CashierPage() {
                   cursor: 'pointer', fontFamily: 'var(--font-heading)', letterSpacing: '0.06em',
                 }}
               >
-                Cancel / إلغاء
+                Cancel
               </button>
               <button
                 onClick={handleVerifyPassword}
                 disabled={passwordVerifying || !passwordValue.trim()}
                 style={{
                   flex: 1, padding: '0.65rem', borderRadius: 8, border: 'none',
-                  background: passwordVerifying ? '#475569' : 'linear-gradient(135deg, #c5a880, #9a7b56)',
-                  color: '#0a0a0b', fontWeight: 700, fontSize: '0.82rem',
+                  background: passwordVerifying ? '#64748b' : '#ffffff',
+                  color: passwordVerifying ? '#ffffff' : '#16234D', fontWeight: 700, fontSize: '0.82rem',
                   cursor: passwordVerifying ? 'wait' : 'pointer', fontFamily: 'var(--font-heading)', letterSpacing: '0.06em',
                   opacity: !passwordValue.trim() && !passwordVerifying ? 0.5 : 1,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
                 }}
               >
                 {passwordVerifying ? <FaSpinner className="animate-spin" style={{ fontSize: '0.9rem' }} /> : null}
-                <span>Verify / تأكيد</span>
+                <span>Verify</span>
               </button>
             </div>
           </div>
@@ -888,10 +902,10 @@ export default function CashierPage() {
         if (shiftLoading) {
           return (
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn 0.2s ease' }}>
-              <div style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '3rem 2.5rem', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
-                <FaSpinner className="animate-spin" style={{ fontSize: '2.5rem', color: '#c5a880', marginBottom: '1rem' }} />
+              <div style={{ background: '#111B3D', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '3rem 2.5rem', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
+                <FaSpinner className="animate-spin" style={{ fontSize: '2.5rem', color: '#ffffff', marginBottom: '1rem' }} />
                 <p style={{ color: '#94a3b8', fontFamily: 'var(--font-heading)', fontSize: '0.9rem', margin: 0 }}>
-                  جاري حساب إجمالي الوردية...
+                  Calculating shift totals...
                 </p>
               </div>
             </div>
@@ -902,10 +916,10 @@ export default function CashierPage() {
         if (shiftError) {
           return (
             <div onClick={() => setShowShiftCheckout(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn 0.2s ease' }}>
-              <div onClick={(e) => e.stopPropagation()} style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, width: '90%', maxWidth: 400, padding: '2rem', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
+              <div onClick={(e) => e.stopPropagation()} style={{ background: '#111B3D', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, width: '90%', maxWidth: 400, padding: '2rem', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
                 <p style={{ color: '#f87171', fontFamily: 'var(--font-heading)', fontSize: '0.95rem', margin: '0 0 1.25rem' }}>{shiftError}</p>
                 <button onClick={() => { setShowShiftCheckout(false); setShiftError(null); }}
-                  style={{ padding: '0.6rem 2rem', borderRadius: 8, border: 'none', background: '#c5a880', color: '#0a0a0b', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', fontFamily: 'var(--font-heading)' }}
+                  style={{ padding: '0.6rem 2rem', borderRadius: 8, border: 'none', background: '#ffffff', color: '#16234D', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', fontFamily: 'var(--font-heading)' }}
                 >OK</button>
               </div>
             </div>
@@ -931,15 +945,15 @@ export default function CashierPage() {
 
         return (
           <div onClick={() => !shiftSubmitting && setShowShiftCheckout(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn 0.2s ease' }}>
-            <div onClick={(e) => e.stopPropagation()} style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, width: '90%', maxWidth: 460, padding: '2rem', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
+            <div onClick={(e) => e.stopPropagation()} style={{ background: '#111B3D', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, width: '90%', maxWidth: 460, padding: '2rem', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h3 style={{ color: '#f8f9fa', fontFamily: 'var(--font-heading)', fontSize: '1.15rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <FaClipboardList style={{ color: '#c5a880' }} /> End Shift
+                  <FaClipboardList style={{ color: '#ffffff' }} /> End Shift
                 </h3>
                 <button onClick={() => setShowShiftCheckout(false)} disabled={shiftSubmitting} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1.1rem' }}><FaTimes /></button>
               </div>
 
-              <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '1.25rem', padding: '0.6rem 0.8rem', background: 'rgba(197,168,128,0.08)', borderRadius: 8 }}>
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '1.25rem', padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.06)', borderRadius: 8 }}>
                 Shift started: <strong style={{ color: '#e2e8f0' }}>{startTimeDisplay}</strong>
               </div>
 
@@ -966,13 +980,13 @@ export default function CashierPage() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.6rem 0 0', fontSize: '1rem', fontWeight: 700, borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '0.3rem' }}>
                   <span style={{ color: '#e2e8f0' }}>Expected Total</span>
-                  <span style={{ color: '#c5a880', fontFamily: 'var(--font-heading)' }}>{formatEGP(expectedTotal)}</span>
+                  <span style={{ color: '#ffffff', fontFamily: 'var(--font-heading)' }}>{formatEGP(expectedTotal)}</span>
                 </div>
               </div>
 
               <div style={{ marginBottom: '1.25rem' }}>
                 <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.4rem', fontWeight: 600 }}>
-                  Actual Cash in Drawer / الكاش الفعلي في الدرج
+                  Actual Cash in Drawer
                 </label>
                 <input
                   type="number" min="0" step="0.01"
@@ -999,13 +1013,13 @@ export default function CashierPage() {
               <button onClick={handleShiftCheckout} disabled={shiftSubmitting}
                 style={{
                   width: '100%', padding: '0.75rem', borderRadius: 8, border: 'none',
-                  background: shiftSubmitting ? '#475569' : 'linear-gradient(135deg, #c5a880, #9a7b56)',
-                  color: '#0a0a0b', fontFamily: 'var(--font-heading)', fontSize: '0.9rem',
+                  background: shiftSubmitting ? '#64748b' : '#ffffff',
+                  color: shiftSubmitting ? '#ffffff' : '#16234D', fontFamily: 'var(--font-heading)', fontSize: '0.9rem',
                   fontWeight: 700, letterSpacing: '0.08em', cursor: shiftSubmitting ? 'wait' : 'pointer',
                   opacity: shiftSubmitting ? 0.6 : 1, transition: 'opacity 0.2s',
                 }}
               >
-                {shiftSubmitting ? 'Processing...' : 'Confirm Checkout & Logout / تأكيد التصفية والخروج'}
+                {shiftSubmitting ? 'Processing...' : 'Confirm Checkout & Logout'}
               </button>
             </div>
           </div>
@@ -1015,16 +1029,30 @@ export default function CashierPage() {
       {/* ── Checkout Modal ── */}
       {showCheckout && (
         <div onClick={() => !submitting && setShowCheckout(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn 0.2s ease' }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, width: '90%', maxWidth: 420, padding: '1.75rem', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
-            {orderSuccess ? (
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#111B3D', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, width: '90%', maxWidth: 420, padding: '1.75rem', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
+            {orderData ? (
               <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
                 <FaCheckCircle style={{ fontSize: '3rem', color: '#22c55e', marginBottom: '1rem' }} />
-                <h3 style={{ color: '#f8f9fa', fontFamily: 'var(--font-heading)', fontSize: '1.15rem', margin: '0 0 0.5rem' }}>Order Confirmed!</h3>
-                <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: '0 0 0.3rem' }}>Order ID: <strong style={{ color: '#e2e8f0' }}>{orderSuccess}</strong></p>
-                <p style={{ color: '#64748b', fontSize: '0.78rem', margin: '0 0 1.5rem' }}>The order has been recorded in the system.</p>
-                <button onClick={closeSuccess}
-                  style={{ padding: '0.6rem 2rem', borderRadius: 8, border: 'none', background: '#c5a880', color: '#0a0a0b', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', fontFamily: 'var(--font-heading)', letterSpacing: '0.06em' }}
-                >Done</button>
+                <h3 style={{ color: '#f8f9fa', fontFamily: 'var(--font-heading)', fontSize: '1.15rem', margin: '0 0 0.5rem' }}>Order saved successfully</h3>
+                <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: '0 0 0.3rem' }}>Order ID: <strong style={{ color: '#e2e8f0' }}>{orderData.orderId}</strong></p>
+                <p style={{ color: '#64748b', fontSize: '0.78rem', margin: '0 0 1.25rem' }}>The order has been recorded in the system.</p>
+                <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
+                  <button onClick={() => window.print()}
+                    style={{
+                      padding: '0.6rem 1.25rem', borderRadius: 8, border: '1px solid rgba(255,255,255,0.3)',
+                      background: 'transparent', color: '#ffffff', fontWeight: 600, fontSize: '0.8rem',
+                      cursor: 'pointer', fontFamily: 'var(--font-heading)', letterSpacing: '0.05em',
+                      display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                    }}
+                  >🖨️ Print Invoice</button>
+                  <button onClick={closeSuccess}
+                    style={{
+                      padding: '0.6rem 2rem', borderRadius: 8, border: 'none',
+                      background: '#ffffff', color: '#16234D', fontWeight: 700, fontSize: '0.85rem',
+                      cursor: 'pointer', fontFamily: 'var(--font-heading)', letterSpacing: '0.06em',
+                    }}
+                  >New Order</button>
+                </div>
               </div>
             ) : (
               <>
@@ -1032,9 +1060,9 @@ export default function CashierPage() {
                   <h3 style={{ color: '#f8f9fa', fontFamily: 'var(--font-heading)', fontSize: '1.1rem', margin: 0 }}>Complete Sale</h3>
                   <button onClick={() => setShowCheckout(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1.1rem' }}><FaTimes /></button>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0.8rem', background: 'rgba(197,168,128,0.08)', borderRadius: 8, marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0.8rem', background: 'rgba(255,255,255,0.06)', borderRadius: 8, marginBottom: '1rem' }}>
                   <span style={{ color: '#cbd5e1', fontSize: '0.85rem' }}>Total</span>
-                  <span style={{ color: '#c5a880', fontWeight: 700, fontSize: '1.1rem', fontFamily: 'var(--font-heading)' }}>{formatEGP(grandTotal)}</span>
+                  <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1.1rem', fontFamily: 'var(--font-heading)' }}>{formatEGP(grandTotal)}</span>
                 </div>
 
                 {/* ── Customer Info ── */}
@@ -1044,7 +1072,7 @@ export default function CashierPage() {
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="اسم العميل / Customer Name"
+                    placeholder="Customer Name"
                     disabled={submitting}
                     style={{
                       width: '100%', padding: '0.6rem 0.8rem', borderRadius: 6,
@@ -1056,7 +1084,7 @@ export default function CashierPage() {
                     type="tel"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    placeholder="رقم الهاتف / Phone Number"
+                    placeholder="Phone Number"
                     disabled={submitting}
                     style={{
                       width: '100%', padding: '0.6rem 0.8rem', borderRadius: 6,
@@ -1073,8 +1101,8 @@ export default function CashierPage() {
                       style={{
                         display: 'flex', alignItems: 'center', gap: '0.5rem',
                         padding: '0.65rem 0.75rem', borderRadius: 8, cursor: 'pointer',
-                        border: payMethod === m.key ? '2px solid #c5a880' : '1px solid rgba(255,255,255,0.1)',
-                        background: payMethod === m.key ? 'rgba(197,168,128,0.12)' : 'transparent',
+                        border: payMethod === m.key ? '2px solid #ffffff' : '1px solid rgba(255,255,255,0.1)',
+                        background: payMethod === m.key ? 'rgba(255,255,255,0.12)' : 'transparent',
                         color: payMethod === m.key ? '#e2e8f0' : '#94a3b8',
                         fontSize: '0.8rem', fontWeight: 600, transition: 'all 0.2s',
                       }}
@@ -1084,17 +1112,114 @@ export default function CashierPage() {
                 <button onClick={handleSubmitOrder} disabled={submitting}
                   style={{
                     width: '100%', padding: '0.75rem', borderRadius: 8, border: 'none',
-                    background: 'linear-gradient(135deg, #c5a880, #9a7b56)',
-                    color: '#0a0a0b', fontFamily: 'var(--font-heading)', fontSize: '0.9rem',
+                    background: submitting ? '#64748b' : '#ffffff',
+                    color: submitting ? '#ffffff' : '#16234D', fontFamily: 'var(--font-heading)', fontSize: '0.9rem',
                     fontWeight: 700, letterSpacing: '0.08em', cursor: submitting ? 'wait' : 'pointer',
                     opacity: submitting ? 0.6 : 1, transition: 'opacity 0.2s',
                   }}
-                >{submitting ? 'Processing…' : 'Confirm Order / تأكيد'}</button>
+                >{submitting ? 'Processing\u2026' : 'Confirm Order'}</button>
               </>
             )}
           </div>
         </div>
       )}
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @media print {
+  @page {
+    size: 80mm auto;
+    margin: 0mm !important;
+  }
+
+  html, body {
+    visibility: hidden !important;
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .receipt-print-area {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    padding: 8mm 4mm !important;
+    box-sizing: border-box !important;
+    background: white !important;
+    color: black !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 26px !important;
+    line-height: 1.3 !important;
+    text-align: center !important;
+  }
+
+  .receipt-print-area * {
+    visibility: visible !important;
+    color: black !important;
+  }
+
+  .receipt-print-area table {
+    width: 100% !important;
+    font-size: 24px !important;
+  }
+}
+      ` }} />
+      <div className="receipt-print-area" style={{ display: 'none' }}>
+        <div className="text-center w-full mb-4">
+          <h1 className="text-[52px] font-black tracking-tight text-black uppercase block leading-none mb-2">
+            CITY FRAGRANCE
+          </h1>
+          <p className="text-base tracking-[0.2em] text-black font-mono font-black uppercase">LUXURY PERFUMES</p>
+        </div>
+
+        <div className="w-full border-b-4 border-dashed border-black my-4"></div>
+
+        <div className="w-full text-center text-xl font-mono space-y-1 text-black font-black leading-normal">
+          <div>Cashier: {orderData?.cashierName || 'Staff'}</div>
+          <div suppressHydrationWarning>
+            Date: {new Date().toLocaleString('en-US', { hour12: true })}
+          </div>
+          <div>Order ID: #{orderData?.orderId}</div>
+        </div>
+
+        <div className="w-full border-b-4 border-dashed border-black my-4"></div>
+
+        <table className="w-full text-xl font-mono text-black my-4 border-collapse table-fixed">
+          <thead>
+            <tr className="border-b-4 border-black font-black text-lg uppercase">
+              <th className="text-left pb-2 w-[55%]">Item</th>
+              <th className="text-center pb-2 w-[15%]">Qty</th>
+              <th className="text-right pb-2 w-[30%]">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orderData?.items?.map((item: any, idx: number) => (
+              <tr key={idx} className="border-b-2 border-gray-400">
+                <td className="text-left py-3 font-extrabold break-words pr-1 leading-tight">{item.name}</td>
+                <td className="text-center py-3 font-black">x{item.quantity}</td>
+                <td className="text-right py-3 font-black">{(item.price * item.quantity).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div className="w-full flex justify-between items-center text-2xl font-black text-black my-5 pt-4 border-t-4 border-black">
+          <span>TOTAL:</span>
+          <span className="text-3xl font-mono underline decoration-2">{orderData?.totalPrice?.toFixed(2)} EGP</span>
+        </div>
+
+        <div className="w-full border-b-4 border-dashed border-black my-4"></div>
+
+        <div className="text-center text-sm text-black font-mono font-black tracking-normal uppercase leading-relaxed px-2">
+          THANK YOU FOR SHOPPING AT CITY FRAGRANCE!
+        </div>
+      </div>
     </div>
   );
 }
@@ -1132,7 +1257,7 @@ function CartPanel({ cart, subtotal, discount, setDiscount, grandTotal, discount
         {cart.map((line) => (
           <div key={line.item.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             <div style={{ width: 36, height: 36, borderRadius: 6, overflow: 'hidden', flexShrink: 0, position: 'relative', background: '#1e293b' }}>
-               <ImageWithFallback src={line.item.image} alt="" sizes="36px" />
+              <ImageWithFallback src={line.item.image} alt="" sizes="36px" />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ margin: 0, fontSize: '0.72rem', fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{line.item.name}</p>
@@ -1144,7 +1269,7 @@ function CartPanel({ cart, subtotal, discount, setDiscount, grandTotal, discount
               <span style={{ minWidth: 20, textAlign: 'center', fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>{line.qty}</span>
               <button onClick={() => updateQty(line.item.id, 1)} style={qtyBtnStyle}><FaPlus style={{ fontSize: '0.5rem' }} /></button>
             </div>
-            <span style={{ width: 65, textAlign: 'right', fontSize: '0.72rem', fontWeight: 700, color: '#c5a880', fontFamily: 'var(--font-heading)' }}>
+            <span style={{ width: 65, textAlign: 'right', fontSize: '0.72rem', fontWeight: 700, color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
               {formatEGP(line.item.price * line.qty)}
             </span>
             <button onClick={() => removeFromCart(line.item.id)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: 2, transition: 'color 0.2s' }}
@@ -1156,7 +1281,7 @@ function CartPanel({ cart, subtotal, discount, setDiscount, grandTotal, discount
       </div>
 
       {/* Totals + checkout */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '0.65rem 1rem', flexShrink: 0, background: '#0f172a' }}>
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '0.65rem 1rem', flexShrink: 0, background: '#0B1336' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginBottom: 3 }}>
           <span>Subtotal</span><span style={{ color: '#e2e8f0', fontWeight: 600 }}>{formatEGP(subtotal)}</span>
         </div>
@@ -1168,18 +1293,18 @@ function CartPanel({ cart, subtotal, discount, setDiscount, grandTotal, discount
           />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-heading)', padding: '0.3rem 0 0.5rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-          <span>Grand Total</span><span style={{ color: '#c5a880' }}>{formatEGP(grandTotal)}</span>
+          <span>Grand Total</span><span style={{ color: '#ffffff' }}>{formatEGP(grandTotal)}</span>
         </div>
         <button disabled={cart.length === 0} onClick={onCheckout}
           style={{
             width: '100%', padding: '0.6rem', borderRadius: 8, border: 'none',
-            background: cart.length > 0 ? 'linear-gradient(135deg, #c5a880, #9a7b56)' : '#1e293b',
-            color: cart.length > 0 ? '#0a0a0b' : '#475569', fontFamily: 'var(--font-heading)',
+            background: cart.length > 0 ? '#ffffff' : '#1e293b',
+            color: cart.length > 0 ? '#16234D' : '#475569', fontFamily: 'var(--font-heading)',
             fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.08em',
             cursor: cart.length > 0 ? 'pointer' : 'not-allowed',
           }}
         >
-          Checkout / تأكيد البيع
+          Checkout
         </button>
       </div>
     </>

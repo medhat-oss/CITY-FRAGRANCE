@@ -1,6 +1,9 @@
+// AI GUARDRAIL: MULTI-ACCOUNT ISOLATION — Always filter and create records using strictly
+// `session.id` to prevent concurrent cashier sessions from cross-contaminating data.
+// Admin management paths (e.g., viewing all closed shifts) must remain UNFILTERED by session.
+
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { readJsonFile } from '@/lib/dataFile';
+import prisma from '@/lib/prisma';
 import { verifySession, verifySessionForPOS } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -17,12 +20,11 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const statusFilter = searchParams.get('status');
-    const cashierIdParam = searchParams.get('cashierId');
 
     // When fetching the active OPEN shift (cashier POS), use POS-aware session
     // so a cashier_session always wins over admin_session.
     const session = statusFilter === 'OPEN'
-      ? await verifySessionForPOS(cashierIdParam || undefined)
+      ? await verifySessionForPOS()
       : await verifySession();
 
     if (!session) {
@@ -30,7 +32,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const targetCashierId = cashierIdParam || session.id;
+    // ALWAYS use the session's own ID — never trust client-provided cashierId (multi-account isolation)
+    const targetCashierId = session.id;
 
     if (statusFilter === 'OPEN') {
       const shift = await prisma.shift.findFirst({
@@ -42,33 +45,27 @@ export async function GET(request: Request) {
         return NextResponse.json({ shift: null });
       }
 
-      // Aggregate actual total sums using Prisma _sum
-      const cashAgg = await prisma.order.aggregate({
+      // Aggregate all payment methods in a single groupBy query
+      const cancelledFilter = { notIn: ['Cancelled', 'CANCELLED', 'cancelled'] };
+      const agg = await prisma.order.groupBy({
+        by: ['paymentMethod'],
         _sum: { totalPrice: true },
-        where: { shiftId: shift.id, paymentMethod: 'cash', status: { not: 'Cancelled' } }
-      });
-      const instapayAgg = await prisma.order.aggregate({
-        _sum: { totalPrice: true },
-        where: { shiftId: shift.id, paymentMethod: 'instapay', status: { not: 'Cancelled' } }
-      });
-      const vodafoneAgg = await prisma.order.aggregate({
-        _sum: { totalPrice: true },
-        where: { shiftId: shift.id, paymentMethod: 'vodafone', status: { not: 'Cancelled' } }
-      });
-      const visaAgg = await prisma.order.aggregate({
-        _sum: { totalPrice: true },
-        where: { shiftId: shift.id, paymentMethod: 'visa', status: { not: 'Cancelled' } }
+        _count: true,
+        where: { shiftId: shift.id, status: cancelledFilter },
       });
 
-      const totalCash = cashAgg._sum.totalPrice || 0;
-      const totalInstaPay = instapayAgg._sum.totalPrice || 0;
-      const totalVodafoneCash = vodafoneAgg._sum.totalPrice || 0;
-      const totalVisa = visaAgg._sum.totalPrice || 0;
+      let totalCash = 0, totalInstaPay = 0, totalVodafoneCash = 0, totalVisa = 0;
+      let orderCount = 0;
+      for (const row of agg) {
+        const method = (row.paymentMethod || '').toLowerCase();
+        const sum = row._sum.totalPrice || 0;
+        if (method.includes('cash')) totalCash = sum;
+        else if (method.includes('instapay')) totalInstaPay = sum;
+        else if (method.includes('vodafone')) totalVodafoneCash = sum;
+        else if (method.includes('visa')) totalVisa = sum;
+        orderCount += row._count;
+      }
       const expectedTotal = totalCash + totalInstaPay + totalVodafoneCash + totalVisa;
-
-      const orderCount = await prisma.order.count({
-        where: { shiftId: shift.id, status: { not: 'Cancelled' } }
-      });
 
       return NextResponse.json({
         shift: { ...shift, totalCash, totalInstaPay, totalVodafoneCash, totalVisa, expectedTotal, orderCount },
@@ -104,19 +101,37 @@ export async function POST(request: Request) {
       action: string;
       actualCash?: number;
       shiftPassword?: string;
-      cashierId?: string;
-      userId?: string;
     };
+
+    // ── FAIL-FAST: Validate action BEFORE any session/DB work ──────────────
+    // This ensures malformed requests are rejected in <1ms without touching
+    // the database or verifying the session cookie.
+    const VALID_ACTIONS = ['open', 'verify-password', 'close'] as const;
+    if (!body.action || !VALID_ACTIONS.includes(body.action as typeof VALID_ACTIONS[number])) {
+      return NextResponse.json(
+        { success: false, error: `Invalid action. Must be one of: ${VALID_ACTIONS.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // For 'close' and 'verify-password', shiftPassword is required — validate early.
+    if ((body.action === 'close' || body.action === 'verify-password') && !body.shiftPassword) {
+      return NextResponse.json(
+        { success: false, error: 'Shift password is required' },
+        { status: 400 }
+      );
+    }
 
     // All shift operations (open, verify-password, close) are cashier POS actions.
     // Use POS-aware session so cashier_session always wins over admin_session.
-    const session = await verifySessionForPOS(body.userId || body.cashierId);
+    // ALWAYS use session.id for isolation — never trust client-provided IDs.
+    const session = await verifySessionForPOS();
     if (!session) {
       console.error('[SHIFTS API] POST 401: verifySessionForPOS returned null');
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const targetCashierId = body.userId || body.cashierId || session.id;
+    const targetCashierId = session.id;
 
     if (body.action === 'open') {
       // strict active shift check
@@ -125,16 +140,19 @@ export async function POST(request: Request) {
         select: { id: true },
       });
       if (existingShift) {
+        // 400 + SHIFT_ALREADY_OPEN is *expected* — the cashier client treats this
+        // as a success (shift is already running). Using a distinct code avoids
+        // fragile string-matching on the error message.
         return NextResponse.json({
           success: false,
-          error: 'Active shift already exists for this cashier'
+          code: 'SHIFT_ALREADY_OPEN',
+          error: 'Active shift already exists for this cashier',
         }, { status: 400 });
       }
 
-      // Find username from admin-users.json file using targetCashierId
-      const fileData = await readJsonFile<{ users: { id: string; email: string; username: string; shiftPassword?: string }[] }>('admin-users.json', { users: [] });
-      const cashier = fileData.users.find((u) => u.id === targetCashierId);
-      const cashierName = cashier?.username || session.username || 'Cashier';
+      // Find username from database
+      const cashierUser = await prisma.user.findUnique({ where: { id: targetCashierId }, select: { username: true } });
+      const cashierName = cashierUser?.username || session.username || 'Cashier';
 
       const newShift = await prisma.shift.create({
         data: {
@@ -148,11 +166,8 @@ export async function POST(request: Request) {
     }
 
     if (body.action === 'verify-password') {
-      if (!body.shiftPassword) {
-        return NextResponse.json({ error: 'Shift password is required' }, { status: 400 });
-      }
-      const fileData = await readJsonFile<{ users: { id: string; email: string; username: string; shiftPassword?: string }[] }>('admin-users.json', { users: [] });
-      const cashier = fileData.users.find((u) => u.id === targetCashierId);
+      // shiftPassword already validated above (fail-fast)
+      const cashier = await prisma.user.findUnique({ where: { id: targetCashierId }, select: { shiftPassword: true } });
       if (!cashier) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
@@ -163,16 +178,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    if (body.action !== 'close') {
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-    }
+    // action === 'close' — shiftPassword already validated above (fail-fast)
 
-    if (!body.shiftPassword) {
-      return NextResponse.json({ error: 'Shift password is required' }, { status: 400 });
-    }
-
-    const fileData = await readJsonFile<{ users: { id: string; email: string; username: string; shiftPassword?: string }[] }>('admin-users.json', { users: [] });
-    const cashier = fileData.users.find((u) => u.id === targetCashierId);
+    const cashier = await prisma.user.findUnique({ where: { id: targetCashierId }, select: { shiftPassword: true, username: true } });
     if (!cashier) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -192,35 +200,30 @@ export async function POST(request: Request) {
         throw new Error('No active shift found');
       }
 
-      // Aggregate using _sum
-      const cashAgg = await tx.order.aggregate({
+      const cancelledFilter = { notIn: ['Cancelled', 'CANCELLED', 'cancelled'] };
+
+      // Aggregate all payment methods in a single groupBy query
+      const agg = await tx.order.groupBy({
+        by: ['paymentMethod'],
         _sum: { totalPrice: true },
-        where: { shiftId: activeShift.id, paymentMethod: 'cash', status: { not: 'Cancelled' } }
-      });
-      const instapayAgg = await tx.order.aggregate({
-        _sum: { totalPrice: true },
-        where: { shiftId: activeShift.id, paymentMethod: 'instapay', status: { not: 'Cancelled' } }
-      });
-      const vodafoneAgg = await tx.order.aggregate({
-        _sum: { totalPrice: true },
-        where: { shiftId: activeShift.id, paymentMethod: 'vodafone', status: { not: 'Cancelled' } }
-      });
-      const visaAgg = await tx.order.aggregate({
-        _sum: { totalPrice: true },
-        where: { shiftId: activeShift.id, paymentMethod: 'visa', status: { not: 'Cancelled' } }
+        _count: true,
+        where: { shiftId: activeShift.id, status: cancelledFilter },
       });
 
-      const totalCash = cashAgg._sum.totalPrice || 0;
-      const totalInstaPay = instapayAgg._sum.totalPrice || 0;
-      const totalVodafoneCash = vodafoneAgg._sum.totalPrice || 0;
-      const totalVisa = visaAgg._sum.totalPrice || 0;
+      let totalCash = 0, totalInstaPay = 0, totalVodafoneCash = 0, totalVisa = 0;
+      let orderCount = 0;
+      for (const row of agg) {
+        const method = (row.paymentMethod || '').toLowerCase();
+        const sum = row._sum.totalPrice || 0;
+        if (method.includes('cash')) totalCash = sum;
+        else if (method.includes('instapay')) totalInstaPay = sum;
+        else if (method.includes('vodafone')) totalVodafoneCash = sum;
+        else if (method.includes('visa')) totalVisa = sum;
+        orderCount += row._count;
+      }
       const expectedTotal = totalCash + totalInstaPay + totalVodafoneCash + totalVisa;
       const actualCashValue = body.actualCash ?? 0;
       const discrepancy = actualCashValue - expectedTotal;
-
-      const orderCount = await tx.order.count({
-        where: { shiftId: activeShift.id, status: { not: 'Cancelled' } }
-      });
 
       await tx.shift.update({
         where: { id: activeShift.id },

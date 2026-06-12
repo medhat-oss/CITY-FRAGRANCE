@@ -14,7 +14,7 @@ import {
 import { FaInstagram, FaTiktok } from 'react-icons/fa';
 import { useCart } from '@/context/CartContext';
 import { useLocale } from '@/context/LocaleContext';
-
+import { fetchCachedSettings } from '@/lib/settingsCache';
 import { formatEGP } from '@/utils/currency';
 import type { NavLink, SiteSettings } from '@/types';
 import AnnouncementBar from '@/components/AnnouncementBar';
@@ -47,9 +47,11 @@ export default function Header() {
   const [announcementText, setAnnouncementText] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/settings')
-      .then((res) => res.json())
-      .then((data: SiteSettings) => setAnnouncementText(data.announcementText))
+    // Use the shared 30s-TTL cache — prevents Header from firing its own
+    // parallel /api/admin/settings request alongside page-level fetchCachedSettings
+    // calls, which was causing 3× simultaneous hits on every route transition.
+    fetchCachedSettings<SiteSettings>()
+      .then((data) => setAnnouncementText(data.announcementText ?? ''))
       .catch(() => setAnnouncementText(''));
   }, []);
 
@@ -109,7 +111,7 @@ export default function Header() {
               muted
               playsInline
               preload="none"
-              poster="/images/logo-poster.png"
+              poster="/images/logo.png"
               className="h-14 w-auto object-contain"
               aria-label="City Fragrance"
             />

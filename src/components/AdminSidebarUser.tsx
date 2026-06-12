@@ -116,7 +116,7 @@ export default function AdminSidebarUser() {
               background: 'rgba(255,255,255,0.08)',
               border: '1px solid rgba(255,255,255,0.2)',
               borderRadius: '4px',
-              color: '#c5a880',
+              color: '#ffffff',
               fontFamily: 'var(--font-heading, "Instrument Sans", sans-serif)',
               fontSize: '0.7rem',
               letterSpacing: '0.08em',

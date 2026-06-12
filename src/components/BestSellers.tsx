@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
@@ -12,33 +12,33 @@ interface BestSellersProps {
   title?: string;
 }
 
-export default function BestSellers({ products, title = 'Best Sellers' }: BestSellersProps) {
+const BestSellers = memo(function BestSellers({ products, title = 'Best Sellers' }: BestSellersProps) {
   const { dir } = useLocale();
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
-  const handleImgError = (id: string) => {
+  const handleImgError = useCallback((id: string) => {
     setImgErrors((prev) => ({ ...prev, [id]: true }));
-  };
+  }, []);
 
   return (
     <section className="py-16 px-4 sm:px-8 bg-white dark:bg-[#09142E]" dir={dir}>
       <div className="max-w-container mx-auto">
         {/* Section Header */}
-          <div className="flex justify-between items-end mb-8 border-b border-navy/10 dark:border-slate-800 pb-2">
-          <h2 className="font-heading text-3xl sm:text-4xl font-normal text-navy dark:text-white">
+        <div className="flex items-center justify-between border-b border-navy/10 dark:border-slate-600 pt-0 pb-10">
+          <h2 className="font-heading text-3xl sm:text-4xl font-normal text-navy dark:text-white leading-none m-0 mt-0 mb-0">
             {title}
           </h2>
           <Link
-            href="/collections/all"
+            href="/collections/all-fragrances"
             prefetch="auto"
-            className="font-heading text-xs uppercase tracking-[0.1em] text-navy dark:text-slate-300 font-medium relative pb-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-0 hover:after:origin-left"
+            className="font-heading text-xs uppercase tracking-[0.1em] text-navy dark:text-slate-300 font-medium leading-none m-0 mt-0 mb-0 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-0 hover:after:origin-left"
           >
             View All
           </Link>
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 mt-12">
           {products.slice(0, 4).map((product) => {
             const mainImage = imgErrors[product.id]
               ? '/placeholder.png'
@@ -52,21 +52,20 @@ export default function BestSellers({ products, title = 'Best Sellers' }: BestSe
                   : product.badge;
 
             return (
-              <div key={product.id} className="flex flex-col transition-all duration-700 ease-out hover:scale-[1.03]">
+              <div key={product.id} className="flex flex-col transition-[transform,opacity] duration-700 ease-out hover:scale-[1.03] transform-gpu backface-hidden translate-z-0">
                 {/* Image Wrapper — perfect aspect-square, no padding gaps */}
                 <Link
                   href={`/product/${product.id}`}
                   prefetch="auto"
-                  className="relative aspect-square overflow-hidden bg-transparent block"
+                  className="relative aspect-square overflow-hidden rounded-2xl bg-transparent block"
                 >
                   {/* Badge */}
                   {badgeLabel && (
                     <span
-                      className={`absolute top-3 left-3 z-[2] font-heading text-[0.65rem] font-semibold tracking-[0.1em] px-3 py-1 uppercase rounded-sm ${
-                        isSale
-                          ? 'bg-sale text-white'
-                          : 'bg-navy text-white'
-                      }`}
+                      className={`absolute top-3 left-3 z-[2] font-heading text-[0.65rem] font-semibold tracking-[0.1em] px-3 py-1 uppercase rounded-sm ${isSale
+                        ? 'bg-sale text-white'
+                        : 'bg-navy text-white'
+                        }`}
                     >
                       {badgeLabel}
                     </span>
@@ -82,7 +81,7 @@ export default function BestSellers({ products, title = 'Best Sellers' }: BestSe
                   />
 
                   {/* Quick View Overlay */}
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full opacity-0 w-[85%] py-3 bg-white/95 text-navy font-heading text-xs font-semibold uppercase tracking-[0.1em] text-center cursor-pointer transition-all duration-300 z-[2] rounded-sm hover:bg-navy hover:text-white group-hover:translate-y-0 group-hover:opacity-100">
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full opacity-0 w-[85%] py-3 bg-white/95 text-navy font-heading text-xs font-semibold uppercase tracking-[0.1em] text-center cursor-pointer transition-[transform,opacity] duration-300 z-[2] rounded-sm hover:bg-navy hover:text-white group-hover:translate-y-0 group-hover:opacity-100">
                     Quick View
                   </span>
                 </Link>
@@ -123,4 +122,7 @@ export default function BestSellers({ products, title = 'Best Sellers' }: BestSe
       </div>
     </section>
   );
-}
+});
+
+BestSellers.displayName = 'BestSellers';
+export default BestSellers;

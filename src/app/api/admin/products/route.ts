@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
 
 /** All known collection slugs that exist in the DB */
 const KNOWN_SLUGS = [
@@ -39,7 +41,17 @@ function revalidateAll() {
 
 export async function GET() {
   try {
-    const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true, name: true, type: true, category: true,
+        collection: true, collections: true, isDraft: true,
+        badge: true, notes: true, description: true,
+        price: true, costPrice: true, salePrice: true,
+        images: true, videoUrl: true, stock: true,
+        createdAt: true, updatedAt: true,
+      },
+    });
     return NextResponse.json({ products });
   } catch (err) {
     console.error('PRODUCTS GET ERROR:', err);
@@ -68,7 +80,8 @@ export async function POST(request: Request) {
       badge: product.badge || '',
       notes: [product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).join(' • '),
       description: product.description || '',
-      price: product.price,
+      price: parseFloat(product.price) || 0,
+      costPrice: product.costPrice ? parseFloat(product.costPrice) : 0,
       salePrice: product.salePrice || null,
       images: product.images || [],
       videoUrl: product.videoUrl || '',
@@ -113,7 +126,8 @@ export async function PUT(request: Request) {
       badge: updated.badge || '',
       notes: [updated.topNotes, updated.middleNotes, updated.baseNotes].filter(Boolean).join(' • '),
       description: updated.description || '',
-      price: updated.price,
+      price: parseFloat(updated.price) || 0,
+      costPrice: updated.costPrice ? parseFloat(updated.costPrice) : 0,
       salePrice: updated.salePrice || null,
       images: updated.images || [],
       videoUrl: updated.videoUrl || '',

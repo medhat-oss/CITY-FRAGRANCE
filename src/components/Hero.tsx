@@ -1,145 +1,127 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
 import type { SiteSettings } from '@/types';
-import { getOptimizedVideoUrl } from '@/lib/videoUtils';
+import { getOptimizedImageUrl, getOptimizedVideoUrl } from '@/lib/videoUtils';
 
-export default function Hero() {
+interface HeroProps {
+  settings: SiteSettings | null;
+}
+
+export default function Hero({ settings }: HeroProps) {
   const { dir } = useLocale();
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
 
-  useEffect(() => {
-    fetch('/api/admin/settings')
-      .then((res) => res.json())
-      .then((data: SiteSettings) => setSettings(data))
-      .catch(() => setSettings(null));
-  }, []);
-
-  const loaded = settings !== null;
-  const heroTitle       = settings?.heroTitle       ?? '';
-  const heroSubtitle    = settings?.heroSubtitle    ?? '';
-  const heroDescription = settings?.heroDescription ?? '';
-  const videoUrl        = settings?.heroVideoUrl    ?? '';
-  const bgImageMobile   = settings?.heroBgImage        ?? '';
-  const bgImageDesktop  = settings?.heroBgImageDesktop ?? '';
-
-  // Dev-only: log the exact URL sent to <video src> so you can verify
-  // f_auto,q_auto:best and ?v=3 are present in DevTools → Network tab.
-  if (process.env.NODE_ENV === 'development' && videoUrl) {
-    console.log('[Hero] raw videoUrl from DB :', videoUrl);
-    console.log('[Hero] optimized videoUrl   :', getOptimizedVideoUrl(videoUrl));
+  if (!settings) {
+    return (
+      <section className="relative w-full bg-[#09142E] overflow-hidden transform-gpu backface-hidden translate-z-0">
+        <div className="w-full aspect-[4/5] md:aspect-[21/9] bg-zinc-900/50 animate-pulse" />
+      </section>
+    );
   }
 
-  const hiddenTitle       = !heroTitle.trim()       || heroTitle.trim()       === 'HIDDEN';
-  const hiddenSubtitle    = !heroSubtitle.trim()    || heroSubtitle.trim()    === 'HIDDEN';
+  const heroTitle = settings.heroTitle ?? '';
+  const heroSubtitle = settings.heroSubtitle ?? '';
+  const heroDescription = settings.heroDescription ?? '';
+  const imageDesktop = settings.heroBgImageDesktop ?? '';
+  const imageMobile = settings.heroBgImage ?? '';
+
+  const hiddenTitle = !heroTitle.trim() || heroTitle.trim() === 'HIDDEN';
+  const hiddenSubtitle = !heroSubtitle.trim() || heroSubtitle.trim() === 'HIDDEN';
   const hiddenDescription = !heroDescription.trim() || heroDescription.trim() === 'HIDDEN';
-  const hasText = !hiddenTitle || !hiddenSubtitle || !hiddenDescription;
+  const hasImage = imageDesktop || imageMobile;
+  const heroVideoUrl = settings.heroVideoUrl ?? '';
+  const heroVideoMobile = settings.heroVideoMobile ?? '';
+  const hasVideo = heroVideoUrl || heroVideoMobile;
 
   return (
-    /*
-     * NATURAL IMAGE HEIGHT STRATEGY
-     * ─────────────────────────────
-     * The section carries NO explicit height on desktop. Instead, the
-     * background image is rendered as a normal block element (w-full h-auto)
-     * so the section expands to exactly the image's intrinsic height —
-     * zero cropping, zero clipping, regardless of how tall the asset is.
-     *
-     * The dark overlay and text are positioned absolutely on top.
-     *
-     * VIDEO exception: video has no intrinsic layout height, so we keep a
-     * viewport-relative min-height for that case only.
-     */
-    <section className="relative w-full bg-[#09142E] overflow-hidden">
+    <section className="relative w-full bg-[#09142E] overflow-hidden transform-gpu backface-hidden translate-z-0">
 
-      {/* ── VIDEO (viewport-height fallback) ── */}
-      {loaded && videoUrl && (
-        <div className="relative w-full min-h-[85svh] md:min-h-[80vh]">
-          <video
-            src={getOptimizedVideoUrl(videoUrl)}
-            autoPlay loop muted playsInline preload="auto"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-          />
-        </div>
-      )}
-
-      {/* ── DESKTOP landscape image (16:9 — natural width×height, no crop) ── */}
-      {loaded && !videoUrl && bgImageDesktop && (
-        <Image
-          src={bgImageDesktop}
-          alt="Hero banner — desktop"
-          width={1920}
-          height={1080}
-          priority
-          sizes="100vw"
-          className="hidden md:block w-full h-auto"
-          style={{ display: undefined }}
+      {/* Mobile Video */}
+      {hasVideo && (
+        <video
+          key="hero-video-mobile"
+          src={getOptimizedVideoUrl(heroVideoMobile || heroVideoUrl)}
+          autoPlay loop muted playsInline preload="metadata"
+          className="w-full h-auto block md:hidden"
         />
       )}
 
-      {/* ── MOBILE portrait image (natural height — entire bottle visible) ── */}
-      {loaded && !videoUrl && bgImageMobile && (
+      {/* Desktop Video */}
+      {hasVideo && (
+        <video
+          key="hero-video-desktop"
+          src={getOptimizedVideoUrl(heroVideoUrl || heroVideoMobile)}
+          autoPlay loop muted playsInline preload="metadata"
+          className="w-full h-auto hidden md:block"
+        />
+      )}
+
+      {/* Mobile Image */}
+      {!hasVideo && hasImage && (
         <Image
-          src={bgImageMobile}
+          src={getOptimizedImageUrl(imageMobile || imageDesktop)}
           alt="Hero banner"
           width={900}
           height={1200}
           priority
-          sizes="100vw"
-          className={
-            bgImageDesktop
-              ? 'block md:hidden w-full h-auto'  // portrait only on mobile when desktop image exists
-              : 'block w-full h-auto'              // portrait on ALL viewports when no desktop image
-          }
+          sizes="(max-width: 768px) 100vw, 50vw"
+          style={{ width: '100%', height: 'auto' }}
+          className="block md:hidden"
         />
       )}
 
-      {/* ── Dark plate when no media is set yet ── */}
-      {loaded && !videoUrl && !bgImageMobile && !bgImageDesktop && (
-        <div className="w-full min-h-[85svh] md:min-h-[75vh]" />
+      {/* Desktop Image */}
+      {!hasVideo && hasImage && (
+        <Image
+          src={getOptimizedImageUrl(imageDesktop || imageMobile)}
+          alt="Hero banner"
+          width={1920}
+          height={1080}
+          priority
+          sizes="(max-width: 1200px) 100vw, 1920px"
+          style={{ width: '100%', height: 'auto' }}
+          className="hidden md:block"
+        />
       )}
 
-      {/* ── Dark gradient overlays ── */}
-      <div className="absolute inset-0 bg-black/45" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#09142E]/55 via-transparent to-[#09142E]/70" />
+      {/* Overlay + Foreground Content */}
+      <div className="absolute inset-0 bg-black/40 flex flex-col justify-between items-center py-16 md:py-24 text-center px-4 z-10" dir={dir}>
 
-      {/* ── Foreground text & CTA — bottom-aligned over the full image ── */}
-      <div
-        className="absolute inset-0 flex flex-col justify-end items-center pb-14 md:pb-16 lg:pb-20"
-        dir={dir}
-      >
-        <div className="max-w-container mx-auto px-4 sm:px-16 text-white flex flex-col items-center text-center w-full">
+        {/* Top Spacer */}
+        <div className="h-0 w-0 invisible" />
+
+        {/* Middle Content — perfectly centered */}
+        <div className="text-center space-y-4 px-6 max-w-3xl flex flex-col items-center justify-center flex-1">
           {!hiddenSubtitle && (
             <span
-              className="font-heading text-xs sm:text-sm md:text-base uppercase tracking-[0.25em] text-white block mb-4 md:mb-5 animate-fade-up opacity-0 [animation-delay:0.2s]"
+              className="font-heading text-xs sm:text-sm md:text-base uppercase tracking-[0.25em] text-white block animate-fade-up opacity-0 [animation-delay:0.2s]"
               dangerouslySetInnerHTML={{ __html: heroSubtitle }}
             />
           )}
-
           {!hiddenTitle && (
             <h1
-              className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light leading-[1.15] mb-4 md:mb-6 animate-fade-up opacity-0 [animation-delay:0.4s] drop-shadow-[0_4px_15px_rgba(0,0,0,0.35)]"
+              className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light leading-[1.15] animate-fade-up opacity-0 [animation-delay:0.4s] drop-shadow-[0_4px_15px_rgba(0,0,0,0.35)]"
               dangerouslySetInnerHTML={{ __html: heroTitle }}
             />
           )}
-
           {!hiddenDescription && (
             <p
-              className="font-body text-sm sm:text-base md:text-lg font-light max-w-md mb-6 md:mb-8 animate-fade-up opacity-0 [animation-delay:0.6s] text-white/90"
+              className="font-body text-sm sm:text-base md:text-lg font-light max-w-md animate-fade-up opacity-0 [animation-delay:0.6s] text-white/90"
               dangerouslySetInnerHTML={{ __html: heroDescription }}
             />
           )}
+        </div>
 
-          <div className={`flex justify-center gap-6 animate-fade-up opacity-0 [animation-delay:0.8s] ${hasText ? 'mt-2 md:mt-4' : ''}`}>
-            <Link
-              href="/collections/all-fragrances"
-              className="btn btn-primary rounded-full px-8 py-3 text-sm transition-all duration-300 ease-in-out hover:-translate-y-0.5"
-            >
-              Shop All Fragrances
-            </Link>
-          </div>
+        {/* Bottom Content — button locked at the bottom */}
+        <div className="w-full flex justify-center mt-auto">
+          <Link
+            href="/collections/all-fragrances"
+            className="bg-white text-black px-8 py-4 text-sm font-semibold tracking-[0.2em] uppercase rounded-full hover:bg-neutral-200 transition-[transform,opacity] duration-300 hover:scale-105 shadow-lg"
+          >
+            Shop All Fragrances
+          </Link>
         </div>
       </div>
     </section>

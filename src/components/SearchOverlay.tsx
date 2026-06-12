@@ -118,6 +118,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                       src={product.images[0] || '/images/product-placeholder.png'}
                       alt={product.name}
                       fill
+                      sizes="(max-width: 768px) 50vw, 20vw"
                       className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
                   </div>

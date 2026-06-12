@@ -64,6 +64,7 @@ model Product {
   concentration String   @default("")
   volume        String   @default("")
   price         Float
+  costPrice     Float  @default(0)
   salePrice     Float?
   images        Json     @default("[]")
   videoUrl      String   @default("")
@@ -84,6 +85,7 @@ model GiftSet {
   name        String
   description String   @default("")
   price       Float
+  costPrice   Float    @default(0)
   isDraft     Boolean  @default(true)
   image       String   @default("")
   productIds  Json     @default("[]")
@@ -97,13 +99,16 @@ model Subscriber {
   createdAt DateTime @default(now())
 }
 
-model AdminUser {
-  id            String @id @default(cuid())
-  email         String @unique
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  username      String   @unique
   password      String
-  name          String @default("Admin")
-  role          String @default("ADMIN")
-  shiftPassword String @default("123456")
+  name          String   @default("")
+  role          Role     @default(CASHIER)
+  shiftPassword String   @default("123456")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model ShiftLog {
@@ -134,11 +139,29 @@ model SiteSetting {
   heroBgImage             String @default("")
   heroBgImageDesktop      String @default("")
   heroVideoUrl            String @default("")
+  heroVideoMobile         String @default("")
   moodTitle               String @default("")
   moodSubtitle            String @default("")
   moodImage               String @default("")
   moodImageDesktop        String @default("")
   moodVideoUrl            String @default("")
+  moodVideoMobile         String @default("")
+  heroWidth               Int    @default(1600)
+  heroHeight              Int    @default(1200)
+  heroMobileWidth         Int    @default(600)
+  heroMobileHeight        Int    @default(800)
+  heroVideoWidth          Int    @default(1600)
+  heroVideoHeight         Int    @default(1200)
+  heroVideoMobileWidth    Int    @default(600)
+  heroVideoMobileHeight   Int    @default(800)
+  moodWidth               Int    @default(900)
+  moodHeight              Int    @default(650)
+  moodMobileWidth         Int    @default(600)
+  moodMobileHeight        Int    @default(800)
+  moodVideoWidth          Int    @default(900)
+  moodVideoHeight         Int    @default(506)
+  moodVideoMobileWidth    Int    @default(600)
+  moodVideoMobileHeight   Int    @default(800)
   womenCollectionVideoUrl String @default("")
   menCollectionVideoUrl   String @default("")
   giftSetsVideoUrl        String @default("")
@@ -152,4 +175,9 @@ model SiteSetting {
 model CollectionImage {
   slug  String @id
   image String @default("")
+}
+
+enum Role {
+  ADMIN
+  CASHIER
 }

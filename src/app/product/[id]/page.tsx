@@ -2,7 +2,7 @@
 // All client-side interactivity lives in ./product-detail.tsx.
 
 import type { Metadata } from 'next';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import ProductDetail from './product-detail';
 
 type Props = {

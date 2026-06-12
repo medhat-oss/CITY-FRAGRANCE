@@ -345,7 +345,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
               </div>
               {product.stock !== undefined && product.stock > 0 && product.stock < 10 && (
                 <span className="text-xs text-amber-500 font-semibold uppercase tracking-wider">
-                  Only {product.stock} items left in stock / المتبقي {product.stock} فقط
+                  Only {product.stock} items left in stock
                 </span>
               )}
             </div>
@@ -360,7 +360,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                   : 'border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer hover:bg-[#E5E7EB] hover:text-[#09142E] hover:border-[#E5E7EB]'
               }`}
             >
-              <HiShoppingBag className="mr-2.5" /> {product.stock === 0 ? 'Out of Stock / نفد من المخزن' : 'Add to Cart'}
+              <HiShoppingBag className="mr-2.5" /> {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
 
             <button
@@ -372,7 +372,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                   : 'border-[#F9FAFB] bg-[#F9FAFB] text-[#09142E] cursor-pointer hover:bg-[#E5E7EB] hover:text-[#09142E] hover:border-[#E5E7EB]'
               }`}
             >
-              <HiBolt className="mr-2.5" /> {product.stock === 0 ? 'Out of Stock / نفد من المخزن' : 'Buy It Now'}
+              <HiBolt className="mr-2.5" /> {product.stock === 0 ? 'Out of Stock' : 'Buy It Now'}
             </button>
           </div>
         </div>

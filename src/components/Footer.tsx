@@ -207,12 +207,11 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="underline decoration-gray-600 transition-all duration-300 hover:text-white hover:decoration-amber-500"
               >
-                Code Craft <span className="inline-block">↗</span>
+                MACHINE CODE <span className="inline-block">↗</span>
               </a>
             </p>
           </div>
           <p>Powerd by Medhat Elaraby</p>
-
           <div className="flex items-center gap-4 text-xl text-white/30">
             <FaCcVisa />
             <FaCcMastercard />

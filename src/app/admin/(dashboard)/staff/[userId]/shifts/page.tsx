@@ -24,8 +24,8 @@ interface ShiftRecord {
 }
 
 export default function StaffShiftsPage() {
-  const params = useParams<{ id: string }>();
-  const staffId = params.id;
+  const params = useParams<{ userId: string }>();
+  const staffId = params.userId;
 
   const [staffName, setStaffName] = useState('');
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
@@ -41,7 +41,7 @@ export default function StaffShiftsPage() {
         const staffRes = await fetch('/api/admin/staff');
         const staffData = await staffRes.json();
         if (staffData.success) {
-          const found = staffData.staff.find((u: { id: string }) => u.id === staffId);
+          const found = staffData.staff?.find((u: { id: string }) => u.id === staffId);
           if (found) setStaffName(found.username || found.email);
         }
 
@@ -74,7 +74,7 @@ export default function StaffShiftsPage() {
   }
 
   return (
-    <div>
+    <div dir="ltr">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Link
@@ -227,7 +227,7 @@ export default function StaffShiftsPage() {
                           }}
                         >
                           <FaListAlt style={{ fontSize: '0.7rem' }} />
-                          عرض الطلبات
+                          View Orders
                         </Link>
                       </td>
                     </tr>

@@ -1,10 +1,15 @@
+// AI GUARDRAIL: MULTI-ACCOUNT ISOLATION — POS order creation must use `session.id`
+// exclusively. Never trust client-provided cashierId/userId fields.
+// Failure to scope by session will cause concurrent cashier orders to cross-contaminate.
+
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import { verifySession, verifySessionForPOS } from '@/lib/auth';
 
 interface OrderItem {
+  id: string;
   name: string;
   quantity: number;
   price: number;
@@ -12,6 +17,32 @@ interface OrderItem {
 
 function generateOrderId(prefix = 'CF'): string {
   return `${prefix}-${String(Date.now()).slice(-6)}`;
+}
+
+function generateItemId(): string {
+  return Math.random().toString(36).substring(2, 10);
+}
+
+async function injectProductImages(orders: any[]): Promise<any[]> {
+  const names = [...new Set(orders.flatMap((o) => (o.items as any[])?.map((i: any) => i.name) || []))];
+  if (!names.length) return orders;
+  const products = await prisma.product.findMany({
+    where: { name: { in: names, mode: 'insensitive' } },
+    select: { name: true, images: true },
+  });
+  const imageMap = new Map<string, string>();
+  for (const p of products) {
+    const arr = p.images as string[];
+    imageMap.set(p.name.toLowerCase(), arr?.[0] || '');
+  }
+  return orders.map((o) => ({
+    ...o,
+    items: (o.items as any[])?.map((item: any) => ({
+      ...item,
+      id: item.id || Math.random().toString(36).substring(2, 10),
+      image: imageMap.get(item.name.toLowerCase()) || '',
+    })) || [],
+  }));
 }
 
 export async function GET() {
@@ -24,10 +55,12 @@ export async function GET() {
         status: true, paymentMethod: true, date: true,
         createdAt: true, source: true, items: true,
         phoneNumber: true, address: true, city: true,
+        governorate: true, apartment: true, email: true,
         cashierId: true, shiftId: true,
       },
     });
-    return NextResponse.json({ orders });
+    const enriched = await injectProductImages(orders);
+    return NextResponse.json({ orders: enriched });
   } catch (err) {
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Failed to fetch orders' },
@@ -50,66 +83,97 @@ export async function POST(request: Request) {
       totalPrice: number;
       paymentMethod?: string;
       source?: string;
-      cashierId?: string;
     };
 
-    // Determine source and cashierId from session or request body
+    // Determine source and cashierId from session
     let source = 'WEB';
     let cashierId: string | null = null;
     let shiftId: string | null = null;
 
     if (body.source === 'POS') {
-      // Use POS-aware session so cashier_session always wins over admin_session
-      const session = await verifySessionForPOS(body.cashierId);
+      const session = await verifySessionForPOS();
       if (session && (session.role === 'CASHIER' || session.role === 'ADMIN')) {
         source = 'POS';
-        // Prioritize the cashierId passed from client session context
-        cashierId = body.cashierId || session.id;
-
-        const activeShift = await prisma.shift.findFirst({
-          where: { cashierId: cashierId, status: 'OPEN' },
-          select: { id: true },
-        });
-        if (!activeShift) {
-          return NextResponse.json(
-            { success: false, error: 'No active shift found. Please open a shift first.' },
-            { status: 400 }
-          );
-        }
-        shiftId = activeShift.id;
+        cashierId = session.id;
       }
     }
 
-    const order = await prisma.order.create({
-      data: {
-        orderId: generateOrderId(source === 'POS' ? 'POS' : 'CF'),
-        customerName: body.customerName,
-        phoneNumber: body.phoneNumber,
-        email: body.email || '',
-        address: body.address,
-        apartment: body.apartment || '',
-        city: body.city,
-        governorate: body.governorate || '',
-        items: JSON.parse(JSON.stringify(body.items)),
-        totalPrice: body.totalPrice,
-        status: 'Pending',
-        date: new Date().toLocaleDateString('en-CA'),
-        paymentMethod: body.paymentMethod || null,
-        source,
-        cashierId,
-        shiftId,
-      },
+    // ── Ensure every item has an id ──
+    const itemsWithIds = body.items.map((item) => ({
+      ...item,
+      id: item.id || generateItemId(),
+    }));
+
+    // ── Atomic order creation + stock deduction + shift resolution ──
+    const order = await prisma.$transaction(async (tx) => {
+      // 0. Resolve active shift inside the transaction (avoids a separate DB roundtrip)
+      if (source === 'POS' && cashierId) {
+        const activeShift = await tx.shift.findFirst({
+          where: { cashierId, status: 'OPEN' },
+          select: { id: true },
+        });
+        if (!activeShift) {
+          throw new Error('No active shift found. Please open a shift first.');
+        }
+        shiftId = activeShift.id;
+      }
+
+      // 1. Create the order
+      const created = await tx.order.create({
+        data: {
+          orderId: generateOrderId(source === 'POS' ? 'POS' : 'CF'),
+          customerName: body.customerName,
+          phoneNumber: body.phoneNumber,
+          email: body.email || '',
+          address: body.address,
+          apartment: body.apartment || '',
+          city: body.city,
+          governorate: body.governorate || '',
+          items: JSON.parse(JSON.stringify(itemsWithIds)),
+          totalPrice: body.totalPrice,
+          status: 'ACCEPTED',
+          date: new Date().toLocaleDateString('en-CA'),
+          paymentMethod: body.paymentMethod || null,
+          source,
+          cashierId,
+          shiftId,
+        },
+      });
+
+      // 2. Deduct stock for each item
+      for (const item of itemsWithIds) {
+        const product = await tx.product.findFirst({
+          where: { name: { equals: item.name, mode: 'insensitive' } },
+          select: { id: true, stock: true, name: true },
+        });
+
+        if (product) {
+          if (product.stock < item.quantity) {
+            throw new Error(
+              `Insufficient stock for "${product.name}": requested ${item.quantity}, available ${product.stock}`
+            );
+          }
+          await tx.product.update({
+            where: { id: product.id },
+            data: { stock: { decrement: item.quantity } },
+          });
+        }
+        // Items not found in Product table are ignored (likely gift sets handled via JSON below)
+      }
+
+      return created;
     });
 
-    // --- Stock Deduction ---
+    // ── JSON file sync (for legacy analytics / gift-set stock) ──
     try {
-      const products = await readJsonFile<any[]>('products.json', []);
-      const giftSets = await readJsonFile<any[]>('gift-sets.json', []);
+      const [products, giftSets] = await Promise.all([
+        readJsonFile<any[]>('products.json', []),
+        readJsonFile<any[]>('gift-sets.json', []),
+      ]);
       let updatedProducts = false;
       let updatedGiftSets = false;
 
-      for (const item of body.items) {
-        // Match product by name (case-insensitive)
+      for (const item of itemsWithIds) {
         const pIdx = products.findIndex(
           (p) => p.name && p.name.toLowerCase() === item.name.toLowerCase()
         );
@@ -117,18 +181,7 @@ export async function POST(request: Request) {
           const currentStock = typeof products[pIdx].stock === 'number' ? products[pIdx].stock : 0;
           products[pIdx].stock = Math.max(0, currentStock - item.quantity);
           updatedProducts = true;
-
-          // Also try to update DB
-          try {
-            await prisma.product.updateMany({
-              where: { name: { equals: products[pIdx].name, mode: 'insensitive' } },
-              data: { stock: { decrement: item.quantity } },
-            });
-          } catch {
-            // ignore safely if table is not synced
-          }
         } else {
-          // Try to match gift set by name (case-insensitive)
           const gIdx = giftSets.findIndex(
             (g) => g.name && g.name.toLowerCase() === item.name.toLowerCase()
           );
@@ -147,20 +200,23 @@ export async function POST(request: Request) {
         await writeJsonFile('gift-sets.json', giftSets);
       }
 
-      // Revalidate cache to reflect new inventory values
       revalidatePath('/');
       revalidatePath('/cashier');
       revalidatePath('/admin/analytics');
       revalidatePath('/collections/gift-sets');
       revalidatePath('/collections/all-fragrances');
     } catch (stockErr) {
-      console.error('STOCK DEDUCTION ERROR:', stockErr);
+      console.error('JSON STOCK SYNC ERROR (non-blocking):', stockErr);
     }
 
     return NextResponse.json({ success: true, order });
   } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to save order';
+    if (message.toLowerCase().includes('insufficient stock')) {
+      return NextResponse.json({ success: false, error: message }, { status: 400 });
+    }
     return NextResponse.json(
-      { success: false, error: err instanceof Error ? err.message : 'Failed to save order' },
+      { success: false, error: message },
       { status: 500 }
     );
   }
@@ -182,6 +238,9 @@ export async function PUT(request: Request) {
     const newStatus = body.status;
     const prevStatus = existingOrder.status;
 
+    // Normalize status to title case for consistent filtering
+    const normalizedStatus = newStatus.charAt(0).toUpperCase() + newStatus.slice(1).toLowerCase();
+
     // Lock: once Cancelled, status can never be changed again
     if (prevStatus.toLowerCase() === 'cancelled') {
       return NextResponse.json(
@@ -190,68 +249,112 @@ export async function PUT(request: Request) {
       );
     }
 
-    // Prevent duplicate stock restoration
-    const isNowCancelled = newStatus.toLowerCase() === 'cancelled';
+    const isNowCancelled = normalizedStatus === 'Cancelled';
+    const items = (existingOrder.items as { name: string; quantity: number; price: number }[]) || [];
 
-    if (isNowCancelled) {
-      // Restore stock for each item in the order
-      const items = (existingOrder.items as { name: string; quantity: number; price: number }[]) || [];
-
-      const products = await readJsonFile<any[]>('products.json', []);
-      const giftSets = await readJsonFile<any[]>('gift-sets.json', []);
-      let updatedProducts = false;
-      let updatedGiftSets = false;
-
-      for (const item of items) {
-        // Restore product stock (match by name, case-insensitive)
-        const pIdx = products.findIndex(
-          (p) => p.name && p.name.toLowerCase() === item.name.toLowerCase()
-        );
-        if (pIdx !== -1) {
-          const currentStock = typeof products[pIdx].stock === 'number' ? products[pIdx].stock : 0;
-          products[pIdx].stock = currentStock + item.quantity;
-          updatedProducts = true;
-
-          try {
-            await prisma.product.updateMany({
-              where: { name: { equals: products[pIdx].name, mode: 'insensitive' } },
+    // ── Atomic status update + stock restoration ──
+    const order = await prisma.$transaction(async (tx) => {
+      if (isNowCancelled) {
+        for (const item of items) {
+          const product = await tx.product.findFirst({
+            where: { name: { equals: item.name, mode: 'insensitive' } },
+            select: { id: true },
+          });
+          if (product) {
+            await tx.product.update({
+              where: { id: product.id },
               data: { stock: { increment: item.quantity } },
             });
-          } catch {
-            // ignore if table is not synced
           }
-        } else {
-          // Restore gift set stock (match by name, case-insensitive)
-          const gIdx = giftSets.findIndex(
-            (g) => g.name && g.name.toLowerCase() === item.name.toLowerCase()
-          );
-          if (gIdx !== -1) {
-            const currentStock = typeof giftSets[gIdx].stock === 'number' ? giftSets[gIdx].stock : 0;
-            giftSets[gIdx].stock = currentStock + item.quantity;
-            updatedGiftSets = true;
-          }
+          // Items not found (gift sets) are handled via JSON sync below
         }
       }
 
-      if (updatedProducts) {
-        await writeJsonFile('products.json', products);
-      }
-      if (updatedGiftSets) {
-        await writeJsonFile('gift-sets.json', giftSets);
-      }
+      return tx.order.update({
+        where: { orderId: body.orderId },
+        data: { status: normalizedStatus },
+      });
+    });
 
-      // Revalidate cache to reflect restored inventory
-      revalidatePath('/');
-      revalidatePath('/cashier');
-      revalidatePath('/admin/analytics');
-      revalidatePath('/collections/gift-sets');
-      revalidatePath('/collections/all-fragrances');
+    // ── JSON file sync (for legacy gift-set stock) ──
+    if (isNowCancelled) {
+      try {
+        const products = await readJsonFile<any[]>('products.json', []);
+        const giftSets = await readJsonFile<any[]>('gift-sets.json', []);
+        let updatedProducts = false;
+        let updatedGiftSets = false;
+
+        for (const item of items) {
+          const pIdx = products.findIndex(
+            (p) => p.name && p.name.toLowerCase() === item.name.toLowerCase()
+          );
+          if (pIdx !== -1) {
+            products[pIdx].stock = (products[pIdx].stock || 0) + item.quantity;
+            updatedProducts = true;
+          } else {
+            const gIdx = giftSets.findIndex(
+              (g) => g.name && g.name.toLowerCase() === item.name.toLowerCase()
+            );
+            if (gIdx !== -1) {
+              giftSets[gIdx].stock = (giftSets[gIdx].stock || 0) + item.quantity;
+              updatedGiftSets = true;
+            }
+          }
+        }
+
+        if (updatedProducts) await writeJsonFile('products.json', products);
+        if (updatedGiftSets) await writeJsonFile('gift-sets.json', giftSets);
+
+        revalidatePath('/');
+        revalidatePath('/cashier');
+        revalidatePath('/admin/analytics');
+        revalidatePath('/collections/gift-sets');
+        revalidatePath('/collections/all-fragrances');
+      } catch (stockErr) {
+        console.error('JSON STOCK RESTORE ERROR (non-blocking):', stockErr);
+      }
     }
 
-    const order = await prisma.order.update({
-      where: { orderId: body.orderId },
-      data: { status: newStatus },
-    });
+    // --- Recalculate Shift Totals (if order is tied to a shift) ---
+    if (order.shiftId) {
+      try {
+        const ordersInShift = await prisma.order.findMany({
+          where: { shiftId: order.shiftId },
+          select: { totalPrice: true, paymentMethod: true, status: true },
+        });
+
+        let expectedTotal = 0;
+        let orderCount = 0;
+        let totalCash = 0;
+        let totalInstaPay = 0;
+        let totalVodafoneCash = 0;
+        let totalVisa = 0;
+
+        for (const o of ordersInShift) {
+          const orderStatus = (o.status || '').toLowerCase();
+          if (orderStatus === 'cancelled') continue;
+          expectedTotal += o.totalPrice;
+          orderCount++;
+          const method = (o.paymentMethod || '').toLowerCase();
+          if (method.includes('cash')) {
+            totalCash += o.totalPrice;
+          } else if (method.includes('instapay')) {
+            totalInstaPay += o.totalPrice;
+          } else if (method.includes('vodafone')) {
+            totalVodafoneCash += o.totalPrice;
+          } else if (method.includes('visa')) {
+            totalVisa += o.totalPrice;
+          }
+        }
+
+        await prisma.shift.update({
+          where: { id: order.shiftId },
+          data: { expectedTotal, orderCount, totalCash, totalInstaPay, totalVodafoneCash, totalVisa },
+        });
+      } catch (recalcErr) {
+        console.error('[SHIFT RECALC ERROR]', recalcErr);
+      }
+    }
 
     return NextResponse.json({ success: true, order });
   } catch (err) {

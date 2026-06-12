@@ -49,9 +49,12 @@ export default function ManageStaffPage() {
       const data = await res.json();
       if (data.success) {
         setStaffList(data.staff || []);
+      } else {
+        setStaffList([]);
       }
     } catch (err) {
       console.error('Failed to fetch staff:', err);
+      setStaffList([]);
     }
     setLoading(false);
   }
@@ -81,7 +84,7 @@ export default function ManageStaffPage() {
         return;
       }
 
-      if (data.success) {
+      if (data.success && data.user) {
         setStaffList((prev) => [...prev, data.user]);
         setModalOpen(false);
       }
@@ -150,12 +153,12 @@ export default function ManageStaffPage() {
   };
 
   return (
-    <div>
+    <div dir="ltr">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <FaUsers style={{ color: '#ffffff', fontSize: '1.25rem' }} />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
-            Manage Staff / إدارة الموظفين
+            Manage Staff
           </h2>
         </div>
         <button onClick={openAdd} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -371,7 +374,7 @@ export default function ManageStaffPage() {
                 Updating shift password for: <strong style={{ color: '#e2e8f0' }}>{passwordModal.staff.username}</strong> ({passwordModal.staff.email})
               </p>
               <div className={styles.formGroup}>
-                <label>New Shift Password / كلمة المرور الجديدة</label>
+                <label>New Shift Password</label>
                 <input
                   type="text"
                   value={newShiftPassword}

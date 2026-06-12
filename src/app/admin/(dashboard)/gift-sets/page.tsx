@@ -15,6 +15,7 @@ interface GiftSet {
   name: string;
   description: string;
   price: number;
+  costPrice?: number;
   isDraft: boolean;
   image: string;
   productIds: string[];
@@ -26,6 +27,7 @@ interface FormState {
   name: string;
   description: string;
   price: string;
+  costPrice: string;
   isDraft: boolean;
   image: string;
   productIds: string[];
@@ -33,7 +35,7 @@ interface FormState {
 }
 
 const EMPTY_FORM: FormState = {
-  name: '', description: '', price: '', isDraft: true,
+  name: '', description: '', price: '', costPrice: '', isDraft: true,
   image: '', productIds: [], stock: '',
 };
 
@@ -68,7 +70,8 @@ export default function AdminGiftSetsPage() {
     setEditing(gs);
     setForm({
       name: gs.name, description: gs.description,
-      price: String(gs.price), isDraft: gs.isDraft ?? false,
+      price: String(gs.price), costPrice: String(gs.costPrice ?? ''),
+      isDraft: gs.isDraft ?? false,
       image: gs.image, productIds: [...gs.productIds],
       stock: gs.stock !== undefined ? String(gs.stock) : '',
     });
@@ -98,8 +101,8 @@ export default function AdminGiftSetsPage() {
     const url    = '/api/admin/gift-sets';
     const method = editingSnapshot ? 'PUT' : 'POST';
     const body   = editingSnapshot
-      ? { ...form, id: editingSnapshot.id, price: parseFloat(form.price) || 0, stock: form.stock !== '' ? parseInt(form.stock, 10) : 0 }
-      : { ...form, price: parseFloat(form.price) || 0, stock: form.stock !== '' ? parseInt(form.stock, 10) : 0 };
+      ? { ...form, id: editingSnapshot.id, price: parseFloat(form.price) || 0, costPrice: parseFloat(form.costPrice) || 0, stock: form.stock !== '' ? parseInt(form.stock, 10) : 0 }
+      : { ...form, price: parseFloat(form.price) || 0, costPrice: parseFloat(form.costPrice) || 0, stock: form.stock !== '' ? parseInt(form.stock, 10) : 0 };
 
     try {
       const res  = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -244,11 +247,15 @@ export default function AdminGiftSetsPage() {
               </div>
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label>Price (EGP)</label>
-                  <input type="number" value={form.price} onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))} step="0.01" required />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Stock Quantity</label>
+                <label>Price (EGP)</label>
+                <input type="number" value={form.price} onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))} step="0.01" required />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Cost Price (EGP)</label>
+                <input type="number" value={form.costPrice} onChange={(e) => setForm((p) => ({ ...p, costPrice: e.target.value }))} step="0.01" placeholder="Optional" />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Stock Quantity</label>
                   <input type="number" value={form.stock} onChange={(e) => setForm((p) => ({ ...p, stock: e.target.value }))} min="0" placeholder="e.g. 50" />
                 </div>
                 <div className={styles.formGroup}>

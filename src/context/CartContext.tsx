@@ -214,10 +214,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         >
           <div style={{ flex: 1, textAlign: 'center' }}>
             <div style={{ fontFamily: 'var(--font-heading, sans-serif)', fontSize: '0.9rem', fontWeight: 600 }}>
-              عذراً، الكمية المتاحة في المخزن هي {stockError.limit} فقط
+              The requested quantity exceeds available luxury stock
             </div>
             <div style={{ fontFamily: 'var(--font-body, sans-serif)', fontSize: '0.75rem', color: '#fbbf24', marginTop: '0.25rem' }}>
-              Sorry, only {stockError.limit} items left in stock
+              Only {stockError.limit} items available
             </div>
           </div>
           <button 

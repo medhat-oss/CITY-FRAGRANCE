@@ -1,9 +1,20 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 
 const FILE = 'site-settings.json';
+
+const getCachedDbSettings = cache(
+  unstable_cache(
+    async () => {
+      return prisma.siteSetting.findUnique({ where: { id: 'default' } });
+    },
+    ['admin-settings'],
+    { revalidate: 5, tags: ['settings'] }
+  )
+);
 
 interface SiteSettings {
   heroTitle: string;
@@ -13,11 +24,13 @@ interface SiteSettings {
   heroBgImage: string;
   heroBgImageDesktop: string;
   heroVideoUrl: string;
+  heroVideoMobile: string;
   moodTitle: string;
   moodSubtitle: string;
   moodImage: string;
   moodImageDesktop: string;
   moodVideoUrl: string;
+  moodVideoMobile: string;
   womenCollectionVideoUrl: string;
   menCollectionVideoUrl: string;
   giftSetsVideoUrl: string;
@@ -28,8 +41,8 @@ interface SiteSettings {
 
 const ALL_KEYS: Array<keyof SiteSettings> = [
   'heroTitle', 'heroSubtitle', 'heroDescription', 'announcementText',
-  'heroBgImage', 'heroBgImageDesktop', 'heroVideoUrl',
-  'moodTitle', 'moodSubtitle', 'moodImage', 'moodImageDesktop', 'moodVideoUrl',
+  'heroBgImage', 'heroBgImageDesktop', 'heroVideoUrl', 'heroVideoMobile',
+  'moodTitle', 'moodSubtitle', 'moodImage', 'moodImageDesktop', 'moodVideoUrl', 'moodVideoMobile',
   'womenCollectionVideoUrl', 'menCollectionVideoUrl',
   'giftSetsVideoUrl', 'newArrivalsVideoUrl', 'allFragrancesVideoUrl', 'oudCollectionVideoUrl',
 ];
@@ -42,11 +55,13 @@ const DEFAULTS: SiteSettings = {
   heroBgImage: '/images/hero-banner.png',
   heroBgImageDesktop: '',
   heroVideoUrl: '',
+  heroVideoMobile: '',
   moodTitle: 'The Essence of Luxury & Elegance',
   moodSubtitle: 'Discover timeless scents crafted for those who appreciate the finer things in life.',
   moodImage: '/images/hero-banner.png',
   moodImageDesktop: '',
   moodVideoUrl: '',
+  moodVideoMobile: '',
   womenCollectionVideoUrl: '',
   menCollectionVideoUrl: '',
   giftSetsVideoUrl: '',
@@ -69,11 +84,9 @@ function applyRecord(target: SiteSettings, source: Record<string, any>): SiteSet
 export async function GET() {
   // 1. Try database first as the primary source of truth
   try {
-    const dbSettings = await prisma.siteSetting.findUnique({ where: { id: 'default' } });
-    if (dbSettings) {
-      const merged = applyRecord({ ...DEFAULTS }, dbSettings);
-      return NextResponse.json(merged);
-    }
+    let dbSettings = await getCachedDbSettings();
+    const merged = applyRecord({ ...DEFAULTS }, (dbSettings || {}) as any);
+    return NextResponse.json(merged);
   } catch (err) {
     console.error('SETTINGS GET DB ERROR:', err);
   }
@@ -120,7 +133,7 @@ export async function POST(request: Request) {
     const updated: SiteSettings = { ...current };
     for (const key of ALL_KEYS) {
       if (body[key] !== undefined) {
-        updated[key] = body[key];
+        (updated as any)[key] = body[key];
       }
     }
 
@@ -135,8 +148,7 @@ export async function POST(request: Request) {
       updatePayload[key] = updated[key];
     }
 
-    console.log('DB Payload (create):', JSON.stringify(createPayload));
-    console.log('DB Payload (update):', JSON.stringify(updatePayload));
+
 
     try {
       await prisma.siteSetting.upsert({
@@ -144,6 +156,8 @@ export async function POST(request: Request) {
         update: updatePayload,
         create: createPayload,
       });
+      // Call immediately after a successful database update to ensure instant UI invalidation
+      revalidatePath('/', 'layout');
     } catch (dbErr: any) {
       console.error('PRISMA UPSERT ERROR:', dbErr?.message || dbErr);
       return NextResponse.json({
@@ -152,7 +166,7 @@ export async function POST(request: Request) {
       }, { status: 500 });
     }
 
-    console.log('SETTINGS SAVED to local JSON, Neon DB, and Cloudinary');
+
     // Purge Next.js server cache for every page that renders hero/mood media
     const pathsToRevalidate = [
       '/',

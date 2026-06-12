@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import { verifySession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -12,23 +12,12 @@ export async function POST() {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Delete orders first (no FK constraint but logical order)
-    const { count: deletedOrders } = await prisma.order.deleteMany();
-
-    // Reset shift records — set all closed shifts to zeroed summaries
-    await prisma.shift.updateMany({
-      where: { status: 'CLOSED' },
-      data: {
-        totalCash: 0,
-        totalInstaPay: 0,
-        totalVodafoneCash: 0,
-        totalVisa: 0,
-        actualCash: 0,
-        expectedTotal: 0,
-        discrepancy: 0,
-        orderCount: 0,
-      },
-    });
+    // Atomically delete orders (frees FK references) then all shifts
+    const [deleteResult] = await prisma.$transaction([
+      prisma.order.deleteMany(),
+      prisma.shift.deleteMany(),
+    ]);
+    const deletedOrders = deleteResult.count;
 
     // Purge caches so analytics & cashier pages reflect instantly
     revalidatePath('/admin/analytics');

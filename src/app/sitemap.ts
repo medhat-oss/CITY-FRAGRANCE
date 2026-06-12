@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 
 const BASE_URL = 'https://city-fragrance-medhat-oss-projects.vercel.app';
 

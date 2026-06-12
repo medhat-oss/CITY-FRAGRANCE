@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import styles from '../admin.module.css';
 import type { SiteSettings, CollectionSlug, CollectionData } from '@/types';
 import { FaCog, FaImage } from 'react-icons/fa';
+import { invalidateSettingsCache } from '@/lib/settingsCache';
 
 const COLLECTION_SLUGS: { slug: CollectionSlug; label: string }[] = [
   { slug: 'new-arrivals', label: 'New Arrivals' },
@@ -63,11 +64,13 @@ export default function AdminSettingsPage() {
     heroBgImage: '',
     heroBgImageDesktop: '',
     heroVideoUrl: '',
+    heroVideoMobile: '',
     moodTitle: '',
     moodSubtitle: '',
     moodImage: '',
     moodImageDesktop: '',
     moodVideoUrl: '',
+    moodVideoMobile: '',
     womenCollectionVideoUrl: '',
     menCollectionVideoUrl: '',
     giftSetsVideoUrl: '',
@@ -81,7 +84,9 @@ export default function AdminSettingsPage() {
   const [heroUploadError, setHeroUploadError] = useState('');
   const [moodUploadError, setMoodUploadError] = useState('');
   const [heroVideoUploadError, setHeroVideoUploadError] = useState('');
+  const [heroVideoMobileUploadError, setHeroVideoMobileUploadError] = useState('');
   const [moodVideoUploadError, setMoodVideoUploadError] = useState('');
+  const [moodVideoMobileUploadError, setMoodVideoMobileUploadError] = useState('');
   const [womenVideoUploadError, setWomenVideoUploadError] = useState('');
   const [menVideoUploadError, setMenVideoUploadError] = useState('');
   const [giftSetsVideoUploadError, setGiftSetsVideoUploadError] = useState('');
@@ -98,23 +103,29 @@ export default function AdminSettingsPage() {
   const [collectionsUploadError, setCollectionsUploadError] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/settings')
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    fetch('/api/admin/settings', { signal: controller.signal })
       .then((res) => res.json())
-      .then((data: SiteSettings) => {
-        setSettings(data);
+      .then((data: Partial<SiteSettings>) => {
+        setSettings((prev) => ({ ...prev, ...data }));
         setSettingsLoaded(true);
       })
-      .catch(() => setSettingsLoaded(true));
+      .catch(() => setSettingsLoaded(true))
+      .finally(() => clearTimeout(timeout));
   }, []);
 
   useEffect(() => {
-    fetch('/api/admin/collections')
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    fetch('/api/admin/collections', { signal: controller.signal })
       .then((res) => res.json())
       .then((data: { images: Record<string, CollectionData> }) => {
         setCollectionData(data.images);
         setCollectionsLoaded(true);
       })
-      .catch(() => setCollectionsLoaded(true));
+      .catch(() => setCollectionsLoaded(true))
+      .finally(() => clearTimeout(timeout));
   }, []);
 
   const handleSettingsChange = (field: keyof SiteSettings, value: string) => {
@@ -133,6 +144,9 @@ export default function AdminSettingsPage() {
       const data = await res.json();
       if (data.success && data.settings) {
         setSettings(data.settings);
+        // Bust the client-side settings cache so Header + other consumers
+        // immediately re-fetch fresh data on the next render cycle.
+        invalidateSettingsCache();
         setSaveMsg('Settings saved successfully!');
       } else {
         setSaveMsg(data.error || 'Failed to save settings.');
@@ -274,6 +288,46 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const handleHeroVideoMobileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setHeroVideoMobileUploadError('');
+    const formData = new FormData();
+    formData.append('file', file);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000);
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData, signal: controller.signal });
+      clearTimeout(timeout);
+      const data = await res.json();
+      if (data.success) handleSettingsChange('heroVideoMobile', data.path);
+      else setHeroVideoMobileUploadError(data.error || 'Upload failed');
+    } catch {
+      clearTimeout(timeout);
+      setHeroVideoMobileUploadError('Network error. Please try again.');
+    }
+  };
+
+  const handleMoodVideoMobileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMoodVideoMobileUploadError('');
+    const formData = new FormData();
+    formData.append('file', file);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000);
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData, signal: controller.signal });
+      clearTimeout(timeout);
+      const data = await res.json();
+      if (data.success) handleSettingsChange('moodVideoMobile', data.path);
+      else setMoodVideoMobileUploadError(data.error || 'Upload failed');
+    } catch {
+      clearTimeout(timeout);
+      setMoodVideoMobileUploadError('Network error. Please try again.');
+    }
+  };
+
   const makeCollectionVideoUploader = (
     field: 'womenCollectionVideoUrl' | 'menCollectionVideoUrl' | 'giftSetsVideoUrl' | 'newArrivalsVideoUrl' | 'allFragrancesVideoUrl' | 'oudCollectionVideoUrl',
     setError: (msg: string) => void
@@ -306,7 +360,15 @@ export default function AdminSettingsPage() {
   const handleAllFragrancesVideoUpload = makeCollectionVideoUploader('allFragrancesVideoUrl', setAllFragrancesVideoUploadError);
   const handleOudCollectionVideoUpload = makeCollectionVideoUploader('oudCollectionVideoUrl', setOudCollectionVideoUploadError);
 
-  if (!settingsLoaded || !collectionsLoaded) return null;
+  if (!settingsLoaded || !collectionsLoaded) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', color: '#94a3b8', fontFamily: 'var(--font-body)', fontSize: '0.9rem', gap: '0.75rem' }}>
+        <div style={{ width: 20, height: 20, border: '2px solid #1d3573', borderTopColor: '#ffffff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        Loading settings...
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.adminContent} style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '900px', width: '100%' }}>
@@ -374,156 +436,49 @@ export default function AdminSettingsPage() {
             >حذف النص / Remove</button>
           </div>
           <div style={fieldStyle}>
-            <label style={labelStyle}>Hero Background Image</label>
-            {settings.heroBgImage && (
-              <div
-                style={{
-                  width: '100%',
-                  aspectRatio: '16 / 9',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  border: '1px solid #1d3573',
-                  background: '#09142E',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={settings.heroBgImage}
-                  alt="Hero background preview"
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSettingsChange('heroBgImage', '')}
-                  style={{
-                    position: 'absolute',
-                    top: '8px',
-                    right: '8px',
-                    background: 'rgba(220, 38, 38, 0.95)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '0.4rem 0.8rem',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                    fontFamily: 'var(--font-body)',
-                    fontWeight: 600,
-                    zIndex: 10,
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}
-                >
-                  Remove / حذف
-                </button>
+            <label style={labelStyle}>Hero Image — Desktop View / صورة الكمبيوتر (عريضة)</label>
+            {settings.heroBgImageDesktop && (
+              <div style={{ width: '100%', maxWidth: '400px', height: '220px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #1d3573', background: '#09142E', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <img src={settings.heroBgImageDesktop} alt="Hero desktop preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <button type="button" onClick={() => handleSettingsChange('heroBgImageDesktop', '')} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(220, 38, 38, 0.95)', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-body)', fontWeight: 600, zIndex: 10 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}>Remove / حذف</button>
               </div>
             )}
-            <label
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.6rem 1.2rem',
-                background: '#ffffff',
-                color: '#09142E',
-                borderRadius: '6px',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                border: 'none',
-                width: 'fit-content',
-                transition: 'opacity 0.2s',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-            >
-              Choose Image
-              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleHeroBgUpload} />
-            </label>
-            {heroUploadError && (
-              <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{heroUploadError}</p>
-            )}
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', background: '#ffffff', color: '#09142E', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '0.85rem', cursor: 'pointer', border: 'none', width: 'fit-content' }}>Choose Image<input type="file" accept="image/*" style={{ display: 'none' }} onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; setHeroUploadError(''); const fd = new FormData(); fd.append('file', f); const c = new AbortController(); const t = setTimeout(() => c.abort(), 30000); try { const r = await fetch('/api/upload', { method: 'POST', body: fd, signal: c.signal }); clearTimeout(t); const d = await r.json(); if (d.success) handleSettingsChange('heroBgImageDesktop', d.path); else setHeroUploadError(d.error || 'Upload failed'); } catch { clearTimeout(t); setHeroUploadError('Network error.'); } }} /></label>
+            {heroUploadError && <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{heroUploadError}</p>}
           </div>
 
           <div style={fieldStyle}>
-            <label style={labelStyle}>Hero Background Video</label>
-            {settings.heroVideoUrl && (
-              <div
-                style={{
-                  width: '100%',
-                  aspectRatio: '16 / 9',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  border: '1px solid #1d3573',
-                  background: '#09142E',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                }}
-              >
-                <video
-                  src={settings.heroVideoUrl}
-                  muted
-                  controls
-                  onContextMenu={(e) => e.preventDefault()}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSettingsChange('heroVideoUrl', '')}
-                  style={{
-                    position: 'absolute',
-                    top: '8px',
-                    right: '8px',
-                    background: 'rgba(220, 38, 38, 0.95)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '0.4rem 0.8rem',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                    fontFamily: 'var(--font-body)',
-                    fontWeight: 600,
-                    zIndex: 10,
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}
-                >
-                  Remove / حذف
-                </button>
+            <label style={labelStyle}>Hero Image — Mobile View / صورة الموبايل (طويلة)</label>
+            {settings.heroBgImage && (
+              <div style={{ width: '100%', maxWidth: '400px', height: '220px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #1d3573', background: '#09142E', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <img src={settings.heroBgImage} alt="Hero mobile preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <button type="button" onClick={() => handleSettingsChange('heroBgImage', '')} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(220, 38, 38, 0.95)', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-body)', fontWeight: 600, zIndex: 10 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}>Remove / حذف</button>
               </div>
             )}
-            <label
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.6rem 1.2rem',
-                background: '#ffffff',
-                color: '#09142E',
-                borderRadius: '6px',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                border: 'none',
-                width: 'fit-content',
-                transition: 'opacity 0.2s',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-            >
-              Choose Video
-              <input type="file" accept="video/*" style={{ display: 'none' }} onChange={handleHeroVideoUpload} />
-            </label>
-            {heroVideoUploadError && (
-              <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{heroVideoUploadError}</p>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', background: '#ffffff', color: '#09142E', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '0.85rem', cursor: 'pointer', border: 'none', width: 'fit-content' }}>Choose Image<input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleHeroBgUpload} /></label>
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Hero Video — Desktop View / فيديو الكمبيوتر (عريضة)</label>
+            {settings.heroVideoUrl && (
+              <div style={{ width: '100%', maxWidth: '400px', height: '220px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #1d3573', background: '#09142E', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <video src={settings.heroVideoUrl} muted controls onContextMenu={(e) => e.preventDefault()} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <button type="button" onClick={() => handleSettingsChange('heroVideoUrl', '')} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(220, 38, 38, 0.95)', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-body)', fontWeight: 600, zIndex: 10 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}>Remove / حذف</button>
+              </div>
             )}
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', background: '#ffffff', color: '#09142E', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '0.85rem', cursor: 'pointer', border: 'none', width: 'fit-content' }}>Choose Video<input type="file" accept="video/*" style={{ display: 'none' }} onChange={handleHeroVideoUpload} /></label>
+            {heroVideoUploadError && <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{heroVideoUploadError}</p>}
+          </div>
+
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Hero Video — Mobile View / فيديو الموبايل (طويلة)</label>
+            {settings.heroVideoMobile && (
+              <div style={{ width: '100%', maxWidth: '400px', height: '220px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #1d3573', background: '#09142E', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <video src={settings.heroVideoMobile} muted controls onContextMenu={(e) => e.preventDefault()} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <button type="button" onClick={() => handleSettingsChange('heroVideoMobile', '')} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(220, 38, 38, 0.95)', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-body)', fontWeight: 600, zIndex: 10 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}>Remove / حذف</button>
+              </div>
+            )}
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', background: '#ffffff', color: '#09142E', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '0.85rem', cursor: 'pointer', border: 'none', width: 'fit-content' }}>Choose Video<input type="file" accept="video/*" style={{ display: 'none' }} onChange={handleHeroVideoMobileUpload} /></label>
+            {heroVideoMobileUploadError && <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{heroVideoMobileUploadError}</p>}
           </div>
           <div style={fieldStyle}>
             <label style={labelStyle}>Top Announcement Bar Text</label>
@@ -595,156 +550,49 @@ export default function AdminSettingsPage() {
             >حذف النص / Remove</button>
           </div>
           <div style={fieldStyle}>
-            <label style={labelStyle}>Background Image</label>
-            {settings.moodImage && (
-              <div
-                style={{
-                  width: '100%',
-                  aspectRatio: '16 / 9',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  border: '1px solid #1d3573',
-                  background: '#09142E',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={settings.moodImage}
-                  alt="Mood section preview"
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSettingsChange('moodImage', '')}
-                  style={{
-                    position: 'absolute',
-                    top: '8px',
-                    right: '8px',
-                    background: 'rgba(220, 38, 38, 0.95)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '0.4rem 0.8rem',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                    fontFamily: 'var(--font-body)',
-                    fontWeight: 600,
-                    zIndex: 10,
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}
-                >
-                  Remove / حذف
-                </button>
+            <label style={labelStyle}>Mood Image — Desktop View / صورة الكمبيوتر (عريضة)</label>
+            {settings.moodImageDesktop && (
+              <div style={{ width: '100%', maxWidth: '400px', height: '220px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #1d3573', background: '#09142E', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <img src={settings.moodImageDesktop} alt="Mood desktop preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <button type="button" onClick={() => handleSettingsChange('moodImageDesktop', '')} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(220, 38, 38, 0.95)', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-body)', fontWeight: 600, zIndex: 10 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}>Remove / حذف</button>
               </div>
             )}
-            <label
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.6rem 1.2rem',
-                background: '#ffffff',
-                color: '#09142E',
-                borderRadius: '6px',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                border: 'none',
-                width: 'fit-content',
-                transition: 'opacity 0.2s',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-            >
-              Choose Image
-              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleMoodImageUpload} />
-            </label>
-            {moodUploadError && (
-              <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{moodUploadError}</p>
-            )}
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', background: '#ffffff', color: '#09142E', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '0.85rem', cursor: 'pointer', border: 'none', width: 'fit-content' }}>Choose Image<input type="file" accept="image/*" style={{ display: 'none' }} onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; setMoodUploadError(''); const fd = new FormData(); fd.append('file', f); const c = new AbortController(); const t = setTimeout(() => c.abort(), 30000); try { const r = await fetch('/api/upload', { method: 'POST', body: fd, signal: c.signal }); clearTimeout(t); const d = await r.json(); if (d.success) handleSettingsChange('moodImageDesktop', d.path); else setMoodUploadError(d.error || 'Upload failed'); } catch { clearTimeout(t); setMoodUploadError('Network error.'); } }} /></label>
+            {moodUploadError && <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{moodUploadError}</p>}
           </div>
 
           <div style={fieldStyle}>
-            <label style={labelStyle}>Background Video</label>
-            {settings.moodVideoUrl && (
-              <div
-                style={{
-                  width: '100%',
-                  aspectRatio: '16 / 9',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  border: '1px solid #1d3573',
-                  background: '#09142E',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                }}
-              >
-                <video
-                  src={settings.moodVideoUrl}
-                  muted
-                  controls
-                  onContextMenu={(e) => e.preventDefault()}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSettingsChange('moodVideoUrl', '')}
-                  style={{
-                    position: 'absolute',
-                    top: '8px',
-                    right: '8px',
-                    background: 'rgba(220, 38, 38, 0.95)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '0.4rem 0.8rem',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                    fontFamily: 'var(--font-body)',
-                    fontWeight: 600,
-                    zIndex: 10,
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}
-                >
-                  Remove / حذف
-                </button>
+            <label style={labelStyle}>Mood Image — Mobile View / صورة الموبايل (طويلة)</label>
+            {settings.moodImage && (
+              <div style={{ width: '100%', maxWidth: '400px', height: '220px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #1d3573', background: '#09142E', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <img src={settings.moodImage} alt="Mood mobile preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <button type="button" onClick={() => handleSettingsChange('moodImage', '')} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(220, 38, 38, 0.95)', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-body)', fontWeight: 600, zIndex: 10 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}>Remove / حذف</button>
               </div>
             )}
-            <label
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.6rem 1.2rem',
-                background: '#ffffff',
-                color: '#09142E',
-                borderRadius: '6px',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                border: 'none',
-                width: 'fit-content',
-                transition: 'opacity 0.2s',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-            >
-              Choose Video
-              <input type="file" accept="video/*" style={{ display: 'none' }} onChange={handleMoodVideoUpload} />
-            </label>
-            {moodVideoUploadError && (
-              <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{moodVideoUploadError}</p>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', background: '#ffffff', color: '#09142E', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '0.85rem', cursor: 'pointer', border: 'none', width: 'fit-content' }}>Choose Image<input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleMoodImageUpload} /></label>
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Mood Video — Desktop View / فيديو الكمبيوتر (عريضة)</label>
+            {settings.moodVideoUrl && (
+              <div style={{ width: '100%', maxWidth: '400px', height: '220px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #1d3573', background: '#09142E', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <video src={settings.moodVideoUrl} muted controls onContextMenu={(e) => e.preventDefault()} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <button type="button" onClick={() => handleSettingsChange('moodVideoUrl', '')} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(220, 38, 38, 0.95)', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-body)', fontWeight: 600, zIndex: 10 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}>Remove / حذف</button>
+              </div>
             )}
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', background: '#ffffff', color: '#09142E', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '0.85rem', cursor: 'pointer', border: 'none', width: 'fit-content' }}>Choose Video<input type="file" accept="video/*" style={{ display: 'none' }} onChange={handleMoodVideoUpload} /></label>
+            {moodVideoUploadError && <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{moodVideoUploadError}</p>}
+          </div>
+
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Mood Video — Mobile View / فيديو الموبايل (طويلة)</label>
+            {settings.moodVideoMobile && (
+              <div style={{ width: '100%', maxWidth: '400px', height: '220px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #1d3573', background: '#09142E', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <video src={settings.moodVideoMobile} muted controls onContextMenu={(e) => e.preventDefault()} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <button type="button" onClick={() => handleSettingsChange('moodVideoMobile', '')} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(220, 38, 38, 0.95)', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-body)', fontWeight: 600, zIndex: 10 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)')}>Remove / حذف</button>
+              </div>
+            )}
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', background: '#ffffff', color: '#09142E', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '0.85rem', cursor: 'pointer', border: 'none', width: 'fit-content' }}>Choose Video<input type="file" accept="video/*" style={{ display: 'none' }} onChange={handleMoodVideoMobileUpload} /></label>
+            {moodVideoMobileUploadError && <p style={{ color: '#dc2626', fontSize: '0.75rem', fontFamily: 'var(--font-body)', margin: 0 }}>{moodVideoMobileUploadError}</p>}
           </div>
           <div style={{ ...fieldStyle, gridColumn: '1 / -1' }}>
             <label style={labelStyle}>Subtitle</label>
@@ -801,13 +649,7 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-            gap: '1.5rem',
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {COLLECTION_SLUGS.map(({ slug, label }) => (
             <div
               key={slug}
@@ -819,7 +661,6 @@ export default function AdminSettingsPage() {
                 border: '1px solid #1d3573',
                 borderRadius: '8px',
                 background: '#11224D',
-                gridColumn: slug === 'womens-collection' || slug === 'mens-collection' ? '1 / -1' : undefined,
               }}
             >
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid rgba(29, 53, 115, 0.5)', paddingBottom: '0.5rem' }}>
@@ -827,7 +668,7 @@ export default function AdminSettingsPage() {
                   {label}
                 </label>
                 {(slug === 'womens-collection' || slug === 'mens-collection') && (
-                  <span style={{ fontSize: '0.75rem', color: '#D4AF37', fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+                  <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontFamily: 'var(--font-body)', fontWeight: 500 }}>
                     ★ Collection Header Banner Image (Horizontal / Wide Aspect Ratio)
                   </span>
                 )}

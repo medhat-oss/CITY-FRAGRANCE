@@ -28,6 +28,7 @@ const EMPTY_FORM = {
   baseNotes: '',
   description: '',
   price: '',
+  costPrice: '',
   salePrice: '',
   images: [],
   videoUrl: '',
@@ -70,8 +71,9 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
         middleNotes: productToEdit.middleNotes || '',
         baseNotes: productToEdit.baseNotes || '',
         description: productToEdit.description || '',
-        price: productToEdit.price,
-        salePrice: productToEdit.salePrice || '',
+        price: productToEdit.price ?? '',
+        costPrice: productToEdit.costPrice ?? '',
+        salePrice: productToEdit.salePrice ?? '',
         images: productToEdit.images || (productToEdit.image ? [productToEdit.image] : []),
         videoUrl: productToEdit.videoUrl || '',
         stock: productToEdit.stock !== undefined ? productToEdit.stock : '',
@@ -201,6 +203,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
       type: 'Perfume',
       id: formData.id || 'p' + Date.now(),
       price: parseFloat(formData.price),
+      costPrice: parseFloat(formData.costPrice) || 0,
       salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
       images: formData.images.length > 0 ? formData.images : ['/images/product-placeholder.png'],
       videoUrl: formData.videoUrl || '',
@@ -301,15 +304,19 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
               <label>Original Price (EGP)</label>
-              <input type="number" name="price" value={formData.price} onChange={handleChange} step="0.01" required />
+              <input type="number" name="price" value={formData.price ?? ''} onChange={handleChange} step="0.01" required />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Cost Price (EGP)</label>
+              <input type="number" name="costPrice" value={formData.costPrice ?? ''} onChange={handleChange} step="0.01" placeholder="Optional" />
             </div>
             <div className={styles.formGroup}>
               <label>Sale Price (EGP)</label>
-              <input type="number" name="salePrice" value={formData.salePrice} onChange={handleChange} step="0.01" placeholder="Optional" />
+              <input type="number" name="salePrice" value={formData.salePrice ?? ''} onChange={handleChange} step="0.01" placeholder="Optional" />
             </div>
             <div className={styles.formGroup}>
               <label>Stock Quantity</label>
-              <input type="number" name="stock" value={formData.stock} onChange={handleChange} min="0" placeholder="e.g. 50" required />
+              <input type="number" name="stock" value={formData.stock ?? ''} onChange={handleChange} min="0" placeholder="e.g. 50" required />
             </div>
           </div>
 

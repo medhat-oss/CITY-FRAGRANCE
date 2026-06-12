@@ -7,6 +7,7 @@ export interface Product {
   middleNotes: string;
   baseNotes: string;
   price: number;
+  costPrice?: number;
   salePrice: number | null;
   images: string[];
   videoUrl?: string;
@@ -39,7 +40,7 @@ export interface Order {
   apartment: string;
   city: string;
   governorate: string;
-  items: { name: string; quantity: number; price: number }[];
+  items: { id: string; name: string; quantity: number; price: number; image?: string }[];
   totalPrice: number;
   status: string;
   date: string;
@@ -85,11 +86,13 @@ export interface SiteSettings {
   heroBgImage: string;
   heroBgImageDesktop: string;
   heroVideoUrl: string;
+  heroVideoMobile: string;
   moodTitle: string;
   moodSubtitle: string;
   moodImage: string;
   moodImageDesktop: string;
   moodVideoUrl: string;
+  moodVideoMobile: string;
   womenCollectionVideoUrl?: string;
   menCollectionVideoUrl?: string;
   giftSetsVideoUrl?: string;

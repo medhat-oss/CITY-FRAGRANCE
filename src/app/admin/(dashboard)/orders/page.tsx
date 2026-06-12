@@ -4,13 +4,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatEGP } from '@/utils/currency';
 import type { Order } from '@/types';
-import { FaClipboardList, FaTimes, FaEye, FaSpinner } from 'react-icons/fa';
+import { FaClipboardList, FaTimes, FaEye, FaSpinner, FaImage } from 'react-icons/fa';
 import styles from '../admin.module.css';
 
-const STATUSES = ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+const STATUSES = ['ACCEPTED', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
 const STATUS_COLORS: Record<string, string> = {
-  'Pending': 'bg-gray-100 text-black',
+  'ACCEPTED': 'bg-green-100 text-green-800',
   'Confirmed': 'bg-blue-100 text-blue-800',
   'Processing': 'bg-indigo-100 text-indigo-800',
   'Shipped': 'bg-purple-100 text-purple-800',
@@ -64,6 +64,7 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [cancellingItemId, setCancellingItemId] = useState<string | null>(null);
   const [latestOrder, setLatestOrder] = useState<Order | null>(null);
   const [showAlert, setShowAlert] = useState(false);
   // Tracks the orderId at position [0] from the PREVIOUS successful fetch.
@@ -133,6 +134,39 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleCancelSingleItem = async (itemId: string, orderId: string) => {
+    try {
+      setCancellingItemId(itemId);
+      const res = await fetch('/api/admin/orders/items', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderItemId: itemId, orderId }),
+      });
+
+      if (!res.ok) throw new Error('Failed to cancel item');
+      const data = await res.json();
+      if (data.success && data.order) {
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.orderId === orderId
+              ? { ...o, items: data.order.items, totalPrice: data.order.totalPrice }
+              : o
+          )
+        );
+        setSelectedOrder((prev) =>
+          prev && prev.orderId === orderId
+            ? { ...prev, items: data.order.items, totalPrice: data.order.totalPrice }
+            : prev
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error cancelling product');
+    } finally {
+      setCancellingItemId(null);
+    }
+  };
+
   const totalRevenue = orders
     .filter((o) => o.status !== 'Cancelled')
     .reduce((sum, o) => sum + o.totalPrice, 0);
@@ -191,12 +225,13 @@ export default function AdminOrdersPage() {
                 <Th>Payment</Th>
                 <Th>Status</Th>
                 <Th>Date</Th>
-                <Th>{'\u00A0'}</Th>
+                <Th>Time</Th>
+                <Th>{' '}</Th>
               </tr>
             </thead>
             <tbody>
               {orders.map((order) => {
-                const isNew = order.status && order.status.toLowerCase() === 'pending';
+                const isNew = order.status && (order.status === 'ACCEPTED' || order.status.toLowerCase() === 'pending');
                 return (
                   <tr
                     key={order.orderId}
@@ -222,18 +257,68 @@ export default function AdminOrdersPage() {
                             title="New Order"
                           />
                         )}
-                        <span>{order.orderId}</span>
+                        <span
+                          style={{ cursor: 'pointer', color: '#60a5fa', textDecoration: 'underline', textDecorationColor: 'rgba(96,165,250,0.3)' }}
+                          onClick={() => setSelectedOrder(order)}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = '#93c5fd'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = '#60a5fa'; }}
+                        >{order.orderId}</span>
                       </div>
                     </Td>
                     <Td>{order.customerName}</Td>
                     <Td><span dir="ltr">{order.phoneNumber}</span></Td>
                     <Td>{order.governorate || '\u2014'}</Td>
                   <Td>
-                    {order.items.map((item, i) => (
-                      <div key={i} style={{ lineHeight: 1.6 }}>
-                        {item.name} x{item.quantity}
-                      </div>
-                    ))}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      {order.items.map((item) => {
+                        const isCancelling = cancellingItemId === item.id;
+                        const showCancelBtn = order.status !== 'CANCELLED' && order.status !== 'COMPLETED' && order.items.length > 1;
+
+                        return (
+                          <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(24,24,27,0.5)', padding: '0.35rem 0.5rem', borderRadius: '8px', border: '1px solid rgba(63,63,70,0.4)', minWidth: '180px' }}>
+                            <span style={{ color: '#e4e4e7' }}>
+                              {item.quantity}x {item.name}
+                            </span>
+                            {showCancelBtn && (
+                              <button
+                                type="button"
+                                disabled={isCancelling}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCancelSingleItem(item.id, order.orderId);
+                                }}
+                                style={{
+                                  marginLeft: '0.5rem',
+                                  width: '28px',
+                                  height: '28px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: '#ef4444',
+                                  background: 'rgba(127,29,29,0.2)',
+                                  border: '1px solid rgba(127,29,29,0.3)',
+                                  borderRadius: '6px',
+                                  fontWeight: 700,
+                                  fontSize: '0.85rem',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s',
+                                  opacity: isCancelling ? 0.5 : 1,
+                                }}
+                                onMouseEnter={(e) => { if (!isCancelling) { e.currentTarget.style.background = 'rgba(127,29,29,0.7)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#ef4444'; } }}
+                                onMouseLeave={(e) => { if (!isCancelling) { e.currentTarget.style.background = 'rgba(127,29,29,0.2)'; e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = 'rgba(127,29,29,0.3)'; } }}
+                                title="Cancel this item"
+                              >
+                                {isCancelling ? (
+                                  <span style={{ animation: 'spin 1s linear infinite', fontSize: '0.75rem' }}>🌀</span>
+                                ) : (
+                                  '✕'
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </Td>
                   <Td style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, color: '#ffffff' }}>
                     {formatEGP(order.totalPrice)}
@@ -257,6 +342,11 @@ export default function AdminOrdersPage() {
                     </div>
                   </Td>
                   <Td style={{ color: '#94a3b8' }}>{order.date}</Td>
+                  <Td style={{ color: '#64748b', whiteSpace: 'nowrap', fontSize: '0.8rem' }}>
+                    {order.createdAt
+                      ? new Date(order.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                      : '—'}
+                  </Td>
                   <Td>
                     <button
                       onClick={() => setSelectedOrder(order)}
@@ -291,7 +381,7 @@ export default function AdminOrdersPage() {
               ); })}
               {orders.length === 0 && (
                 <tr>
-                  <td colSpan={10} style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748b' }}>
+                  <td colSpan={11} style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748b' }}>
                     No orders yet.
                   </td>
                 </tr>
@@ -304,9 +394,9 @@ export default function AdminOrdersPage() {
       {/* Order Details Modal */}
       {selectedOrder && (
         <div className={`${styles.modalOverlay} ${styles.active}`} onClick={() => setSelectedOrder(null)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px' }}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px' }}>
             <div className={styles.modalHeader}>
-              <h3>Order Details</h3>
+              <h3>Order Details — {selectedOrder.orderId}</h3>
               <button type="button" className={styles.btnClose} onClick={() => setSelectedOrder(null)}>
                 <FaTimes />
               </button>
@@ -316,6 +406,12 @@ export default function AdminOrdersPage() {
               {/* Order ID & Date */}
               <DetailRow label="Order ID" value={selectedOrder.orderId} />
               <DetailRow label="Date" value={selectedOrder.date} />
+              {selectedOrder.createdAt && (
+                <DetailRow
+                  label="Time"
+                  value={new Date(selectedOrder.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                />
+              )}
               <DetailRow label="Status" value={selectedOrder.status} />
 
               <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.25rem 0' }} />
@@ -353,11 +449,73 @@ export default function AdminOrdersPage() {
                 <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#f8f9fa', display: 'block', marginBottom: '0.3rem' }}>
                   Items
                 </span>
-                {selectedOrder.items.map((item, i) => (
-                  <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: '#e2e8f0', padding: '0.2rem 0', borderBottom: i < selectedOrder.items.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                    {item.name} &times; {item.quantity} &mdash; {formatEGP(item.price * item.quantity)}
-                  </div>
-                ))}
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                      <th style={{ textAlign: 'left', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Product</th>
+                      <th style={{ textAlign: 'center', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem', width: '50px' }}>Qty</th>
+                      <th style={{ textAlign: 'right', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Unit Price</th>
+                      <th style={{ textAlign: 'right', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Subtotal</th>
+                       <th style={{ textAlign: 'right', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedOrder.items.map((item) => {
+                      const orderLocked = selectedOrder.status.toLowerCase() === 'cancelled' || selectedOrder.status.toLowerCase() === 'completed';
+                      const isCancelling = cancellingItemId === item.id;
+                      return (
+                        <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                          <td style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                            {item.image ? (
+                              <img src={item.image} alt={item.name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', background: '#1d3573', flexShrink: 0 }} />
+                            ) : (
+                              <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: '#1d3573', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <FaImage style={{ color: '#4a5e8a', fontSize: '1rem' }} />
+                              </div>
+                            )}
+                            <span style={{ color: '#e2e8f0' }}>{item.name}</span>
+                          </td>
+                          <td style={{ padding: '0.4rem 0.5rem', textAlign: 'center', color: '#cbd5e1' }}>{item.quantity}</td>
+                          <td style={{ padding: '0.4rem 0.5rem', textAlign: 'right', color: '#94a3b8', fontFamily: 'var(--font-heading)' }}>
+                            {formatEGP(item.price)}
+                          </td>
+                          <td style={{ padding: '0.4rem 0.5rem', textAlign: 'right', color: '#f1f5f9', fontFamily: 'var(--font-heading)' }}>
+                            {formatEGP(item.price * item.quantity)}
+                          </td>
+                          <td style={{ padding: '0.4rem 0.5rem', textAlign: 'right' }}>
+                            {!orderLocked ? (
+                              isCancelling ? (
+                                <FaSpinner className="animate-spin" style={{ fontSize: '0.85rem', color: '#ef4444' }} />
+                              ) : (
+                                <button
+                                  onClick={() => handleCancelSingleItem(item.id, selectedOrder.orderId)}
+                                  style={{
+                                    background: 'rgba(127,29,29,0.4)',
+                                    border: '1px solid rgba(127,29,29,0.5)',
+                                    borderRadius: '4px',
+                                    color: '#f87171',
+                                    cursor: 'pointer',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    padding: '0.3rem 0.7rem',
+                                    transition: 'all 0.15s',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(127,29,29,0.7)'; e.currentTarget.style.color = '#fff'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(127,29,29,0.4)'; e.currentTarget.style.color = '#f87171'; }}
+                                >
+                                  Cancel Item
+                                </button>
+                              )
+                            ) : (
+                              <span style={{ color: '#4a5e8a', fontSize: '0.75rem' }}>—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -394,15 +552,14 @@ export default function AdminOrdersPage() {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
               <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#c5a880', fontSize: '1rem', letterSpacing: '0.05em' }}>
-                🔔 New Order Received!<br />
-                <span style={{ fontSize: '0.8rem', fontWeight: 500, opacity: 0.85 }}>تم استلام طلب جديد</span>
+                 🔔 New Order Received!
               </div>
             </div>
 
             {/* Details */}
             <div style={{ fontSize: '0.85rem', borderTop: '1px solid rgba(197,168,128,0.25)', paddingTop: '0.75rem', marginBottom: '1rem' }}>
               <div style={{ marginBottom: '0.35rem' }}>
-                <span style={{ opacity: 0.7 }}>Customer / العميل:&nbsp;</span>
+                <span style={{ opacity: 0.7 }}>Customer:&nbsp;</span>
                 <strong style={{ color: '#ffffff' }}>{latestOrder?.customerName || '—'}</strong>
               </div>
               <div style={{ marginBottom: '0.35rem' }}>
@@ -410,7 +567,7 @@ export default function AdminOrdersPage() {
                 <strong style={{ color: '#ffffff' }}>{latestOrder?.orderId || '—'}</strong>
               </div>
               <div>
-                <span style={{ opacity: 0.7 }}>Total / الإجمالي:&nbsp;</span>
+                <span style={{ opacity: 0.7 }}>Total:&nbsp;</span>
                 <strong style={{ color: '#c5a880', fontFamily: 'var(--font-heading)' }}>
                   {typeof latestOrder?.totalPrice === 'number' ? formatEGP(latestOrder.totalPrice) : '—'}
                 </strong>
@@ -436,7 +593,7 @@ export default function AdminOrdersPage() {
                 onMouseEnter={(e) => { e.currentTarget.style.background = '#c5a880'; e.currentTarget.style.color = '#000'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#c5a880'; }}
               >
-                Dismiss / إغلاق
+                Dismiss
               </button>
             </div>
           </div>

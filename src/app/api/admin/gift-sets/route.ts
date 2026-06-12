@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { unstable_noStore as noStore } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 
 const FILE = 'gift-sets.json';
 
@@ -11,6 +11,7 @@ interface GiftSet {
   name: string;
   description: string;
   price: number;
+  costPrice?: number;
   isDraft: boolean;
   image: string;
   productIds: string[];
@@ -36,6 +37,7 @@ async function syncToDB(gs: GiftSet) {
         name: gs.name,
         description: gs.description || '',
         price: gs.price,
+        costPrice: gs.costPrice ?? 0,
         isDraft: gs.isDraft,
         image: gs.image || '',
         productIds: gs.productIds || [],
@@ -45,6 +47,7 @@ async function syncToDB(gs: GiftSet) {
         name: gs.name,
         description: gs.description || '',
         price: gs.price,
+        costPrice: gs.costPrice ?? 0,
         isDraft: gs.isDraft,
         image: gs.image || '',
         productIds: gs.productIds || [],
@@ -70,6 +73,7 @@ export async function POST(request: Request) {
       name: body.name,
       description: body.description || '',
       price: parseFloat(body.price) || 0,
+      costPrice: parseFloat(body.costPrice) || 0,
       isDraft: body.isDraft ?? true,
       image: body.image || '',
       productIds: body.productIds || [],

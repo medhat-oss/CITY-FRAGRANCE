@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import { readJsonFile } from '@/lib/dataFile';
 
 interface OrderItem {
+  id?: string;
   name: string;
   quantity: number;
   price: number;
@@ -52,26 +53,75 @@ export async function GET() {
       }),
     ]);
 
-    // ── Fetch products & gift sets from JSON ──
-    const products = await readJsonFile<ProductData[]>('products.json', []);
-    const giftSets = await readJsonFile<GiftSetData[]>('gift-sets.json', []);
+    // ── Fetch products & gift sets from JSON (parallel) ──
+    const [products, giftSets] = await Promise.all([
+      readJsonFile<ProductData[]>('products.json', []),
+      readJsonFile<GiftSetData[]>('gift-sets.json', []),
+    ]);
 
-    // ── Financial Aggregation ──
+    // ── Fetch Prisma products & gift sets for costPrice data ──
+    const [prismaProducts, prismaGiftSets] = await Promise.all([
+      prisma.product.findMany({
+        where: { isDraft: false },
+        select: { id: true, name: true, costPrice: true },
+      }),
+      prisma.giftSet.findMany({
+        where: { isDraft: false },
+        select: { id: true, name: true, costPrice: true },
+      }),
+    ]);
+    // Key by lowercase name — order items store real product names but not real product IDs
+    const costPriceMap = new Map<string, number>();
+    for (const p of prismaProducts) if (p.name) costPriceMap.set(p.name.toLowerCase(), p.costPrice);
+    for (const g of prismaGiftSets) if (g.name) costPriceMap.set(g.name.toLowerCase(), g.costPrice);
+
+    // ── Single-pass aggregation over orders ──
     const orders = activeOrders;
-    const totalRevenue = orders.reduce((sum, o) => sum + o.totalPrice, 0);
     const totalOrders = orders.length;
+    let totalRevenue = 0;
+    let posRevenue = 0;
+    let onlineRevenue = 0;
+    let posOrderCount = 0;
+    let onlineOrderCount = 0;
+    let netProfit = 0;
+    const salesMap: Record<string, { name: string; totalQty: number; totalRevenue: number }> = {};
+    const paymentBreakdown: Record<string, { count: number; revenue: number }> = {};
+    const monthlyRevenue: Record<string, number> = {};
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      monthlyRevenue[d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })] = 0;
+    }
 
-    // POS vs Online split
-    const posOrders = orders.filter(
-      (o) => o.address === 'In-Store' || o.customerName === 'POS Walk-in'
-    );
-    const onlineOrders = orders.filter(
-      (o) => o.address !== 'In-Store' && o.customerName !== 'POS Walk-in'
-    );
-    const posRevenue = posOrders.reduce((sum, o) => sum + o.totalPrice, 0);
-    const onlineRevenue = onlineOrders.reduce((sum, o) => sum + o.totalPrice, 0);
+    for (const order of orders) {
+      const isPos = order.address === 'In-Store' || order.customerName === 'POS Walk-in';
+      totalRevenue += order.totalPrice;
+      if (isPos) { posRevenue += order.totalPrice; posOrderCount++; }
+      else { onlineRevenue += order.totalPrice; onlineOrderCount++; }
 
-    // Average order value
+      // Payment breakdown
+      const method = order.paymentMethod || 'Unknown';
+      if (!paymentBreakdown[method]) paymentBreakdown[method] = { count: 0, revenue: 0 };
+      paymentBreakdown[method].count += 1;
+      paymentBreakdown[method].revenue += order.totalPrice;
+
+      // Monthly revenue
+      const monthKey = new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      if (monthKey in monthlyRevenue) monthlyRevenue[monthKey] += order.totalPrice;
+
+      // Items: net profit + top-selling
+      const items = (order.items as unknown as OrderItem[]) || [];
+      for (const item of items) {
+        const costKey = item.name?.toLowerCase() || '';
+        const costPrice = costPriceMap.get(costKey) ?? 0;
+        netProfit += (item.price - costPrice) * item.quantity;
+
+        if (!salesMap[item.name]) salesMap[item.name] = { name: item.name, totalQty: 0, totalRevenue: 0 };
+        salesMap[item.name].totalQty += item.quantity;
+        salesMap[item.name].totalRevenue += item.price * item.quantity;
+      }
+    }
+
     const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
     // ── Recent Transactions (latest 20) ──
@@ -85,106 +135,42 @@ export async function GET() {
       isPos: o.address === 'In-Store' || o.customerName === 'POS Walk-in',
     }));
 
-    // ── Top Selling Products ──
-    const salesMap: Record<string, { name: string; totalQty: number; totalRevenue: number }> = {};
-
-    for (const order of orders) {
-      const items = (order.items as unknown as OrderItem[]) || [];
-      for (const item of items) {
-        if (!salesMap[item.name]) {
-          salesMap[item.name] = { name: item.name, totalQty: 0, totalRevenue: 0 };
-        }
-        salesMap[item.name].totalQty += item.quantity;
-        salesMap[item.name].totalRevenue += item.price * item.quantity;
-      }
-    }
-
     const topSelling = Object.values(salesMap)
       .sort((a, b) => b.totalQty - a.totalQty)
       .slice(0, 10);
 
-    // ── Collection Performance ──
+    // ── Collection Performance (single pass over products) ──
     const collectionMap: Record<string, { name: string; productCount: number; estimatedSales: number }> = {};
-
     for (const p of products) {
       const col = p.collection || p.category || 'Uncategorized';
-      if (!collectionMap[col]) {
-        collectionMap[col] = { name: col, productCount: 0, estimatedSales: 0 };
-      }
+      if (!collectionMap[col]) collectionMap[col] = { name: col, productCount: 0, estimatedSales: 0 };
       collectionMap[col].productCount += 1;
-      // Find sales for this product
       const sold = salesMap[p.name];
-      if (sold) {
-        collectionMap[col].estimatedSales += sold.totalRevenue;
-      }
+      if (sold) collectionMap[col].estimatedSales += sold.totalRevenue;
     }
-
     const collectionPerformance = Object.values(collectionMap)
       .sort((a, b) => b.estimatedSales - a.estimatedSales)
       .slice(0, 8);
 
     // ── Inventory: Low Stock ──
-    // Products that have a stock field and stock < 10
     const lowStockProducts = products
       .filter((p) => typeof p.stock === 'number' && p.stock < 10)
-      .map((p) => ({
-        id: p.id,
-        name: p.name,
-        image: p.images?.[0] || '/images/product-placeholder.png',
-        stock: p.stock ?? 0,
-        kind: 'perfume' as const,
-      }));
-
+      .map((p) => ({ id: p.id, name: p.name, image: p.images?.[0] || '/images/product-placeholder.png', stock: p.stock ?? 0, kind: 'perfume' as const }));
     const lowStockGiftSets = giftSets
       .filter((g) => typeof g.stock === 'number' && g.stock < 10)
-      .map((g) => ({
-        id: g.id,
-        name: g.name,
-        image: g.image || '/images/product-placeholder.png',
-        stock: g.stock ?? 0,
-        kind: 'gift-set' as const,
-      }));
-
-    const lowStockItems = [...lowStockProducts, ...lowStockGiftSets].sort(
-      (a, b) => a.stock - b.stock
-    );
-
-    // ── Payment Method Breakdown ──
-    const paymentBreakdown: Record<string, { count: number; revenue: number }> = {};
-    for (const order of orders) {
-      const method = order.paymentMethod || 'Unknown';
-      if (!paymentBreakdown[method]) {
-        paymentBreakdown[method] = { count: 0, revenue: 0 };
-      }
-      paymentBreakdown[method].count += 1;
-      paymentBreakdown[method].revenue += order.totalPrice;
-    }
-
-    // ── Monthly Revenue (last 6 months) ──
-    const monthlyRevenue: Record<string, number> = {};
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-      monthlyRevenue[key] = 0;
-    }
-    for (const order of orders) {
-      const d = new Date(order.createdAt);
-      const key = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-      if (key in monthlyRevenue) {
-        monthlyRevenue[key] += order.totalPrice;
-      }
-    }
+      .map((g) => ({ id: g.id, name: g.name, image: g.image || '/images/product-placeholder.png', stock: g.stock ?? 0, kind: 'gift-set' as const }));
+    const lowStockItems = [...lowStockProducts, ...lowStockGiftSets].sort((a, b) => a.stock - b.stock);
 
     return NextResponse.json({
       success: true,
       metrics: {
         totalRevenue,
+        netProfit,
         totalOrders,
         posRevenue,
         onlineRevenue,
-        posOrderCount: posOrders.length,
-        onlineOrderCount: onlineOrders.length,
+        posOrderCount,
+        onlineOrderCount,
         avgOrderValue,
         totalProducts: products.length,
         totalGiftSets: giftSets.length,

@@ -1,16 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { readJsonFile } from '@/lib/dataFile';
+import prisma from '@/lib/prisma';
 import { createSession, setCashierCookie } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
-
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  password?: string;
-  role: string;
-}
 
 export async function POST(request: Request) {
   try {
@@ -20,11 +11,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email/Username and password are required' }, { status: 400 });
     }
 
-    const fileData = await readJsonFile<{ users: User[] }>('admin-users.json', { users: [] });
-    const user = fileData.users.find(
-      (u: User) => u.email === email || u.username === email
-    );
+    // Raw query — avoids Prisma client type-mismatch issues
+    const users = await prisma.$queryRaw<Array<{
+      id: string; email: string; username: string; name: string;
+      role: string; password: string;
+    }>>`
+      SELECT id, email, username, name, role::text, password
+      FROM "User"
+      WHERE email = ${email} OR username = ${email}
+      LIMIT 1
+    `;
 
+    const user = users[0];
     if (!user || !user.password) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
@@ -47,7 +45,6 @@ export async function POST(request: Request) {
 
     // Create OPEN shift record on successful login
     try {
-      // Check if there's already an OPEN shift for this cashier
       const existingShift = await prisma.shift.findFirst({
         where: { cashierId: user.id, status: 'OPEN' },
       });
@@ -63,13 +60,12 @@ export async function POST(request: Request) {
         });
       }
     } catch (shiftErr) {
-      // Non-blocking: shift creation failure should not prevent login
       console.error('SHIFT CREATION ERROR:', shiftErr);
     }
 
-    const response = NextResponse.json({ 
-      success: true, 
-      user: { id: user.id, email: user.email, username: user.username, role: user.role } 
+    const response = NextResponse.json({
+      success: true,
+      user: { id: user.id, email: user.email, username: user.username, role: user.role },
     });
 
     setCashierCookie(response, token);

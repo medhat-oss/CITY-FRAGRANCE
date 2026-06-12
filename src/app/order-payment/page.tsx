@@ -196,7 +196,8 @@ export default function CheckoutPage() {
               alt="City Fragrance"
               width={220}
               height={90}
-              className="w-[160px] sm:w-[180px] md:w-[220px] h-auto object-contain bg-transparent mix-blend-screen"
+              style={{ height: 'auto' }}
+              className="w-[160px] sm:w-[180px] md:w-[220px] object-contain bg-transparent mix-blend-screen"
               priority
             />
           </Link>

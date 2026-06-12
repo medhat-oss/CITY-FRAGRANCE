@@ -45,13 +45,13 @@ function CashierLoginForm() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #060608 0%, #0a0a0f 50%, #060608 100%)',
+      background: 'linear-gradient(135deg, #0D1B3E 0%, #16234D 50%, #0D1B3E 100%)',
       padding: '1.5rem',
     }}>
       <div style={{
         width: '100%',
         maxWidth: '440px',
-        background: 'rgba(17, 17, 24, 0.85)',
+        background: 'rgba(17, 27, 61, 0.85)',
         backdropFilter: 'blur(16px)',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '16px',
@@ -68,16 +68,13 @@ function CashierLoginForm() {
             color: '#ffffff',
             letterSpacing: '0.2em',
             marginBottom: '0.4rem',
-            background: 'linear-gradient(to right, #ffffff, #c5a880)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
           }}>
             CITY FRAGRANCE
           </h1>
           <div style={{
             fontFamily: 'var(--font-heading, "Instrument Sans", sans-serif)',
             fontSize: '0.72rem',
-            color: '#c5a880',
+            color: '#94a3b8',
             letterSpacing: '0.3em',
             textTransform: 'uppercase',
             fontWeight: 600,
@@ -107,7 +104,7 @@ function CashierLoginForm() {
               style={{
                 width: '100%',
                 padding: '0.85rem 1.1rem',
-                background: '#09090d',
+                background: '#0a0f2e',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '10px',
                 color: '#ffffff',
@@ -118,8 +115,8 @@ function CashierLoginForm() {
                 boxSizing: 'border-box',
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#c5a880';
-                e.target.style.boxShadow = '0 0 0 3px rgba(197, 168, 128, 0.25)';
+                e.target.style.borderColor = '#ffffff';
+                e.target.style.boxShadow = '0 0 0 3px rgba(255, 255, 255, 0.2)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
@@ -148,7 +145,7 @@ function CashierLoginForm() {
               style={{
                 width: '100%',
                 padding: '0.85rem 1.1rem',
-                background: '#09090d',
+                background: '#0a0f2e',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '10px',
                 color: '#ffffff',
@@ -159,8 +156,8 @@ function CashierLoginForm() {
                 boxSizing: 'border-box',
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#c5a880';
-                e.target.style.boxShadow = '0 0 0 3px rgba(197, 168, 128, 0.25)';
+                e.target.style.borderColor = '#ffffff';
+                e.target.style.boxShadow = '0 0 0 3px rgba(255, 255, 255, 0.2)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
@@ -191,8 +188,8 @@ function CashierLoginForm() {
             style={{
               width: '100%',
               padding: '0.9rem',
-              background: loading ? '#475569' : 'linear-gradient(135deg, #c5a880, #9a7b56)',
-              color: '#0a0a0b',
+              background: loading ? '#64748b' : '#ffffff',
+              color: loading ? '#ffffff' : '#16234D',
               border: 'none',
               borderRadius: '10px',
               fontFamily: 'var(--font-heading, "Instrument Sans", sans-serif)',
@@ -202,10 +199,9 @@ function CashierLoginForm() {
               cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'all 0.25s ease',
               textTransform: 'uppercase',
-              boxShadow: '0 4px 15px rgba(197, 168, 128, 0.2)',
             }}
-            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={(e) => { if (!loading) e.currentTarget.style.transform = 'none'; }}
+            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(255,255,255,0.9)'; }}
+            onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = '#ffffff'; }}
           >
             {loading ? 'Authenticating...' : 'Sign In'}
           </button>
@@ -237,7 +233,7 @@ function CashierLoginForm() {
 
 export default function CashierLoginPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#060608' }} />}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#16234D' }} />}>
       <CashierLoginForm />
     </Suspense>
   );

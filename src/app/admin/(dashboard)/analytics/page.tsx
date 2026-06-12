@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fa';
 
 interface Metrics {
-  totalRevenue: number; totalOrders: number;
+  totalRevenue: number; netProfit: number; totalOrders: number;
   posRevenue: number; onlineRevenue: number;
   posOrderCount: number; onlineOrderCount: number;
   avgOrderValue: number; totalProducts: number; totalGiftSets: number;
@@ -94,13 +94,13 @@ export default function AnalyticsPage() {
   const maxCollSales = collPerf.length > 0 ? collPerf[0].estimatedSales : 1;
 
   return (
-    <div>
+    <div dir="ltr">
       {/* Page Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <FaChartLine style={{ color: '#a78bfa', fontSize: '1.3rem' }} />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
-            Analytics & Inventory <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 400 }}>/ الأرباح والمخازن</span>
+            Analytics & Inventory
           </h2>
         </div>
         <button
@@ -117,23 +117,24 @@ export default function AnalyticsPage() {
           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)'; }}
         >
           <FaTrashAlt style={{ fontSize: '0.7rem' }} />
-          Reset Data / إعادة تعيين
+          Reset Data
         </button>
       </div>
 
       {/* ═══ METRIC CARDS ═══ */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <MetricCard icon={<FaMoneyBillWave />} label="Total Revenue" sublabel="إجمالي الإيرادات" value={formatEGP(metrics.totalRevenue)} accent="#22c55e" />
-        <MetricCard icon={<FaReceipt />} label="Total Orders" sublabel="عدد الطلبات" value={String(metrics.totalOrders)} accent="#60a5fa" />
-        <MetricCard icon={<FaCashRegister />} label="POS Revenue" sublabel="مبيعات الكاشير" value={formatEGP(metrics.posRevenue)} accent="#a78bfa" sub={`${metrics.posOrderCount} orders`} />
-        <MetricCard icon={<FaGlobe />} label="Online Revenue" sublabel="مبيعات الموقع" value={formatEGP(metrics.onlineRevenue)} accent="#f59e0b" sub={`${metrics.onlineOrderCount} orders`} />
-        <MetricCard icon={<FaShoppingCart />} label="Avg Order Value" sublabel="متوسط قيمة الطلب" value={formatEGP(metrics.avgOrderValue)} accent="#06b6d4" />
-        <MetricCard icon={<FaBoxes />} label="Catalog Size" sublabel="عدد المنتجات" value={`${metrics.totalProducts} Products`} accent="#ec4899" sub={`${metrics.totalGiftSets} Gift Sets`} />
+        <MetricCard icon={<FaMoneyBillWave />} label="Total Revenue" value={formatEGP(metrics.totalRevenue)} accent="#22c55e" />
+        <MetricCard icon={<FaMoneyBillWave />} label="Net Profit" value={formatEGP(metrics.netProfit)} accent="#10b981" />
+        <MetricCard icon={<FaReceipt />} label="Total Orders" value={String(metrics.totalOrders)} accent="#60a5fa" />
+        <MetricCard icon={<FaCashRegister />} label="POS Revenue" value={formatEGP(metrics.posRevenue)} accent="#a78bfa" sub={`${metrics.posOrderCount} orders`} />
+        <MetricCard icon={<FaGlobe />} label="Online Revenue" value={formatEGP(metrics.onlineRevenue)} accent="#f59e0b" sub={`${metrics.onlineOrderCount} orders`} />
+        <MetricCard icon={<FaShoppingCart />} label="Avg Order Value" value={formatEGP(metrics.avgOrderValue)} accent="#06b6d4" />
+        <MetricCard icon={<FaBoxes />} label="Catalog Size" value={`${metrics.totalProducts} Products`} accent="#ec4899" sub={`${metrics.totalGiftSets} Gift Sets`} />
       </div>
 
       {/* ═══ MONTHLY REVENUE CHART ═══ */}
       <div className={styles.adminContent} style={{ marginBottom: '2rem' }}>
-        <h3 style={sectionTitle}><FaChartLine style={{ color: '#a78bfa' }} /> Monthly Revenue / الإيرادات الشهرية</h3>
+        <h3 style={sectionTitle}><FaChartLine style={{ color: '#a78bfa' }} /> Monthly Revenue</h3>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.6rem', height: 180, padding: '1rem 0 0' }}>
           {Object.entries(monthlyRev).map(([month, rev]) => (
             <div key={month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
@@ -154,7 +155,7 @@ export default function AnalyticsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
         {/* Top Selling */}
         <div className={styles.adminContent}>
-          <h3 style={sectionTitle}><FaTrophy style={{ color: '#f59e0b' }} /> Top Selling Products / الأكثر مبيعاً</h3>
+          <h3 style={sectionTitle}><FaTrophy style={{ color: '#f59e0b' }} /> Top Selling Products</h3>
           {topSelling.length === 0 ? (
             <p style={{ color: '#64748b', fontSize: '0.85rem', textAlign: 'center', padding: '2rem 0' }}>No sales data yet.</p>
           ) : (
@@ -185,7 +186,7 @@ export default function AnalyticsPage() {
 
         {/* Payment Breakdown */}
         <div className={styles.adminContent}>
-          <h3 style={sectionTitle}><FaMoneyBillWave style={{ color: '#22c55e' }} /> Payment Methods / طرق الدفع</h3>
+          <h3 style={sectionTitle}><FaMoneyBillWave style={{ color: '#22c55e' }} /> Payment Methods</h3>
           {Object.keys(payBreakdown).length === 0 ? (
             <p style={{ color: '#64748b', fontSize: '0.85rem', textAlign: 'center', padding: '2rem 0' }}>No payment data yet.</p>
           ) : (
@@ -210,7 +211,7 @@ export default function AnalyticsPage() {
 
       {/* ═══ COLLECTION PERFORMANCE ═══ */}
       <div className={styles.adminContent} style={{ marginBottom: '2rem' }}>
-        <h3 style={sectionTitle}><FaLayerGroup style={{ color: '#ec4899' }} /> Collection Performance / أداء المجموعات</h3>
+        <h3 style={sectionTitle}><FaLayerGroup style={{ color: '#ec4899' }} /> Collection Performance</h3>
         {collPerf.length === 0 ? (
           <p style={{ color: '#64748b', fontSize: '0.85rem', textAlign: 'center', padding: '2rem 0' }}>No collection data.</p>
         ) : (
@@ -236,7 +237,7 @@ export default function AnalyticsPage() {
 
       {/* ═══ LOW STOCK ALERT ═══ */}
       <div className={styles.adminContent} style={{ marginBottom: '2rem' }}>
-        <h3 style={sectionTitle}><FaExclamationTriangle style={{ color: '#ef4444' }} /> Low Stock Alert / المنتجات القريبة من النفاد</h3>
+        <h3 style={sectionTitle}><FaExclamationTriangle style={{ color: '#ef4444' }} /> Low Stock Alert</h3>
         {lowStock.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '2rem 0' }}>
             <p style={{ color: '#22c55e', fontSize: '0.9rem', fontWeight: 600 }}>✓ All products are sufficiently stocked</p>
@@ -277,7 +278,7 @@ export default function AnalyticsPage() {
 
       {/* ═══ RECENT TRANSACTIONS TABLE ═══ */}
       <div className={styles.adminContent}>
-        <h3 style={sectionTitle}><FaReceipt style={{ color: '#60a5fa' }} /> Recent Transactions / المبيعات الأخيرة</h3>
+        <h3 style={sectionTitle}><FaReceipt style={{ color: '#60a5fa' }} /> Recent Transactions</h3>
         <div className={styles.tableContainer}>
           <table className={styles.adminTable}>
             <thead>
@@ -345,7 +346,7 @@ export default function AnalyticsPage() {
               fontFamily: 'var(--font-heading)', fontSize: '1.05rem', fontWeight: 600,
               color: '#f8f9fa', margin: '0 0 0.5rem',
             }}>
-              هل أنت متأكد من إعادة تعيين كافة المبيعات؟
+             Are you sure you want to reset all sales data?
             </h3>
             <p style={{ color: '#94a3b8', fontSize: '0.82rem', margin: '0 0 0.25rem', lineHeight: 1.5 }}>
               This will permanently clear all POS and Online revenue, order records, and shift summaries.
@@ -385,7 +386,7 @@ export default function AnalyticsPage() {
                   cursor: 'pointer', fontFamily: 'var(--font-heading)', letterSpacing: '0.06em',
                 }}
               >
-                Cancel / إلغاء
+                Cancel
               </button>
               <button
                 onClick={handleResetSales}
@@ -404,7 +405,7 @@ export default function AnalyticsPage() {
               >
                 {resetSubmitting ? <FaSpinner className={styles.spinIcon} style={{ fontSize: '0.9rem' }} />
                   : <FaTrashAlt style={{ fontSize: '0.75rem' }} />}
-                <span>Confirm / تأكيد</span>
+                <span>Confirm</span>
               </button>
             </div>
           </div>
@@ -415,8 +416,8 @@ export default function AnalyticsPage() {
 }
 
 /* ═══ Metric Card Component ═══ */
-function MetricCard({ icon, label, sublabel, value, accent, sub }: {
-  icon: React.ReactNode; label: string; sublabel: string; value: string; accent: string; sub?: string;
+function MetricCard({ icon, label, value, accent, sub }: {
+  icon: React.ReactNode; label: string; value: string; accent: string; sub?: string;
 }) {
   return (
     <div style={{
@@ -427,10 +428,7 @@ function MetricCard({ icon, label, sublabel, value, accent, sub }: {
       <div style={{ position: 'absolute', top: -12, right: -12, width: 60, height: 60, borderRadius: '50%', background: accent, opacity: 0.06 }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <span style={{ color: accent, fontSize: '1rem' }}>{icon}</span>
-        <div>
-          <span style={{ fontSize: '0.78rem', color: '#e2e8f0', fontWeight: 600 }}>{label}</span>
-          <span style={{ fontSize: '0.65rem', color: '#64748b', marginLeft: '0.4rem' }}>{sublabel}</span>
-        </div>
+        <span style={{ fontSize: '0.78rem', color: '#e2e8f0', fontWeight: 600 }}>{label}</span>
       </div>
       <span style={{ fontSize: '1.35rem', fontWeight: 700, color: '#ffffff', fontFamily: 'var(--font-heading)' }}>{value}</span>
       {sub && <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{sub}</span>}

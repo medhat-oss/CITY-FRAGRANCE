@@ -25,22 +25,24 @@ async function main() {
   const adapter = new PrismaNeon({ connectionString });
   const prisma = new PrismaClient({ adapter });
 
-  // 1. Admin User
-  const adminData = loadJSON('admin-users.json');
-  for (const user of adminData.users) {
-    const existing = await prisma.adminUser.findUnique({ where: { email: user.email } });
+  // 1. Users (Admin & Staff)
+  const userData = loadJSON('admin-users.json');
+  for (const user of userData.users) {
+    const existing = await prisma.user.findUnique({ where: { email: user.email } });
     if (!existing) {
-      await prisma.adminUser.create({
+      await prisma.user.create({
         data: {
           email: user.email,
+          username: user.username,
           password: user.password,
-          name: user.username || 'Admin',
-          role: user.role || 'ADMIN',
+          name: user.username || 'User',
+          role: user.role === 'ADMIN' ? 'ADMIN' : 'CASHIER',
+          shiftPassword: user.shiftPassword || '123456',
         },
       });
-      console.log(`  Admin user: ${user.email}`);
+      console.log(`  User added: ${user.email} (${user.role})`);
     } else {
-      console.log(`  Admin user exists: ${user.email}`);
+      console.log(`  User exists: ${user.email}`);
     }
   }
 
