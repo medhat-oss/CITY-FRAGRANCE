@@ -68,7 +68,7 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
 
       {/* ─── Grid ─── */}
       <section className="max-w-5xl mx-auto px-4 pb-24">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 justify-center">
           {collections.map((collection, index) => (
             <Link
               key={`${collection.id}-${index}`}
@@ -97,19 +97,19 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
               )}
 
               {/* Full-card Glassmorphic Overlay */}
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col items-center justify-center p-6 text-center opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out">
-                <h3 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-normal text-white leading-tight mb-3">
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col items-center justify-center p-2 sm:p-6 text-center opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out overflow-hidden">
+                <h3 className="font-heading text-[11px] sm:text-2xl lg:text-3xl font-normal text-white leading-tight mb-1 sm:mb-3">
                   {collection.title}
                 </h3>
                 {collection.description && (
-                  <p className="font-body text-white/90 text-sm sm:text-base leading-relaxed mb-5 sm:mb-6 max-w-[90%] drop-shadow-sm">
+                  <p className="font-body text-white/90 text-[8px] sm:text-sm leading-tight mb-2 sm:mb-5 max-w-[95%] drop-shadow-sm hidden sm:block">
                     {collection.description}
                   </p>
                 )}
-                <div className="w-12 sm:w-16 h-[2px] bg-white/40 mb-4 sm:mb-5 transition-all duration-500 group-hover:w-20 sm:group-hover:w-24" />
-                <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-heading font-semibold uppercase tracking-[0.2em] text-white transition-all duration-300 group-hover:gap-3">
-                  Explore Collection
-                  <HiArrowRight className="transition-transform duration-300 group-hover:translate-x-1.5" />
+                <div className="w-5 sm:w-12 h-px sm:h-[2px] bg-white/40 mb-1.5 sm:mb-4 transition-all duration-500 group-hover:w-10 sm:group-hover:w-20" />
+                <span className="inline-flex items-center gap-1 sm:gap-2 text-[7px] sm:text-xs font-heading font-semibold uppercase tracking-[0.08em] sm:tracking-[0.2em] text-white transition-all duration-300">
+                  Explore
+                  <HiArrowRight className="w-2 h-2 sm:w-3 sm:h-3 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
               </div>
             </Link>
