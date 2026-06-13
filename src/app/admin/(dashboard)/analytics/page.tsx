@@ -152,9 +152,9 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ═══ TWO-COLUMN: TOP SELLING + PAYMENT BREAKDOWN ═══ */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+      <div className={`flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 mb-8 sm:grid sm:grid-cols-2 sm:overflow-x-visible sm:pb-0 sm:gap-4 ${styles.hideScrollbar ?? ''}`}>
         {/* Top Selling */}
-        <div className={styles.adminContent}>
+        <div className={`${styles.adminContent} min-w-[85vw] sm:min-w-0 snap-center shrink-0 sm:shrink`}>
           <h3 style={sectionTitle}><FaTrophy style={{ color: '#f59e0b' }} /> Top Selling Products</h3>
           {topSelling.length === 0 ? (
             <p style={{ color: '#64748b', fontSize: '0.85rem', textAlign: 'center', padding: '2rem 0' }}>No sales data yet.</p>
@@ -185,7 +185,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Payment Breakdown */}
-        <div className={styles.adminContent}>
+        <div className={`${styles.adminContent} min-w-[85vw] sm:min-w-0 snap-center shrink-0 sm:shrink`}>
           <h3 style={sectionTitle}><FaMoneyBillWave style={{ color: '#22c55e' }} /> Payment Methods</h3>
           {Object.keys(payBreakdown).length === 0 ? (
             <p style={{ color: '#64748b', fontSize: '0.85rem', textAlign: 'center', padding: '2rem 0' }}>No payment data yet.</p>
@@ -245,81 +245,159 @@ export default function AnalyticsPage() {
               Add a &quot;stock&quot; field to your products JSON to enable real-time inventory tracking.
             </p>
           </div>
-        ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.adminTable}>
-              <thead><tr><th>Image</th><th>Product Name</th><th>Stock Level</th><th>Status</th></tr></thead>
+        ) : (<div>
+          {/* Desktop table */}
+          <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
+            <table className="w-full min-w-[500px] table-auto text-left border-collapse">
+              <thead>
+                <tr className="bg-[#09142E]">
+                  <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Image</th>
+                  <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Product Name</th>
+                  <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Stock Level</th>
+                  <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
               <tbody>
                 {lowStock.map((item) => (
-                  <tr key={item.id}>
-                    <td style={{ width: 50 }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 6, overflow: 'hidden', position: 'relative', background: '#1e293b' }}>
+                  <tr key={item.id} className="hover:bg-white/5 transition-colors border-b border-white/10">
+                    <td className="p-4 align-middle" style={{ width: 50 }}>
+                      <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-[#1e293b]">
                         <Image src={item.image} alt="" fill sizes="40px" style={{ objectFit: 'cover' }} />
                       </div>
                     </td>
-                    <td style={{ fontWeight: 600, color: '#e2e8f0' }}>{item.name}</td>
-                    <td style={{ fontWeight: 700, color: item.stock <= 3 ? '#ef4444' : '#f59e0b' }}>{item.stock} units</td>
-                    <td>
-                      <span style={{
-                        padding: '0.2rem 0.6rem', borderRadius: 4, fontSize: '0.72rem', fontWeight: 700,
-                        background: item.stock <= 3 ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
-                        color: item.stock <= 3 ? '#ef4444' : '#f59e0b',
-                      }}>
-                        {item.stock <= 3 ? 'CRITICAL' : 'LOW STOCK'}
-                      </span>
+                    <td className="p-4 align-middle font-semibold text-[#e2e8f0]">{item.name}</td>
+                    <td className="p-4 align-middle font-bold" style={{ color: item.stock <= 3 ? '#ef4444' : '#f59e0b' }}>{item.stock} units</td>
+                    <td className="p-4 align-middle">
+                      <span className="inline-block px-2.5 py-1 rounded text-xs font-bold"
+                        style={{
+                          background: item.stock <= 3 ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
+                          color: item.stock <= 3 ? '#ef4444' : '#f59e0b',
+                        }}
+                      >{item.stock <= 3 ? 'CRITICAL' : 'LOW STOCK'}</span>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        )}
+
+          {/* Mobile low stock cards */}
+          <div className="md:hidden space-y-3">
+            {lowStock.map((item) => (
+              <div key={item.id} className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-[#1e293b] shrink-0">
+                    <Image src={item.image} alt="" fill sizes="48px" style={{ objectFit: 'cover' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <strong className="text-sm text-white block truncate">{item.name}</strong>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="font-bold text-sm" style={{ color: item.stock <= 3 ? '#ef4444' : '#f59e0b' }}>{item.stock} units</span>
+                      <span className="inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold"
+                        style={{
+                          background: item.stock <= 3 ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
+                          color: item.stock <= 3 ? '#ef4444' : '#f59e0b',
+                        }}
+                      >{item.stock <= 3 ? 'CRITICAL' : 'LOW STOCK'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>)
+        }
       </div>
 
       {/* ═══ RECENT TRANSACTIONS TABLE ═══ */}
       <div className={styles.adminContent}>
         <h3 style={sectionTitle}><FaReceipt style={{ color: '#60a5fa' }} /> Recent Transactions</h3>
-        <div className={styles.tableContainer}>
-          <table className={styles.adminTable}>
+        {/* Desktop table */}
+        <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
+          <table className="w-full min-w-[650px] table-auto text-left border-collapse">
             <thead>
-              <tr>
-                <th>Order ID</th><th>Date</th><th>Customer</th><th>Channel</th><th>Payment</th><th>Total</th><th>Status</th>
+              <tr className="bg-[#09142E]">
+                <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Order ID</th>
+                <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Date</th>
+                <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Customer</th>
+                <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Channel</th>
+                <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Payment</th>
+                <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Total</th>
+                <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody>
               {recentOrders.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>No orders yet.</td></tr>
+                <tr><td colSpan={7} className="text-center p-12 text-[#64748b]">No orders yet.</td></tr>
               ) : (
                 recentOrders.map((o) => (
-                  <tr key={o.orderId}>
-                    <td style={{ fontWeight: 600, color: '#a78bfa', fontFamily: 'var(--font-heading)', fontSize: '0.82rem' }}>{o.orderId}</td>
-                    <td style={{ color: '#94a3b8', fontSize: '0.82rem' }}>{o.date}</td>
-                    <td style={{ color: '#e2e8f0' }}>{o.customerName}</td>
-                    <td>
-                      <span style={{
-                        padding: '0.2rem 0.5rem', borderRadius: 4, fontSize: '0.7rem', fontWeight: 700,
-                        background: o.isPos ? 'rgba(167,139,250,0.12)' : 'rgba(59,130,246,0.12)',
-                        color: o.isPos ? '#a78bfa' : '#60a5fa',
-                      }}>
-                        {o.isPos ? 'POS' : 'ONLINE'}
-                      </span>
+                  <tr key={o.orderId} className="hover:bg-white/5 transition-colors border-b border-white/10">
+                    <td className="p-4 align-middle font-heading font-semibold text-[#a78bfa] text-sm">{o.orderId}</td>
+                    <td className="p-4 align-middle text-[#94a3b8] text-sm">{o.date}</td>
+                    <td className="p-4 align-middle text-[#e2e8f0]">{o.customerName}</td>
+                    <td className="p-4 align-middle">
+                      <span className="inline-block px-2 py-0.5 rounded text-xs font-bold"
+                        style={{
+                          background: o.isPos ? 'rgba(167,139,250,0.12)' : 'rgba(59,130,246,0.12)',
+                          color: o.isPos ? '#a78bfa' : '#60a5fa',
+                        }}
+                      >{o.isPos ? 'POS' : 'ONLINE'}</span>
                     </td>
-                    <td style={{ color: '#cbd5e1', textTransform: 'capitalize', fontSize: '0.82rem' }}>{o.paymentMethod}</td>
-                    <td style={{ fontWeight: 700, color: '#22c55e', fontFamily: 'var(--font-heading)', fontSize: '0.85rem' }}>{formatEGP(o.totalPrice)}</td>
-                    <td>
-                      <span style={{
-                        padding: '0.2rem 0.5rem', borderRadius: 4, fontSize: '0.7rem', fontWeight: 700,
-                        background: o.status === 'Pending' ? 'rgba(245,158,11,0.12)' : 'rgba(34,197,94,0.12)',
-                        color: o.status === 'Pending' ? '#f59e0b' : '#22c55e',
-                      }}>
-                        {o.status}
-                      </span>
+                    <td className="p-4 align-middle text-[#cbd5e1] text-sm capitalize">{o.paymentMethod}</td>
+                    <td className="p-4 align-middle font-heading font-bold text-[#22c55e] text-sm">{formatEGP(o.totalPrice)}</td>
+                    <td className="p-4 align-middle">
+                      <span className="inline-block px-2 py-0.5 rounded text-xs font-bold"
+                        style={{
+                          background: o.status === 'Pending' ? 'rgba(245,158,11,0.12)' : 'rgba(34,197,94,0.12)',
+                          color: o.status === 'Pending' ? '#f59e0b' : '#22c55e',
+                        }}
+                      >{o.status}</span>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile transaction cards */}
+        <div className="md:hidden space-y-3">
+          {recentOrders.length === 0 ? (
+            <p className="text-center py-12 text-[#64748b] text-sm">No orders yet.</p>
+          ) : (
+            recentOrders.map((o) => (
+              <div key={o.orderId} className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-heading font-semibold text-[#a78bfa] text-sm">{o.orderId}</span>
+                  <span className="inline-block px-2 py-0.5 rounded text-xs font-bold"
+                    style={{
+                      background: o.status === 'Pending' ? 'rgba(245,158,11,0.12)' : 'rgba(34,197,94,0.12)',
+                      color: o.status === 'Pending' ? '#f59e0b' : '#22c55e',
+                    }}
+                  >{o.status}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs mb-2">
+                  <div><span className="text-slate-500">Date</span><p className="text-slate-200 m-0">{o.date}</p></div>
+                  <div><span className="text-slate-500">Customer</span><p className="text-slate-200 m-0 truncate">{o.customerName}</p></div>
+                  <div><span className="text-slate-500">Channel</span>
+                    <p className="m-0">
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[0.6rem] font-bold mt-0.5"
+                        style={{
+                          background: o.isPos ? 'rgba(167,139,250,0.12)' : 'rgba(59,130,246,0.12)',
+                          color: o.isPos ? '#a78bfa' : '#60a5fa',
+                        }}
+                      >{o.isPos ? 'POS' : 'ONLINE'}</span>
+                    </p>
+                  </div>
+                  <div><span className="text-slate-500">Payment</span><p className="text-slate-200 m-0 capitalize">{o.paymentMethod}</p></div>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                  <span className="text-xs text-slate-500">Total</span>
+                  <span className="font-heading font-bold text-[#22c55e]">{formatEGP(o.totalPrice)}</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

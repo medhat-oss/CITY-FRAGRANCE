@@ -82,12 +82,21 @@ export default function AdminPage() {
 
   return (
     <>
-      <header className={styles.adminHeader}>
-        <h1>Products Management</h1>
-        <button className="btn btn-primary" onClick={handleAdd} disabled={isSaving}>
-          <FaPlus style={{ marginRight: '8px' }} /> Add New Product
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full mb-6 pb-4 border-b border-white/10">
+        <h1 className="text-[#f8f9fa] text-2xl font-heading font-normal m-0">Products Management</h1>
+        <button onClick={handleAdd} disabled={isSaving}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border-none cursor-pointer transition-all duration-200 font-heading tracking-wide disabled:opacity-50"
+          style={{
+            background: 'linear-gradient(135deg, #1a3a7a, #2a4a9a)',
+            color: '#ffffff',
+            boxShadow: '0 2px 8px rgba(26,58,122,0.3)',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, #2a4a9a, #3a5aaa)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, #1a3a7a, #2a4a9a)'; }}
+        >
+          <FaPlus /> Add New Product
         </button>
-      </header>
+      </div>
 
       {/* Desktop table — hidden on small screens */}
       <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">

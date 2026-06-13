@@ -567,3 +567,12 @@
     padding: 1.25rem;
   }
 }
+
+/* ─── Utility: hide scrollbar for horizontal scroll containers ─── */
+.hideScrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hideScrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

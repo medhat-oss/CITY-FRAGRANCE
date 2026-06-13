@@ -170,28 +170,24 @@ export default function ShiftOrdersPage({ params }: PageProps) {
   return (
     <div dir="ltr">
       {/* ── Page Header — matches standard admin page pattern ── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Link
             href={`/admin/staff/${staffId}/shifts`}
-            style={{ color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = '#e2e8f0'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; }}
+            className="text-[#94a3b8] hover:text-[#e2e8f0] flex items-center gap-1.5 no-underline text-sm transition-colors"
           >
             <FaArrowLeft /> Back to Shift History
           </Link>
-          <span style={{ color: '#1d3573', fontSize: '1rem' }}>|</span>
-          <FaListAlt style={{ color: '#60a5fa', fontSize: '1rem' }} />
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
+          <span className="text-[#1d3573] text-base">|</span>
+          <FaListAlt className="text-[#60a5fa] text-base" />
+          <h2 className="font-heading text-xl font-medium text-[#f8f9fa] m-0 whitespace-nowrap">
             Shift Orders — {employeeName}
           </h2>
         </div>
         {shift && (
-          <div style={{ padding: '0.6rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(9,20,46,0.6)', textAlign: 'right' }}>
-            <span style={{ display: 'block', fontSize: '0.7rem', color: '#94a3b8', letterSpacing: '0.05em', textTransform: 'uppercase', fontFamily: 'var(--font-heading)' }}>Total Shift Sales</span>
-            <span style={{ display: 'block', fontFamily: 'var(--font-heading)', fontSize: '1.15rem', fontWeight: 700, color: '#ffffff' }}>
-              EGP {(shift.expectedTotal ?? 0).toFixed(2)}
-            </span>
+          <div className="rounded-lg border border-white/10 bg-[rgba(9,20,46,0.6)] px-4 py-2.5 text-right sm:text-right w-full sm:w-auto">
+            <span className="block text-xs text-[#94a3b8] tracking-wide uppercase font-heading">Total Shift Sales</span>
+            <span className="block font-heading text-lg font-bold text-white">EGP {(shift.expectedTotal ?? 0).toFixed(2)}</span>
           </div>
         )}
       </div>
@@ -207,33 +203,22 @@ export default function ShiftOrdersPage({ params }: PageProps) {
           </div>
         ) : (
           <>
-            {/* ── Orders Table ── */}
-            <div className={styles.tableContainer} style={{ overflowX: 'auto' }}>
-              <table className={styles.adminTable} style={{ minWidth: '860px' }}>
+            {/* ── Desktop orders table ── */}
+            <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
+              <table className="w-full min-w-[860px] table-auto text-left border-collapse">
                 <thead>
-                  <tr>
+                  <tr className="bg-[#09142E]">
                     {['Order ID', 'Customer', 'Payment', 'Date & Time', 'Product', 'Qty', 'Unit Price', 'Subtotal', 'Status', 'Cancel'].map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          textAlign: h === 'Subtotal' || h === 'Unit Price' ? 'right' : 'left',
-                          fontSize: '0.7rem',
-                          letterSpacing: '0.06em',
-                          textTransform: 'uppercase',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {h}
-                      </th>
+                      <th key={h} className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap"
+                        style={{ textAlign: h === 'Subtotal' || h === 'Unit Price' ? 'right' : 'left' }}
+                      >{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {itemRows.length === 0 ? (
                     <tr>
-                      <td colSpan={10} style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
-                        No orders recorded for this shift yet.
-                      </td>
+                      <td colSpan={10} className="text-center p-12 text-[#64748b]">No orders recorded for this shift yet.</td>
                     </tr>
                   ) : (
                     itemRows.map(({ order, item, isFirstItem, itemCount }, rowIdx) => {
@@ -242,10 +227,6 @@ export default function ShiftOrdersPage({ params }: PageProps) {
                       const isUpdatingThisOrder = updatingOrder === order.orderId;
                       const canCancelItem = !orderLocked && item.id && itemCount > 1;
 
-                      const rowBorderStyle = isFirstItem && rowIdx > 0
-                        ? { borderTop: '2px solid rgba(30,58,95,0.8)' }
-                        : { borderTop: '1px solid rgba(30,58,95,0.4)' };
-
                       const statusColor =
                         order.status.toLowerCase() === 'cancelled' ? '#ef4444'
                         : order.status.toLowerCase() === 'completed' ? '#22c55e'
@@ -253,125 +234,60 @@ export default function ShiftOrdersPage({ params }: PageProps) {
                         : order.status.toLowerCase() === 'pending' ? '#f59e0b'
                         : '#94a3b8';
 
+                      const rowStyle = isFirstItem && rowIdx > 0
+                        ? { borderTop: '2px solid rgba(30,58,95,0.8)' }
+                        : {};
+
                       return (
-                        <tr
-                          key={`${order.orderId}-${item.id || rowIdx}`}
-                          style={{ ...rowBorderStyle, transition: 'background 0.15s' }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
-                        >
-                          {/* Order ID */}
-                          <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                        <tr key={`${order.orderId}-${item.id || rowIdx}`} className="border-b border-white/10 hover:bg-white/[0.03] transition-colors" style={rowStyle}>
+                          <td className="p-3 align-middle whitespace-nowrap">
+                            {isFirstItem ? <span className="font-mono text-xs text-[#64748b]">#{String(order.orderId || order.id).slice(-8)}</span> : null}
+                          </td>
+                          <td className="p-3 align-middle">
+                            {isFirstItem ? <span className="text-sm text-[#e2e8f0]">{order.customerName || '—'}</span> : null}
+                          </td>
+                          <td className="p-3 align-middle">
+                            {isFirstItem ? <span className="text-sm text-[#94a3b8]">{order.paymentMethod || '—'}</span> : null}
+                          </td>
+                          <td className="p-3 align-middle whitespace-nowrap">
+                            {isFirstItem ? <span className="font-mono text-xs text-[#94a3b8]">{formatDateTime(order.createdAt || order.date)}</span> : null}
+                          </td>
+                          <td className="p-3 align-middle">
+                            <span className="text-sm" style={{ color: item.name === '—' ? '#475569' : '#f1f5f9' }}>{item.name}</span>
+                          </td>
+                          <td className="p-3 align-middle text-center text-[#cbd5e1] text-sm">{item.quantity > 0 ? `×${item.quantity}` : '—'}</td>
+                          <td className="p-3 align-middle text-right font-heading text-[#94a3b8] whitespace-nowrap text-sm">{item.price > 0 ? `EGP ${item.price.toFixed(2)}` : '—'}</td>
+                          <td className="p-3 align-middle text-right font-heading text-[#e2e8f0] font-semibold whitespace-nowrap text-sm">{item.price > 0 ? `EGP ${(item.price * item.quantity).toFixed(2)}` : '—'}</td>
+                          <td className="p-3 align-middle">
                             {isFirstItem ? (
-                              <span style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#64748b' }}>
-                                #{String(order.orderId || order.id).slice(-8)}
-                              </span>
+                              <span className="inline-block px-2 py-0.5 rounded text-[0.68rem] font-bold tracking-wide uppercase whitespace-nowrap"
+                                style={{ color: statusColor, background: `${statusColor}18`, border: `1px solid ${statusColor}40` }}
+                              >{order.status}</span>
                             ) : null}
                           </td>
-
-                          {/* Customer */}
-                          <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle' }}>
-                            {isFirstItem ? (
-                              <span style={{ color: '#e2e8f0', fontSize: '0.82rem' }}>{order.customerName || '—'}</span>
-                            ) : null}
-                          </td>
-
-                          {/* Payment */}
-                          <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle' }}>
-                            {isFirstItem ? (
-                              <span style={{ color: '#94a3b8', fontSize: '0.78rem' }}>{order.paymentMethod || '—'}</span>
-                            ) : null}
-                          </td>
-
-                          {/* Date & Time */}
-                          <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
-                            {isFirstItem ? (
-                              <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                                {formatDateTime(order.createdAt || order.date)}
-                              </span>
-                            ) : null}
-                          </td>
-
-                          {/* Product name */}
-                          <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle' }}>
-                            <span style={{ color: item.name === '—' ? '#475569' : '#f1f5f9', fontSize: '0.82rem' }}>
-                              {item.name}
-                            </span>
-                          </td>
-
-                          {/* Qty */}
-                          <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle', color: '#cbd5e1', textAlign: 'center' }}>
-                            {item.quantity > 0 ? `×${item.quantity}` : '—'}
-                          </td>
-
-                          {/* Unit Price */}
-                          <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle', textAlign: 'right', fontFamily: 'var(--font-heading)', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                            {item.price > 0 ? `EGP ${item.price.toFixed(2)}` : '—'}
-                          </td>
-
-                          {/* Subtotal */}
-                          <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle', textAlign: 'right', fontFamily: 'var(--font-heading)', color: '#e2e8f0', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                            {item.price > 0 ? `EGP ${(item.price * item.quantity).toFixed(2)}` : '—'}
-                          </td>
-
-                          {/* Status badge */}
-                          <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle' }}>
-                            {isFirstItem ? (
-                              <span style={{
-                                display: 'inline-block', padding: '0.2rem 0.6rem', borderRadius: '4px',
-                                fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em',
-                                textTransform: 'uppercase', color: statusColor,
-                                background: `${statusColor}18`, border: `1px solid ${statusColor}40`, whiteSpace: 'nowrap',
-                              }}>
-                                {order.status}
-                              </span>
-                            ) : null}
-                          </td>
-
-                          {/* Per-item Cancel button */}
-                          <td style={{ padding: '0.6rem 1rem', verticalAlign: 'middle' }}>
+                          <td className="p-3 align-middle">
                             {canCancelItem ? (
                               isCancellingThisItem ? (
                                 <FaSpinner className={styles.spinIcon} style={{ fontSize: '0.85rem', color: '#ef4444' }} />
                               ) : (
-                                <button
-                                  onClick={() => handleCancelItem(item.id, order.orderId)}
+                                <button onClick={() => handleCancelItem(item.id, order.orderId)}
                                   disabled={isCancellingThisItem || isUpdatingThisOrder}
-                                  style={{
-                                    padding: '0.25rem 0.65rem', borderRadius: '5px',
-                                    border: '1px solid rgba(127,29,29,0.4)', background: 'rgba(127,29,29,0.15)',
-                                    color: '#f87171', fontSize: '0.72rem', fontWeight: 700,
-                                    cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap', letterSpacing: '0.03em',
-                                  }}
-                                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(127,29,29,0.5)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#ef4444'; }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(127,29,29,0.15)'; e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = 'rgba(127,29,29,0.4)'; }}
+                                  className="px-2.5 py-1 rounded-md border border-[rgba(127,29,29,0.4)] bg-[rgba(127,29,29,0.15)] text-[#f87171] text-xs font-bold cursor-pointer transition-all whitespace-nowrap tracking-wide hover:bg-[rgba(127,29,29,0.5)] hover:text-white hover:border-red-500"
                                   title="Cancel this item"
-                                >
-                                  Cancel
-                                </button>
+                                >Cancel</button>
                               )
                             ) : isFirstItem && !orderLocked && itemCount <= 1 ? (
                               isUpdatingThisOrder ? (
                                 <FaSpinner className={styles.spinIcon} style={{ fontSize: '0.85rem', color: '#ef4444' }} />
                               ) : (
-                                <button
-                                  onClick={() => handleCancelOrder(order.orderId)}
+                                <button onClick={() => handleCancelOrder(order.orderId)}
                                   disabled={isUpdatingThisOrder}
-                                  style={{
-                                    padding: '0.25rem 0.65rem', borderRadius: '5px',
-                                    border: '1px solid rgba(127,29,29,0.4)', background: 'rgba(127,29,29,0.15)',
-                                    color: '#f87171', fontSize: '0.72rem', fontWeight: 700,
-                                    cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
-                                  }}
-                                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(127,29,29,0.5)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#ef4444'; }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(127,29,29,0.15)'; e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = 'rgba(127,29,29,0.4)'; }}
+                                  className="px-2.5 py-1 rounded-md border border-[rgba(127,29,29,0.4)] bg-[rgba(127,29,29,0.15)] text-[#f87171] text-xs font-bold cursor-pointer transition-all whitespace-nowrap hover:bg-[rgba(127,29,29,0.5)] hover:text-white hover:border-red-500"
                                   title="Cancel order"
-                                >
-                                  Cancel Order
-                                </button>
+                                >Cancel Order</button>
                               )
                             ) : (
-                              <span style={{ color: '#1e3a5f', fontSize: '0.7rem' }}>—</span>
+                              <span className="text-[#1e3a5f] text-xs">—</span>
                             )}
                           </td>
                         </tr>
@@ -382,13 +298,96 @@ export default function ShiftOrdersPage({ params }: PageProps) {
               </table>
             </div>
 
+            {/* ── Mobile order cards ── */}
+            <div className="md:hidden space-y-3">
+              {orders.length === 0 ? (
+                <p className="text-center py-12 text-[#64748b] text-sm">No orders recorded for this shift yet.</p>
+              ) : (
+                orders.map((order) => {
+                  const orderLocked = ITEM_CANCEL_LOCKED_STATUSES.includes((order.status || '').toLowerCase());
+                  const isUpdatingThisOrder = updatingOrder === order.orderId;
+                  const items = Array.isArray(order.items) ? order.items : [];
+
+                  const statusColor =
+                    order.status.toLowerCase() === 'cancelled' ? '#ef4444'
+                    : order.status.toLowerCase() === 'completed' ? '#22c55e'
+                    : order.status.toLowerCase() === 'accepted' ? '#22c55e'
+                    : order.status.toLowerCase() === 'pending' ? '#f59e0b'
+                    : '#94a3b8';
+
+                  return (
+                    <div key={order.orderId} className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3">
+                      {/* Card header */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="font-mono text-xs text-[#64748b] shrink-0">#{String(order.orderId || order.id).slice(-8)}</span>
+                          <span className="text-xs px-2 py-0.5 rounded font-bold tracking-wide uppercase"
+                            style={{ color: statusColor, background: `${statusColor}18`, border: `1px solid ${statusColor}40` }}
+                          >{order.status}</span>
+                        </div>
+                        <span className="text-xs font-heading text-white font-semibold whitespace-nowrap ml-2">EGP {(order.totalPrice || 0).toFixed(2)}</span>
+                      </div>
+                      {/* Customer + Payment + Date */}
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs mb-2">
+                        <div><span className="text-slate-500">Customer</span><p className="text-slate-200 m-0 truncate">{order.customerName || '—'}</p></div>
+                        <div><span className="text-slate-500">Payment</span><p className="text-slate-200 m-0 truncate">{order.paymentMethod || '—'}</p></div>
+                        <div className="col-span-2"><span className="text-slate-500">Date & Time</span><p className="text-slate-200 m-0 font-mono text-[10px]">{formatDateTime(order.createdAt || order.date)}</p></div>
+                      </div>
+                      {/* Items */}
+                      <div className="mb-2">
+                        <span className="text-xs text-slate-500 block mb-1">Products</span>
+                        {items.length === 0 ? (
+                          <span className="text-xs text-slate-500 italic">—</span>
+                        ) : items.map((item) => {
+                          const isCancellingThisItem = cancellingItem === item.id;
+                          const canCancelItem = !orderLocked && item.id && items.length > 1;
+                          return (
+                            <div key={item.id || `${order.orderId}-${item.name}`} className="flex items-center justify-between bg-[rgba(24,24,27,0.5)] px-2 py-1.5 rounded-lg border border-[rgba(63,63,70,0.4)] mb-1 last:mb-0 text-xs">
+                              <div className="flex-1 min-w-0">
+                                <span className="text-[#e4e4e7] block truncate">{item.name}</span>
+                                <span className="text-slate-500 text-[10px]">×{item.quantity} @ EGP {item.price.toFixed(2)}</span>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0 ml-2">
+                                <span className="text-[#e2e8f0] font-semibold font-heading">EGP {(item.price * item.quantity).toFixed(2)}</span>
+                                {canCancelItem && (
+                                  isCancellingThisItem ? (
+                                    <FaSpinner className="animate-spin text-red-500 text-[10px]" />
+                                  ) : (
+                                    <button
+                                      onClick={() => handleCancelItem(item.id, order.orderId)}
+                                      disabled={isCancellingThisItem || isUpdatingThisOrder}
+                                      className="w-5 h-5 inline-flex items-center justify-center text-red-500 bg-[rgba(127,29,29,0.2)] border border-[rgba(127,29,29,0.3)] rounded cursor-pointer hover:bg-[rgba(127,29,29,0.5)] hover:text-white text-[10px]"
+                                      title="Cancel this item"
+                                    >✕</button>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {/* Full order cancel */}
+                      {!orderLocked && items.length <= 1 && (
+                        <div className="flex justify-end pt-2 border-t border-white/10">
+                          {isUpdatingThisOrder ? (
+                            <FaSpinner className="animate-spin text-red-500 text-xs" />
+                          ) : (
+                            <button onClick={() => handleCancelOrder(order.orderId)}
+                              disabled={isUpdatingThisOrder}
+                              className="px-3 py-1.5 rounded-md border border-[rgba(127,29,29,0.4)] bg-[rgba(127,29,29,0.15)] text-[#f87171] text-xs font-bold cursor-pointer transition-all hover:bg-[rgba(127,29,29,0.5)] hover:text-white"
+                            >Cancel Order</button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
             {/* ── Shift Summary Footer ── */}
             {shift && (
-              <div style={{
-                marginTop: '1.5rem', padding: '1rem 1.25rem',
-                background: 'rgba(9,20,46,0.6)', border: '1px solid rgba(30,58,95,0.6)',
-                borderRadius: '8px', display: 'flex', flexWrap: 'wrap', gap: '1.5rem',
-              }}>
+              <div className="mt-6 p-4 rounded-xl border border-[rgba(30,58,95,0.6)] bg-[rgba(9,20,46,0.6)] flex flex-wrap gap-4">
                 {[
                   { label: 'Cash', value: shift.totalCash },
                   { label: 'InstaPay', value: shift.totalInstaPay },
@@ -396,15 +395,9 @@ export default function ShiftOrdersPage({ params }: PageProps) {
                   { label: 'Visa / Card', value: shift.totalVisa },
                   { label: 'Expected Total', value: shift.expectedTotal, highlight: true },
                 ].map(({ label, value, highlight }) => (
-                  <div key={label} style={{ minWidth: '110px' }}>
-                    <span style={{ display: 'block', fontSize: '0.7rem', color: '#64748b', marginBottom: '0.2rem', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {label}
-                    </span>
-                    <span style={{
-                      display: 'block', fontFamily: 'var(--font-heading)',
-                      fontSize: highlight ? '1rem' : '0.9rem', fontWeight: highlight ? 700 : 600,
-                      color: highlight ? '#ffffff' : '#e2e8f0',
-                    }}>
+                  <div key={label} style={{ minWidth: '100px' }}>
+                    <span className="block text-xs text-[#64748b] mb-0.5 font-heading uppercase tracking-wide">{label}</span>
+                    <span className="block font-heading text-sm font-semibold" style={{ color: highlight ? '#ffffff' : '#e2e8f0', fontWeight: highlight ? 700 : 600 }}>
                       EGP {(value ?? 0).toFixed(2)}
                     </span>
                   </div>
@@ -412,9 +405,7 @@ export default function ShiftOrdersPage({ params }: PageProps) {
               </div>
             )}
             {shift && (
-              <p style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: '#3a506b', margin: '0.75rem 0 0' }}>
-                Shift ID: {shift.id}
-              </p>
+              <p className="font-mono text-[0.68rem] text-[#3a506b] mt-3 mb-0">Shift ID: {shift.id}</p>
             )}
           </>
         )}
