@@ -569,9 +569,9 @@ export default function CashierPage() {
   }
 
   return (
-    <div dir="ltr" className="flex flex-col h-screen bg-[#16234D] text-white overflow-hidden">
+    <div dir="ltr" className="flex flex-col h-screen bg-[#16234D] text-white overflow-hidden max-w-[100vw]">
       {/* ── Header ── */}
-      <header className="flex items-center justify-between px-3 md:px-6 py-3 bg-[#111B3D] border-b border-white/10 flex-shrink-0">
+      <header className="flex items-center justify-between px-2 md:px-6 py-2 md:py-3 bg-[#111B3D] border-b border-white/10 flex-shrink-0">
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <FaCashRegister style={{ color: '#ffffff', fontSize: '1.2rem', flexShrink: 0 }} />
           <h1 className="font-heading text-sm md:text-lg font-semibold text-[#f8f9fa] m-0 tracking-wider truncate">
@@ -681,7 +681,7 @@ export default function CashierPage() {
       </aside>
 
       {/* ── Main Content: Catalog (desktop: side-by-side, mobile: stacked) ── */}
-      <div className="flex flex-col md:flex-row flex-1 gap-2 md:gap-4 overflow-hidden min-h-0 p-2 md:p-4">
+      <div className="flex flex-col md:flex-row flex-1 gap-2 md:gap-4 overflow-hidden min-h-0 p-2 md:p-4 w-full max-w-full">
 
         {/* ─── LEFT: Catalog ─── */}
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">

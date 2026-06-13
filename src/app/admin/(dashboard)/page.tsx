@@ -89,7 +89,8 @@ export default function AdminPage() {
         </button>
       </header>
 
-      <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
+      {/* Desktop table — hidden on small screens */}
+      <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
         <table className="w-full min-w-[1000px] table-auto text-left border-collapse">
           <thead>
             <tr className="bg-[#09142E]">
@@ -191,6 +192,67 @@ export default function AdminPage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile stacked cards — visible only on small screens */}
+      <div className="md:hidden space-y-3">
+        {rows.map(({ product, cols }) => (
+          <div
+            key={product.id}
+            className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3"
+            style={{ opacity: deletingId === product.id ? 0.4 : 1 }}
+          >
+            <div className="flex gap-3">
+              <Image
+                src={product.images?.[0] || '/images/product-placeholder.png'}
+                alt={product.name}
+                width={60}
+                height={60}
+                className="rounded-lg flex-shrink-0"
+                style={{ objectFit: 'cover' }}
+              />
+              <div className="flex-1 min-w-0">
+                <strong className="text-sm text-white block truncate">{product.name}</strong>
+                <span className="text-xs text-slate-400 block truncate">
+                  {[product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).join(' • ')}
+                </span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {cols.length > 0
+                    ? cols.map((slug) => (
+                        <span key={slug} className="text-[0.6rem] px-1.5 py-0.5 rounded-full"
+                          style={{ background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.35)', color: '#c9a96e' }}
+                        >{COLLECTION_LABELS[slug] || slug}</span>
+                      ))
+                    : null}
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2 mt-2 text-center text-xs">
+              <div><span className="text-slate-400 block">Price</span><span className="text-white font-semibold block">{formatEGP(product.price)}</span></div>
+              <div><span className="text-slate-400 block">Sale</span><span className="text-white font-semibold block">{product.salePrice ? formatEGP(product.salePrice) : '—'}</span></div>
+              <div><span className="text-slate-400 block">Stock</span><span className="text-white font-semibold block">{product.stock ?? '—'}</span></div>
+            </div>
+            <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/10">
+              <span className="text-xs px-2 py-0.5 rounded-full"
+                style={{
+                  background: product.isDraft ? 'rgba(234,179,8,0.12)' : 'rgba(34,197,94,0.12)',
+                  border: `1px solid ${product.isDraft ? 'rgba(234,179,8,0.4)' : 'rgba(34,197,94,0.4)'}`,
+                  color: product.isDraft ? '#facc15' : '#4ade80',
+                }}
+              >{product.isDraft ? 'Draft' : 'Live'}</span>
+              <div className="flex gap-2">
+                <button onClick={() => handleEdit(product)} disabled={deletingId === product.id}
+                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded transition-colors disabled:opacity-40"
+                  aria-label={`Edit ${product.name}`}
+                ><FaEdit /></button>
+                <button onClick={() => handleDelete(product.id)} disabled={deletingId === product.id}
+                  className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-2 rounded transition-colors disabled:opacity-40"
+                  aria-label={`Delete ${product.name}`}
+                >{deletingId === product.id ? <FaSpinner className="animate-spin" /> : <FaTrashAlt />}</button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <ProductModal

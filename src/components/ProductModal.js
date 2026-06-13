@@ -237,7 +237,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
           </div>
 
           {/* ── Category + Badge ── */}
-          <div className={styles.formRow}>
+          <div className={`${styles.formRow} grid-cols-2`}>
             <div className={styles.formGroup}>
               <label>Category</label>
               <select name="category" value={formData.category} onChange={handleChange} required>
@@ -260,9 +260,9 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
             </label>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '8px',
-              padding: '12px',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '6px',
+              padding: '10px',
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid #1d3573',
               borderRadius: '6px',
@@ -301,7 +301,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
           </div>
 
           {/* ── Price + Sale + Stock ── */}
-          <div className={styles.formRow}>
+          <div className={`${styles.formRow} grid-cols-2 md:grid-cols-4`}>
             <div className={styles.formGroup}>
               <label>Original Price (EGP)</label>
               <input type="number" name="price" value={formData.price ?? ''} onChange={handleChange} step="0.01" required />
@@ -321,18 +321,18 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
           </div>
 
           {/* ── Perfume Notes ── */}
-          <div className={styles.formRow}>
+          <div className={`${styles.formRow} grid-cols-1 md:grid-cols-3`}>
             <div className={styles.formGroup}>
               <label>Top Notes</label>
-              <input type="text" name="topNotes" value={formData.topNotes} onChange={handleChange} placeholder="إفتتاحية العطر" />
+              <input type="text" name="topNotes" value={formData.topNotes} onChange={handleChange} placeholder="Top notes" />
             </div>
             <div className={styles.formGroup}>
               <label>Middle Notes</label>
-              <input type="text" name="middleNotes" value={formData.middleNotes} onChange={handleChange} placeholder="قلب العطر" />
+              <input type="text" name="middleNotes" value={formData.middleNotes} onChange={handleChange} placeholder="Middle notes" />
             </div>
             <div className={styles.formGroup}>
               <label>Base Notes</label>
-              <input type="text" name="baseNotes" value={formData.baseNotes} onChange={handleChange} placeholder="قاعدة العطر" />
+              <input type="text" name="baseNotes" value={formData.baseNotes} onChange={handleChange} placeholder="Base notes" />
             </div>
           </div>
 
@@ -461,16 +461,17 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
           </div>
 
           {/* ── Actions ── */}
-          <div className={styles.modalActions}>
+          <div className={styles.modalActions} style={{ flexWrap: 'wrap' }}>
             <button
               type="button"
               className="btn btn-outline"
-              style={{ color: '#e2e8f0', borderColor: 'rgba(255,255,255,0.3)' }}
+              style={{ flex: '1 1 120px', color: '#e2e8f0', borderColor: 'rgba(255,255,255,0.3)' }}
               onClick={onClose}
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={isUploading || isVideoUploading}>
+            <button type="submit" className="btn btn-primary" disabled={isUploading || isVideoUploading}
+              style={{ flex: '1 1 140px' }}>
               {formData.isDraft ? 'Save as Draft' : 'Publish Product'}
             </button>
           </div>
