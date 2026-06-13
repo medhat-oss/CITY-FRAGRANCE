@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './admin.module.css';
 import Link from 'next/link';
 import { FaBoxOpen, FaStore, FaClipboardList, FaGift, FaCog, FaBars, FaTimes, FaUsers, FaChartLine } from 'react-icons/fa';
@@ -9,6 +9,13 @@ import AdminSidebarUser from '@/components/AdminSidebarUser';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const closeDrawer = () => setIsMobileSidebarOpen(false);
 
@@ -49,7 +56,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobile Top Header: visible on mobile, hidden on md+ */}
-      <header className="flex md:hidden fixed top-0 left-0 right-0 h-16 items-center justify-between px-4 border-b border-white/10 z-20" style={{ backgroundColor: '#070B13' }}>
+      <header className={`flex md:hidden fixed top-0 left-0 right-0 h-20 z-[100] transition-all duration-300 items-center justify-between px-4 ${isScrolled ? 'bg-[#11224D]/80 backdrop-blur-md border-b border-white/10' : 'bg-[#11224D]'}`}>
         <button
           className="flex items-center justify-center p-2 text-white"
           onClick={() => setIsMobileSidebarOpen(true)}
@@ -57,7 +64,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         >
           <FaBars className="text-lg" />
         </button>
-        <span className="font-heading text-sm font-semibold text-white tracking-[0.1em] uppercase">Admin Panel</span>
+        <Link href="/admin" className="flex flex-col items-center justify-center">
+          <span className="text-xl font-bold tracking-widest text-white uppercase font-serif">City Fragrance</span>
+          <span className="text-[9px] font-medium text-white/60 uppercase tracking-[0.2em] mt-0.5">Admin Panel</span>
+        </Link>
         <div className="w-8" />
       </header>
 
@@ -69,7 +79,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       {/* Mobile Drawer Panel */}
       <aside className={`${styles.mobileDrawer} ${isMobileSidebarOpen ? styles.mobileDrawerOpen : ''}`}>
         <div className={styles.mobileDrawerHeader}>
-          <div className={styles.mobileDrawerBrand}>
+          <div className={`${styles.mobileDrawerBrand} hidden`}>
             <h2>CITY FRAGRANCE</h2>
             <span>ADMIN PANEL</span>
           </div>
