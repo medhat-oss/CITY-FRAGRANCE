@@ -175,11 +175,13 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <FaClipboardList style={{ color: '#ffffff', fontSize: '1.25rem' }} />
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
-            Orders Management
-          </h2>
+        <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:gap-0.75rem">
+          <div className="flex items-center gap-3">
+            <FaClipboardList style={{ color: '#ffffff', fontSize: '1.25rem' }} />
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
+              Orders Management
+            </h2>
+          </div>
         </div>
 
       {/* Revenue Badge */}
@@ -202,117 +204,63 @@ export default function AdminOrdersPage() {
         <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{formatEGP(totalRevenue)}</span>
       </div>
 
-      {/* Orders Table */}
-      <div style={{ background: '#11224D', borderRadius: '8px', border: '1px solid #1d3573', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.85rem',
-              minWidth: '1100px',
-            }}
-          >
-            <thead>
-              <tr style={{ background: '#09142E', color: '#f8f9fa' }}>
-                <Th>Order ID</Th>
-                <Th>Customer</Th>
-                <Th>Phone</Th>
-                <Th>Governorate</Th>
-                <Th>Items</Th>
-                <Th>Total</Th>
-                <Th>Payment</Th>
-                <Th>Status</Th>
-                <Th>Date</Th>
-                <Th>Time</Th>
-                <Th>{' '}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => {
-                const isNew = order.status && (order.status === 'ACCEPTED' || order.status.toLowerCase() === 'pending');
-                return (
-                  <tr
-                    key={order.orderId}
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', transition: 'background 0.2s' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = '')}
-                  >
-                    <Td>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {isNew && (
-                          <span
-                            className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse mr-2 inline-block"
-                            style={{
-                              width: '10px',
-                              height: '10px',
-                              backgroundColor: '#ef4444',
-                              borderRadius: '50%',
-                              marginRight: '8px',
-                              display: 'inline-block',
-                              boxShadow: '0 0 8px #ef4444',
-                              flexShrink: 0,
-                            }}
-                            title="New Order"
-                          />
-                        )}
-                        <span
-                          style={{ cursor: 'pointer', color: '#60a5fa', textDecoration: 'underline', textDecorationColor: 'rgba(96,165,250,0.3)' }}
-                          onClick={() => setSelectedOrder(order)}
-                          onMouseEnter={(e) => { e.currentTarget.style.color = '#93c5fd'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.color = '#60a5fa'; }}
-                        >{order.orderId}</span>
-                      </div>
-                    </Td>
-                    <Td>{order.customerName}</Td>
-                    <Td><span dir="ltr">{order.phoneNumber}</span></Td>
-                    <Td>{order.governorate || '\u2014'}</Td>
+      {/* ── Desktop orders table ── */}
+      <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
+        <table className="w-full min-w-[1100px] table-auto text-left border-collapse" style={{ fontSize: '0.85rem' }}>
+          <thead>
+            <tr className="bg-[#09142E] text-white">
+              <Th>Order ID</Th>
+              <Th>Customer</Th>
+              <Th>Phone</Th>
+              <Th>Governorate</Th>
+              <Th>Items</Th>
+              <Th>Total</Th>
+              <Th>Payment</Th>
+              <Th>Status</Th>
+              <Th>Date</Th>
+              <Th>Time</Th>
+              <Th>{' '}</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((order) => {
+              const isNew = order.status && (order.status === 'ACCEPTED' || order.status.toLowerCase() === 'pending');
+              return (
+                <tr
+                  key={order.orderId}
+                  className="border-b border-white/[0.06] hover:bg-white/[0.03] transition-colors"
+                >
                   <Td>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                    <div className="flex items-center">
+                      {isNew && (
+                        <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse mr-2 inline-block shrink-0" style={{ boxShadow: '0 0 8px #ef4444' }} title="New Order" />
+                      )}
+                      <span
+                        className="cursor-pointer text-[#60a5fa] underline underline-offset-2 decoration-[rgba(96,165,250,0.3)] hover:text-[#93c5fd]"
+                        onClick={() => setSelectedOrder(order)}
+                      >{order.orderId}</span>
+                    </div>
+                  </Td>
+                  <Td>{order.customerName}</Td>
+                  <Td><span dir="ltr">{order.phoneNumber}</span></Td>
+                  <Td>{order.governorate || '\u2014'}</Td>
+                  <Td>
+                    <div className="flex flex-col gap-1">
                       {order.items.map((item) => {
                         const isCancelling = cancellingItemId === item.id;
                         const showCancelBtn = order.status !== 'CANCELLED' && order.status !== 'COMPLETED' && order.items.length > 1;
-
                         return (
-                          <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(24,24,27,0.5)', padding: '0.35rem 0.5rem', borderRadius: '8px', border: '1px solid rgba(63,63,70,0.4)', minWidth: '180px' }}>
-                            <span style={{ color: '#e4e4e7' }}>
-                              {item.quantity}x {item.name}
-                            </span>
+                          <div key={item.id} className="flex items-center justify-between bg-[rgba(24,24,27,0.5)] px-2 py-1.5 rounded-lg border border-[rgba(63,63,70,0.4)] min-w-[180px]">
+                            <span className="text-[#e4e4e7]">{item.quantity}x {item.name}</span>
                             {showCancelBtn && (
                               <button
                                 type="button"
                                 disabled={isCancelling}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCancelSingleItem(item.id, order.orderId);
-                                }}
-                                style={{
-                                  marginLeft: '0.5rem',
-                                  width: '28px',
-                                  height: '28px',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  color: '#ef4444',
-                                  background: 'rgba(127,29,29,0.2)',
-                                  border: '1px solid rgba(127,29,29,0.3)',
-                                  borderRadius: '6px',
-                                  fontWeight: 700,
-                                  fontSize: '0.85rem',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.15s',
-                                  opacity: isCancelling ? 0.5 : 1,
-                                }}
-                                onMouseEnter={(e) => { if (!isCancelling) { e.currentTarget.style.background = 'rgba(127,29,29,0.7)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#ef4444'; } }}
-                                onMouseLeave={(e) => { if (!isCancelling) { e.currentTarget.style.background = 'rgba(127,29,29,0.2)'; e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = 'rgba(127,29,29,0.3)'; } }}
+                                onClick={(e) => { e.stopPropagation(); handleCancelSingleItem(item.id, order.orderId); }}
+                                className="ml-2 w-7 h-7 inline-flex items-center justify-center text-red-500 bg-[rgba(127,29,29,0.2)] border border-[rgba(127,29,29,0.3)] rounded-md font-bold text-sm cursor-pointer transition-all hover:bg-[rgba(127,29,29,0.7)] hover:text-white hover:border-red-500 disabled:opacity-50"
                                 title="Cancel this item"
                               >
-                                {isCancelling ? (
-                                  <span style={{ animation: 'spin 1s linear infinite', fontSize: '0.75rem' }}>🌀</span>
-                                ) : (
-                                  '✕'
-                                )}
+                                {isCancelling ? <FaSpinner className="animate-spin text-xs" /> : '✕'}
                               </button>
                             )}
                           </div>
@@ -325,7 +273,7 @@ export default function AdminOrdersPage() {
                   </Td>
                   <Td>{order.paymentMethod || '\u2014'}</Td>
                   <Td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <div className="flex items-center gap-1.5">
                       <select
                         value={order.status}
                         onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
@@ -337,7 +285,7 @@ export default function AdminOrdersPage() {
                         ))}
                       </select>
                       {updatingId === order.orderId && (
-                        <FaSpinner className="animate-spin" style={{ fontSize: '0.75rem', color: '#ffffff' }} />
+                        <FaSpinner className="animate-spin text-xs text-white" />
                       )}
                     </div>
                   </Td>
@@ -350,45 +298,102 @@ export default function AdminOrdersPage() {
                   <Td>
                     <button
                       onClick={() => setSelectedOrder(order)}
-                      style={{
-                        background: 'none',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        borderRadius: '4px',
-                        padding: '0.4rem 0.6rem',
-                        cursor: 'pointer',
-                        color: '#e2e8f0',
-                        fontSize: '0.8rem',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        transition: 'all 0.2s',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#ffffff';
-                        e.currentTarget.style.color = '#09142E';
-                        e.currentTarget.style.borderColor = '#ffffff';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '';
-                        e.currentTarget.style.color = '#e2e8f0';
-                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-                      }}
+                      className="bg-none border border-white/20 rounded px-2.5 py-1.5 cursor-pointer text-[#e2e8f0] text-xs inline-flex items-center gap-1 transition-all hover:bg-white hover:text-[#09142E] hover:border-white"
                     >
                       <FaEye /> View
                     </button>
                   </Td>
                 </tr>
               ); })}
-              {orders.length === 0 && (
-                <tr>
-                  <td colSpan={11} style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748b' }}>
-                    No orders yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            {orders.length === 0 && (
+              <tr>
+                <td colSpan={11} className="text-center p-12 text-[#64748b]">No orders yet.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── Mobile order cards ── */}
+      <div className="md:hidden space-y-3">
+        {orders.map((order) => {
+          const isNew = order.status && (order.status === 'ACCEPTED' || order.status.toLowerCase() === 'pending');
+          return (
+            <div key={order.orderId} className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3">
+              {/* Card header */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  {isNew && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse shrink-0" style={{ boxShadow: '0 0 6px #ef4444' }} />}
+                  <span
+                    className="text-sm text-[#60a5fa] underline underline-offset-2 decoration-[rgba(96,165,250,0.3)] truncate cursor-pointer"
+                    onClick={() => setSelectedOrder(order)}
+                  >{order.orderId}</span>
+                </div>
+                <span className="text-xs font-heading text-white font-semibold whitespace-nowrap ml-2">{formatEGP(order.totalPrice)}</span>
+              </div>
+              {/* Details grid */}
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs mb-2">
+                <div><span className="text-slate-500">Customer</span><p className="text-slate-200 m-0 truncate">{order.customerName}</p></div>
+                <div><span className="text-slate-500">Phone</span><p className="text-slate-200 m-0" dir="ltr">{order.phoneNumber}</p></div>
+                <div><span className="text-slate-500">Governorate</span><p className="text-slate-200 m-0">{order.governorate || '\u2014'}</p></div>
+                <div><span className="text-slate-500">Payment</span><p className="text-slate-200 m-0">{order.paymentMethod || '\u2014'}</p></div>
+                <div><span className="text-slate-500">Date</span><p className="text-slate-200 m-0">{order.date}</p></div>
+                <div><span className="text-slate-500">Time</span><p className="text-slate-200 m-0">
+                  {order.createdAt
+                    ? new Date(order.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                    : '—'}
+                </p></div>
+              </div>
+              {/* Items */}
+              <div className="mb-2">
+                <span className="text-xs text-slate-500 block mb-1">Items</span>
+                {order.items.map((item) => {
+                  const isCancelling = cancellingItemId === item.id;
+                  const showCancelBtn = order.status !== 'CANCELLED' && order.status !== 'COMPLETED' && order.items.length > 1;
+                  return (
+                    <div key={item.id} className="flex items-center justify-between bg-[rgba(24,24,27,0.5)] px-2 py-1.5 rounded-lg border border-[rgba(63,63,70,0.4)] mb-1 last:mb-0 text-xs">
+                      <span className="text-[#e4e4e7]">{item.quantity}x {item.name}</span>
+                      {showCancelBtn && (
+                        <button
+                          type="button"
+                          disabled={isCancelling}
+                          onClick={(e) => { e.stopPropagation(); handleCancelSingleItem(item.id, order.orderId); }}
+                          className="w-6 h-6 inline-flex items-center justify-center text-red-500 bg-[rgba(127,29,29,0.2)] border border-[rgba(127,29,29,0.3)] rounded-md cursor-pointer transition-all hover:bg-[rgba(127,29,29,0.7)] hover:text-white disabled:opacity-50 shrink-0 ml-1"
+                          title="Cancel this item"
+                        >
+                          {isCancelling ? <FaSpinner className="animate-spin text-[10px]" /> : '✕'}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Status + view */}
+              <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                <select
+                  value={order.status}
+                  onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
+                  className={`text-xs font-semibold rounded-sm px-2 py-1 border-none max-w-[120px] ${order.status.toLowerCase() === 'cancelled' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}
+                  disabled={updatingId === order.orderId || order.status.toLowerCase() === 'cancelled'}
+                >
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                {updatingId === order.orderId && <FaSpinner className="animate-spin text-xs text-white" />}
+                <button
+                  onClick={() => setSelectedOrder(order)}
+                  className="bg-none border border-white/20 rounded px-2.5 py-1.5 cursor-pointer text-[#e2e8f0] text-xs inline-flex items-center gap-1 transition-all hover:bg-white hover:text-[#09142E] hover:border-white"
+                >
+                  <FaEye className="text-[10px]" /> View
+                </button>
+              </div>
+            </div>
+          );
+        })}
+        {orders.length === 0 && (
+          <p className="text-center py-12 text-[#64748b] text-sm">No orders yet.</p>
+        )}
       </div>
 
       {/* Order Details Modal */}

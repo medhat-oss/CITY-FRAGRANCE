@@ -157,57 +157,65 @@ export default function AdminGiftSetsPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
           <FaGift style={{ color: '#ffffff', fontSize: '1.25rem' }} />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
             Gift Sets Management
           </h2>
         </div>
-        <button onClick={openAdd} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} disabled={isSaving}>
+        <button onClick={openAdd} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'center' }} disabled={isSaving}>
           <FaPlus /> Add Gift Set
         </button>
       </div>
 
-      <div className={styles.tableContainer}>
-        <table className={styles.adminTable}>
+      {/* Desktop table */}
+      <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
+        <table className="w-full min-w-[700px] table-auto text-left border-collapse">
           <thead>
-            <tr>
-              <th>Image</th><th>Name</th><th>Price</th>
-              <th>Products</th><th>Status</th><th>Actions</th>
+            <tr className="bg-[#09142E]">
+              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Image</th>
+              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Name</th>
+              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Price</th>
+              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Products</th>
+              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Status</th>
+              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((gs) => (
-              <tr key={gs.id} style={{ opacity: deletingId === gs.id ? 0.4 : 1, transition: 'opacity 0.2s ease' }}>
-                <td className={styles.productImgCell}>
+              <tr key={gs.id} className="hover:bg-white/5 transition-opacity" style={{ opacity: deletingId === gs.id ? 0.4 : 1 }}>
+                <td className="p-4 border-b border-white/10 align-middle">
                   {gs.image
                     ? <Image src={gs.image} alt={gs.name} width={50} height={50} style={{ objectFit: 'cover', borderRadius: '4px' }} />
                     : <div style={{ width: 50, height: 50, background: '#1d3573', borderRadius: '4px' }} />}
                 </td>
-                <td style={{ fontWeight: 600, color: '#e2e8f0' }}>{gs.name}</td>
-                <td style={{ fontFamily: 'var(--font-heading)', color: '#ffffff', fontWeight: 600 }}>{formatEGP(gs.price)}</td>
-                <td style={{ fontSize: '0.8rem', color: '#64748b' }}>{gs.productIds.length} products</td>
-                <td>
-                  <span style={{
-                    display: 'inline-block', fontSize: '0.68rem', fontWeight: 600,
-                    padding: '3px 9px', borderRadius: '20px',
-                    background: gs.isDraft ? 'rgba(234,179,8,0.12)' : 'rgba(34,197,94,0.12)',
-                    border: `1px solid ${gs.isDraft ? 'rgba(234,179,8,0.4)' : 'rgba(34,197,94,0.4)'}`,
-                    color: gs.isDraft ? '#facc15' : '#4ade80', whiteSpace: 'nowrap',
-                  }}>
-                    {gs.isDraft ? '📝 Draft' : '✅ Live'}
+                <td className="p-4 border-b border-white/10 font-semibold text-[#e2e8f0] align-middle">{gs.name}</td>
+                <td className="p-4 border-b border-white/10 font-heading text-white font-semibold align-middle">{formatEGP(gs.price)}</td>
+                <td className="p-4 border-b border-white/10 text-[#64748b] text-sm align-middle">{gs.productIds.length} products</td>
+                <td className="p-4 border-b border-white/10 align-middle">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+                    style={{
+                      background: gs.isDraft ? 'rgba(234,179,8,0.12)' : 'rgba(34,197,94,0.12)',
+                      border: `1px solid ${gs.isDraft ? 'rgba(234,179,8,0.4)' : 'rgba(34,197,94,0.4)'}`,
+                      color: gs.isDraft ? '#facc15' : '#4ade80',
+                    }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full inline-block" style={{
+                      background: gs.isDraft ? '#facc15' : '#4ade80',
+                    }} />
+                    {gs.isDraft ? 'Draft' : 'Live'}
                   </span>
                 </td>
-                <td>
-                  <div className={styles.actionBtns}>
-                    <button className={`${styles.btnIcon} ${styles.edit}`} onClick={() => openEdit(gs)} disabled={deletingId === gs.id} aria-label={`Edit ${gs.name}`}>
+                <td className="p-4 border-b border-white/10 align-middle text-center">
+                  <div className="flex items-center justify-center gap-3">
+                    <button onClick={() => openEdit(gs)} disabled={deletingId === gs.id}
+                      className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded transition-colors disabled:opacity-40" aria-label={`Edit ${gs.name}`}>
                       <FaEdit />
                     </button>
-                    <button className={`${styles.btnIcon} ${styles.delete}`} onClick={() => handleDelete(gs.id)} disabled={deletingId === gs.id} aria-label={`Delete ${gs.name}`}>
-                      {deletingId === gs.id
-                        ? <FaSpinner style={{ animation: 'spin 0.8s linear infinite' }} />
-                        : <FaTrashAlt />}
+                    <button onClick={() => handleDelete(gs.id)} disabled={deletingId === gs.id}
+                      className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-2 rounded transition-colors disabled:opacity-40" aria-label={`Delete ${gs.name}`}>
+                      {deletingId === gs.id ? <FaSpinner className="animate-spin" /> : <FaTrashAlt />}
                     </button>
                   </div>
                 </td>
@@ -215,13 +223,56 @@ export default function AdminGiftSetsPage() {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '3rem 1rem', color: '#94a3b8' }}>
-                  No gift sets yet.
-                </td>
+                <td colSpan={6} className="text-center p-12 text-[#94a3b8]">No gift sets yet.</td>
               </tr>
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile stacked cards */}
+      <div className="md:hidden space-y-3">
+        {rows.map((gs) => (
+          <div key={gs.id} className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3" style={{ opacity: deletingId === gs.id ? 0.4 : 1 }}>
+            <div className="flex gap-3 items-start">
+              {gs.image
+                ? <Image src={gs.image} alt={gs.name} width={60} height={60} className="rounded-lg flex-shrink-0" style={{ objectFit: 'cover' }} />
+                : <div style={{ width: 60, height: 60, background: '#1d3573', borderRadius: '8px', flexShrink: 0 }} />}
+              <div className="flex-1 min-w-0">
+                <strong className="text-sm text-white block truncate">{gs.name}</strong>
+                <span className="text-xs text-slate-400 block">{gs.productIds.length} products</span>
+                <span className="text-xs font-heading text-white font-semibold">{formatEGP(gs.price)}</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/10">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+                style={{
+                  background: gs.isDraft ? 'rgba(234,179,8,0.12)' : 'rgba(34,197,94,0.12)',
+                  border: `1px solid ${gs.isDraft ? 'rgba(234,179,8,0.4)' : 'rgba(34,197,94,0.4)'}`,
+                  color: gs.isDraft ? '#facc15' : '#4ade80',
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full inline-block" style={{
+                  background: gs.isDraft ? '#facc15' : '#4ade80',
+                }} />
+                {gs.isDraft ? 'Draft' : 'Live'}
+              </span>
+              <div className="flex gap-2">
+                <button onClick={() => openEdit(gs)} disabled={deletingId === gs.id}
+                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded transition-colors disabled:opacity-40" aria-label={`Edit ${gs.name}`}>
+                  <FaEdit />
+                </button>
+                <button onClick={() => handleDelete(gs.id)} disabled={deletingId === gs.id}
+                  className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-2 rounded transition-colors disabled:opacity-40" aria-label={`Delete ${gs.name}`}>
+                  {deletingId === gs.id ? <FaSpinner className="animate-spin" /> : <FaTrashAlt />}
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {rows.length === 0 && (
+          <p className="text-center py-12 text-[#94a3b8] text-sm">No gift sets yet.</p>
+        )}
       </div>
 
       {modalOpen && (

@@ -146,22 +146,16 @@ export default function ManageStaffPage() {
   }
 
 
-  const actionBtnBase: React.CSSProperties = {
-    background: 'none', border: 'none', cursor: 'pointer',
-    padding: '0.4rem', borderRadius: 4, transition: 'all 0.2s',
-    fontSize: '0.85rem',
-  };
-
   return (
     <div dir="ltr">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
           <FaUsers style={{ color: '#ffffff', fontSize: '1.25rem' }} />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
             Manage Staff
           </h2>
         </div>
-        <button onClick={openAdd} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <button onClick={openAdd} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'center' }}>
           <FaPlus /> Create Staff Account
         </button>
       </div>
@@ -171,84 +165,64 @@ export default function ManageStaffPage() {
           <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
             <FaSpinner className={styles.spinIcon} style={{ color: '#ffffff', fontSize: '2rem' }} />
           </div>
-        ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.adminTable}>
+        ) : (<>
+          <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
+            <table className="w-full min-w-[650px] table-auto text-left border-collapse">
               <thead>
-                <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Creation Date</th>
-                  <th>Actions</th>
+                <tr className="bg-[#09142E]">
+                  <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Username</th>
+                  <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Email</th>
+                  <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Role</th>
+                  <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Creation Date</th>
+                  <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {staffList.map((staff) => (
-                  <tr key={staff.id}>
-                    <td style={{ fontWeight: 600, color: '#e2e8f0' }}>{staff.username}</td>
-                    <td style={{ color: '#cbd5e1' }}>{staff.email}</td>
-                    <td>
-                      <span style={{
-                        padding: '0.25rem 0.6rem',
-                        borderRadius: '4px',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.05em',
-                        background: staff.role === 'ADMIN' ? 'rgba(167, 139, 250, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                        color: staff.role === 'ADMIN' ? '#a78bfa' : '#60a5fa',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                      }}>
-                        {staff.role === 'ADMIN' && <FaUserShield style={{ fontSize: '0.7rem' }} />}
+                  <tr key={staff.id} className="hover:bg-white/5 transition-colors border-b border-white/10">
+                    <td className="p-4 font-semibold text-[#e2e8f0] align-middle">{staff.username}</td>
+                    <td className="p-4 text-[#cbd5e1] align-middle">{staff.email}</td>
+                    <td className="p-4 align-middle">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-wider px-2.5 py-1 rounded-sm"
+                        style={{
+                          background: staff.role === 'ADMIN' ? 'rgba(167,139,250,0.15)' : 'rgba(59,130,246,0.15)',
+                          color: staff.role === 'ADMIN' ? '#a78bfa' : '#60a5fa',
+                        }}
+                      >
+                        {staff.role === 'ADMIN' && <FaUserShield className="text-[10px]" />}
                         {staff.role}
                       </span>
                     </td>
-                    <td style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
-                      {new Date(staff.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
+                    <td className="p-4 text-[#94a3b8] text-sm align-middle">
+                      {new Date(staff.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                        {/* View Shifts */}
+                    <td className="p-4 align-middle text-center">
+                      <div className="flex items-center justify-center gap-1">
                         <Link
                           href={`/admin/staff/${staff.id}/shifts`}
-                          style={{ ...actionBtnBase, color: '#60a5fa', display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}
+                          className="text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] p-2 rounded transition-colors inline-flex items-center"
                           title="View Shifts"
-                          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(96, 165, 250, 0.12)'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
                         >
                           <FaEye />
                         </Link>
-                        {/* Change Shift Password (Cashier only) */}
                         {staff.role === 'CASHIER' && (
                           <button
-                            style={{ ...actionBtnBase, color: '#fbbf24' }}
+                            className="text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] p-2 rounded transition-colors"
                             onClick={() => { setPasswordModal({ open: true, staff }); setNewShiftPassword(''); setPasswordError(''); setPasswordSuccess(''); }}
                             title="Change Shift Password"
-                            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(251, 191, 36, 0.12)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
                           >
                             <FaKey />
                           </button>
                         )}
-                        {/* Delete */}
                         <button
-                          style={{
-                            ...actionBtnBase,
-                            color: '#ef4444',
-                            opacity: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 0.3 : 1,
-                            cursor: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 'not-allowed' : 'pointer',
-                          }}
+                          className="text-red-500 hover:bg-[rgba(239,68,68,0.12)] p-2 rounded transition-colors"
                           onClick={() => handleDelete(staff.id, staff.email)}
                           disabled={staff.email.toLowerCase() === 'admin@cityfragrance.com'}
                           title="Delete Staff"
-                          onMouseEnter={(e) => { if (staff.email.toLowerCase() !== 'admin@cityfragrance.com') e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
+                          style={{
+                            opacity: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 0.3 : 1,
+                            cursor: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 'not-allowed' : 'pointer',
+                          }}
                         >
                           <FaTrashAlt />
                         </button>
@@ -258,15 +232,68 @@ export default function ManageStaffPage() {
                 ))}
                 {staffList.length === 0 && (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '3rem 1rem', color: '#94a3b8' }}>
-                      No staff accounts found.
-                    </td>
+                    <td colSpan={5} className="text-center p-12 text-[#94a3b8]">No staff accounts found.</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-        )}
+
+          <div className="md:hidden space-y-3">
+            {staffList.map((staff) => (
+              <div key={staff.id} className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3">
+                <div className="flex items-start justify-between">
+                  <div className="min-w-0 flex-1">
+                    <strong className="text-sm text-white block truncate">{staff.username}</strong>
+                    <span className="text-xs text-slate-400 block truncate">{staff.email}</span>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-wider px-2 py-0.5 rounded-sm mt-1"
+                      style={{
+                        background: staff.role === 'ADMIN' ? 'rgba(167,139,250,0.15)' : 'rgba(59,130,246,0.15)',
+                        color: staff.role === 'ADMIN' ? '#a78bfa' : '#60a5fa',
+                      }}
+                    >
+                      {staff.role === 'ADMIN' && <FaUserShield className="text-[10px]" />}
+                      {staff.role}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-xs text-slate-500 mt-1">
+                  Created: {new Date(staff.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                </div>
+                <div className="flex items-center justify-end gap-2 mt-2 pt-2 border-t border-white/10">
+                  <Link
+                    href={`/admin/staff/${staff.id}/shifts`}
+                    className="text-xs text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] px-2.5 py-1.5 rounded transition-colors inline-flex items-center gap-1"
+                  >
+                    <FaEye className="text-[10px]" /> Shifts
+                  </Link>
+                  {staff.role === 'CASHIER' && (
+                    <button
+                      className="text-xs text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] px-2.5 py-1.5 rounded transition-colors inline-flex items-center gap-1"
+                      onClick={() => { setPasswordModal({ open: true, staff }); setNewShiftPassword(''); setPasswordError(''); setPasswordSuccess(''); }}
+                    >
+                      <FaKey className="text-[10px]" /> Password
+                    </button>
+                  )}
+                  <button
+                    className="text-xs text-red-500 hover:bg-[rgba(239,68,68,0.12)] px-2.5 py-1.5 rounded transition-colors"
+                    onClick={() => handleDelete(staff.id, staff.email)}
+                    disabled={staff.email.toLowerCase() === 'admin@cityfragrance.com'}
+                    style={{
+                      opacity: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 0.3 : 1,
+                      cursor: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <FaTrashAlt /> Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+            {staffList.length === 0 && (
+              <p className="text-center py-12 text-[#94a3b8] text-sm">No staff accounts found.</p>
+            )}
+          </div>
+        </>)}
       </div>
 
       {/* Create Staff Modal */}
