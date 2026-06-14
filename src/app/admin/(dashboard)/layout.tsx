@@ -119,8 +119,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className={styles.adminMain}>
-        <div className="w-full max-w-full overflow-x-hidden">
+      <main className={`${styles.adminMain} min-w-0`}>
+        <div className="w-full">
           {children}
         </div>
       </main>
