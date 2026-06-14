@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -26,6 +26,7 @@ async function resolveCollectionIds(slugs: string[]): Promise<{ id: string }[]> 
 }
 
 function revalidateAll() {
+  revalidateTag('products', 'max');
   revalidatePath('/');
   revalidatePath('/cashier');
   revalidatePath('/admin/products');

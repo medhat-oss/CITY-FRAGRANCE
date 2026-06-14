@@ -47,14 +47,13 @@ export default function AdminPage() {
 
   const handleSave = useCallback(async (data: Product) => {
     setIsSaving(true);
-    // Close modal immediately for snappy UX — state updates optimistically
-    setIsModalOpen(false);
     try {
       if (productToEdit) {
         await updateProduct(data);
       } else {
         await addProduct(data);
       }
+      setIsModalOpen(false);
     } finally {
       setIsSaving(false);
     }
@@ -269,6 +268,7 @@ export default function AdminPage() {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
         productToEdit={productToEdit}
+        isSaving={isSaving}
       />
     </>
   );

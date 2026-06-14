@@ -35,7 +35,7 @@ const EMPTY_FORM = {
   stock: '',
 };
 
-export default function ProductModal({ isOpen, onClose, onSave, productToEdit }) {
+export default function ProductModal({ isOpen, onClose, onSave, productToEdit, isSaving }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -225,7 +225,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
       <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
           <h3>{productToEdit ? 'Edit Product' : 'Add New Product'}</h3>
-          <button type="button" className={styles.btnClose} onClick={onClose}><FaTimes /></button>
+          <button type="button" className={styles.btnClose} onClick={onClose} disabled={isSaving}><FaTimes /></button>
         </div>
 
         <form className={styles.modalForm} onSubmit={handleSubmit}>
@@ -467,12 +467,20 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit })
               className="btn btn-outline"
               style={{ flex: '1 1 120px', color: '#e2e8f0', borderColor: 'rgba(255,255,255,0.3)' }}
               onClick={onClose}
+              disabled={isSaving}
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={isUploading || isVideoUploading}
-              style={{ flex: '1 1 140px' }}>
-              {formData.isDraft ? 'Save as Draft' : 'Publish Product'}
+            <button type="submit" className="btn btn-primary" disabled={isUploading || isVideoUploading || isSaving}
+              style={{ flex: '1 1 140px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              {isSaving ? (
+                <>
+                  <FaSpinner className="animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                formData.isDraft ? 'Save as Draft' : 'Publish Product'
+              )}
             </button>
           </div>
 
