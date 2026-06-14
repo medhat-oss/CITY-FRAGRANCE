@@ -29,7 +29,7 @@ interface Props {
 
 function ProductListInner({ rows, deletingId, onEdit, onDelete }: Props) {
   return (
-    <>
+    <div className="w-full">
       {/* Desktop table */}
       <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
         <table className="w-full min-w-[1000px] table-auto text-left border-collapse">
@@ -195,7 +195,7 @@ function ProductListInner({ rows, deletingId, onEdit, onDelete }: Props) {
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 }
 

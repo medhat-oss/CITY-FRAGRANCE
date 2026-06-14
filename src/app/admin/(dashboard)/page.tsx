@@ -77,7 +77,7 @@ export default function AdminPage() {
   }
 
   return (
-    <>
+    <div className="w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full mb-6 pb-4 border-b border-white/10">
         <h1 className="text-[#f8f9fa] text-2xl font-heading font-normal m-0">Products Management</h1>
         <button onClick={handleAdd} disabled={isSaving}
@@ -109,6 +109,6 @@ export default function AdminPage() {
         isSaving={isSaving}
         saveError={saveError}
       />
-    </>
+    </div>
   );
 }
