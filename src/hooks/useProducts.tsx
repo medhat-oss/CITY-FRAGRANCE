@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, createContext, useContext, useCallback, useMemo } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { defaultProducts } from '@/data/defaultProducts';
 import type { Product } from '@/types';
 
@@ -20,7 +20,7 @@ const ProductsContext = createContext<ProductsContextValue | null>(null);
 
 async function fetchProducts(): Promise<Product[]> {
   try {
-    const res = await fetch('/api/products');
+    const res = await fetch('/api/products', { cache: 'no-store' });
     const data = await res.json() as { products: Product[] };
     return data.products;
   } catch {
@@ -73,6 +73,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const needsProducts = useNeedsProducts();
+  const router = useRouter();
   // ── Fetch-lock ref: prevents the infinite loop caused by needsProducts
   // changing on every client-side navigation (pathname changes → needsProducts
   // recomputes → useEffect re-fires → /api/products hammered 4-5×/second).
@@ -102,54 +103,55 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addProduct = useCallback(async (product: Product) => {
-    try {
-      const res = await fetch('/api/admin/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product),
-      });
-      const data = await res.json() as { success: boolean; product?: Product };
-      if (data.success && data.product) {
-        setAllProducts((prev) => [...prev, data.product!]);
-      }
-    } catch {
-      // ignore
+    const res = await fetch('/api/admin/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify(product),
+    });
+    const data = await res.json() as { success: boolean; product?: Product; error?: string };
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Failed to add product');
     }
-  }, []);
+    if (data.product) {
+      setAllProducts((prev) => [...prev, data.product!]);
+    }
+    router.refresh();
+  }, [router]);
 
   const updateProduct = useCallback(async (updated: Product) => {
-    try {
-      const res = await fetch('/api/admin/products', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      });
-      const data = await res.json() as { success: boolean; product?: Product };
-      if (data.success && data.product) {
-        setAllProducts((prev) =>
-          prev.map((p) => (p.id === data.product!.id ? data.product! : p))
-        );
-      }
-    } catch {
-      // ignore
+    const res = await fetch('/api/admin/products', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify(updated),
+    });
+    const data = await res.json() as { success: boolean; product?: Product; error?: string };
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Failed to update product');
     }
-  }, []);
+    if (data.product) {
+      setAllProducts((prev) =>
+        prev.map((p) => (p.id === data.product!.id ? data.product! : p))
+      );
+    }
+    router.refresh();
+  }, [router]);
 
   const deleteProduct = useCallback(async (id: string) => {
-    try {
-      const res = await fetch('/api/admin/products', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      const data = await res.json() as { success: boolean };
-      if (data.success) {
-        setAllProducts((prev) => prev.filter((p) => p.id !== id));
-      }
-    } catch {
-      // ignore
+    const res = await fetch('/api/admin/products', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json() as { success: boolean; error?: string };
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Failed to delete product');
     }
-  }, []);
+    setAllProducts((prev) => prev.filter((p) => p.id !== id));
+    router.refresh();
+  }, [router]);
 
   const getBestSellers = useCallback(
     (): Product[] =>
@@ -202,6 +204,7 @@ export function useProducts(): ProductsContextValue {
   // Fallback (rare – only when used outside ProductsProvider)
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const router = useRouter();
 
   const products = useVisibleProducts(allProducts);
 
@@ -213,48 +216,45 @@ export function useProducts(): ProductsContextValue {
   }, []);
 
   const addProduct = useCallback(async (product: Product) => {
-    try {
-      const res = await fetch('/api/admin/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product),
-      });
-      const data = await res.json() as { success: boolean; product?: Product };
-      if (data.success && data.product) {
-        setAllProducts((prev) => [...prev, data.product!]);
-      }
-    } catch { /* ignore */ }
-  }, []);
+    const res = await fetch('/api/admin/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify(product),
+    });
+    const data = await res.json() as { success: boolean; product?: Product; error?: string };
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to add product');
+    if (data.product) setAllProducts((prev) => [...prev, data.product!]);
+    router.refresh();
+  }, [router]);
 
   const updateProduct = useCallback(async (updated: Product) => {
-    try {
-      const res = await fetch('/api/admin/products', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      });
-      const data = await res.json() as { success: boolean; product?: Product };
-      if (data.success && data.product) {
-        setAllProducts((prev) =>
-          prev.map((p) => (p.id === data.product!.id ? data.product! : p))
-        );
-      }
-    } catch { /* ignore */ }
-  }, []);
+    const res = await fetch('/api/admin/products', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify(updated),
+    });
+    const data = await res.json() as { success: boolean; product?: Product; error?: string };
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to update product');
+    if (data.product) {
+      setAllProducts((prev) => prev.map((p) => (p.id === data.product!.id ? data.product! : p)));
+    }
+    router.refresh();
+  }, [router]);
 
   const deleteProduct = useCallback(async (id: string) => {
-    try {
-      const res = await fetch('/api/admin/products', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      const data = await res.json() as { success: boolean };
-      if (data.success) {
-        setAllProducts((prev) => prev.filter((p) => p.id !== id));
-      }
-    } catch { /* ignore */ }
-  }, []);
+    const res = await fetch('/api/admin/products', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json() as { success: boolean; error?: string };
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to delete product');
+    setAllProducts((prev) => prev.filter((p) => p.id !== id));
+    router.refresh();
+  }, [router]);
 
   const getBestSellers = useCallback(
     (): Product[] =>

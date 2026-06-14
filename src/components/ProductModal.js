@@ -35,7 +35,7 @@ const EMPTY_FORM = {
   stock: '',
 };
 
-export default function ProductModal({ isOpen, onClose, onSave, productToEdit, isSaving }) {
+export default function ProductModal({ isOpen, onClose, onSave, productToEdit, isSaving, saveError }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -459,6 +459,24 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit, i
               }} />
             </button>
           </div>
+
+          {/* ── Save Error Banner ── */}
+          {saveError && (
+            <div style={{
+              padding: '10px 14px',
+              borderRadius: '6px',
+              background: 'rgba(220,38,38,0.12)',
+              border: '1px solid rgba(220,38,38,0.4)',
+              color: '#f87171',
+              fontSize: '0.82rem',
+              fontFamily: 'var(--font-body)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}>
+              ⚠ {saveError}
+            </div>
+          )}
 
           {/* ── Actions ── */}
           <div className={styles.modalActions} style={{ flexWrap: 'wrap' }}>

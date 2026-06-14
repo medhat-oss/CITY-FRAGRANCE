@@ -23,6 +23,7 @@ export default function AdminPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleAdd = useCallback(() => {
@@ -40,6 +41,8 @@ export default function AdminPage() {
     setDeletingId(id);
     try {
       await deleteProduct(id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete product. Please try again.');
     } finally {
       setDeletingId(null);
     }
@@ -47,6 +50,7 @@ export default function AdminPage() {
 
   const handleSave = useCallback(async (data: Product) => {
     setIsSaving(true);
+    setSaveError(null);
     try {
       if (productToEdit) {
         await updateProduct(data);
@@ -54,6 +58,9 @@ export default function AdminPage() {
         await addProduct(data);
       }
       setIsModalOpen(false);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Save failed. Please try again.');
+      // Keep modal open so user can retry
     } finally {
       setIsSaving(false);
     }
@@ -265,10 +272,11 @@ export default function AdminPage() {
 
       <ProductModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => { setIsModalOpen(false); setSaveError(null); }}
         onSave={handleSave}
         productToEdit={productToEdit}
         isSaving={isSaving}
+        saveError={saveError}
       />
     </>
   );

@@ -1,19 +1,18 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath, unstable_cache } from 'next/cache';
-import { cache } from 'react';
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 const FILE = 'site-settings.json';
 
-const getCachedDbSettings = cache(
-  unstable_cache(
-    async () => {
-      return prisma.siteSetting.findUnique({ where: { id: 'default' } });
-    },
-    ['admin-settings'],
-    { revalidate: 5, tags: ['settings'] }
-  )
+const getCachedDbSettings = unstable_cache(
+  async () => {
+    return prisma.siteSetting.findUnique({ where: { id: 'default' } });
+  },
+  ['admin-settings'],
+  { revalidate: 5, tags: ['settings'] }
 );
 
 interface SiteSettings {
@@ -156,7 +155,8 @@ export async function POST(request: Request) {
         update: updatePayload,
         create: createPayload,
       });
-      // Call immediately after a successful database update to ensure instant UI invalidation
+      // Bust the settings unstable_cache and the root layout in one shot
+      revalidateTag('settings', 'max');
       revalidatePath('/', 'layout');
     } catch (dbErr: any) {
       console.error('PRISMA UPSERT ERROR:', dbErr?.message || dbErr);
