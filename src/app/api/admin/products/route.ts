@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -68,20 +68,10 @@ function buildDbData(body: Record<string, unknown>) {
 }
 
 function revalidateAll() {
-  revalidateTag('products', 'max');
   revalidatePath('/');
-  revalidatePath('/cashier');
-  revalidatePath('/admin');
-  revalidatePath('/admin/products');
   revalidatePath('/products');
-  revalidatePath('/admin/analytics');
   revalidatePath('/collections/all-fragrances');
-  revalidatePath('/collections/mens-collection');
-  revalidatePath('/collections/womens-collection');
-  revalidatePath('/collections/oud-collection');
-  revalidatePath('/collections/new-arrivals');
-  revalidatePath('/collections/gift-sets');
-  revalidatePath('/product/[id]', 'page');
+  revalidatePath('/admin');
 }
 
 function parseNotes(notes: string) {
