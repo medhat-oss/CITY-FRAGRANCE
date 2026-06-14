@@ -11,7 +11,7 @@ import { readJsonFile } from '@/lib/dataFile';
 import type { SiteSettings, CollectionData } from '@/types';
 import { getOptimizedVideoUrl, getOptimizedImageUrl } from '@/lib/videoUtils';
 
-export const revalidate = 60; // SSR Cache Revalidation
+export const dynamic = 'force-dynamic';
 
 // ─── Data Fetching Helpers ──────────────────────────────────────────────────
 

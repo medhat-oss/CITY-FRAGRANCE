@@ -68,10 +68,10 @@ function buildDbData(body: Record<string, unknown>) {
 }
 
 function revalidateAll() {
-  revalidatePath('/');
-  revalidatePath('/products');
-  revalidatePath('/collections/all-fragrances');
-  revalidatePath('/admin');
+  revalidatePath('/', 'layout');
+  revalidatePath('/products', 'layout');
+  revalidatePath('/collections/all-fragrances', 'layout');
+  revalidatePath('/admin', 'layout');
 }
 
 function parseNotes(notes: string) {
