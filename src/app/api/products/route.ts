@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { unstable_cache } from 'next/cache';
 import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 function parseNotes(notes: string) {
   const parts = (notes || '').split(' • ');
@@ -13,8 +13,8 @@ function parseNotes(notes: string) {
   };
 }
 
-const getCachedProducts = unstable_cache(
-  async () => {
+export async function GET() {
+  try {
     const raw = await prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
       select: {
@@ -27,18 +27,10 @@ const getCachedProducts = unstable_cache(
         createdAt: true, updatedAt: true,
       },
     });
-    return raw.map((p) => ({
+    const products = raw.map((p) => ({
       ...p,
       ...parseNotes(p.notes),
     }));
-  },
-  ['api-products'],
-  { revalidate: 5, tags: ['products'] }
-);
-
-export async function GET() {
-  try {
-    const products = await getCachedProducts();
     return NextResponse.json({ products });
   } catch (err) {
     console.error('PRODUCTS FETCH ERROR:', err);

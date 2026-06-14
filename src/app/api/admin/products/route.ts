@@ -72,6 +72,7 @@ function revalidateAll() {
   revalidatePath('/products', 'layout');
   revalidatePath('/collections/all-fragrances', 'layout');
   revalidatePath('/admin', 'layout');
+  revalidatePath('/api/products');
 }
 
 function parseNotes(notes: string) {
