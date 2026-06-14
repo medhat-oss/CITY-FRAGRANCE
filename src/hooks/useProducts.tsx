@@ -21,7 +21,14 @@ const ProductsContext = createContext<ProductsContextValue | null>(null);
 async function fetchProducts(isAdmin: boolean): Promise<Product[]> {
   try {
     const url = isAdmin ? '/api/admin/products' : '/api/products';
-    const res = await fetch(url, { cache: 'no-store' });
+    const res = await fetch(`${url}?t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
     const data = await res.json() as { products: Product[] };
     return data.products;
   } catch {
