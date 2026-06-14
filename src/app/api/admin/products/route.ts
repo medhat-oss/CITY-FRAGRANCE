@@ -110,9 +110,8 @@ function upsertProduct(id: string, scalarData: Record<string, unknown>, collecti
   const createData: Record<string, unknown> = { id, ...scalarData };
 
   if (collectionOps.length > 0) {
-    const rel = isCreate ? { connect: collectionOps } : { set: collectionOps };
-    updateData.collections = rel;
-    createData.collections = rel;
+    updateData.collections = { set: collectionOps };
+    createData.collections = { connect: collectionOps };
   } else if (!isCreate) {
     updateData.collections = { set: [] };
   }
