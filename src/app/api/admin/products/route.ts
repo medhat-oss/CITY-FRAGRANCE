@@ -44,7 +44,7 @@ async function resolveCollectionIds(slugs: string[]): Promise<{ id: string }[]> 
 }
 
 function revalidateAll() {
-  revalidateTag('products');
+  revalidateTag('products', 'max');
   revalidatePath('/');
   revalidatePath('/cashier');
   revalidatePath('/admin');
