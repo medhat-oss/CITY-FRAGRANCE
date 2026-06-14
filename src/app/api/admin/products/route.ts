@@ -4,17 +4,16 @@ import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-/** All known collection slugs that exist in the DB */
-const KNOWN_SLUGS = [
+const KNOWN_SLUGS = new Set([
   'womens-collection',
   'mens-collection',
   'new-arrivals',
   'gift-sets',
   'all-fragrances',
   'oud-collection',
-];
+]);
 
-function toSlug(v: unknown): string {
+function extractString(v: unknown): string {
   if (typeof v === 'string') return v;
   if (v && typeof v === 'object') {
     const o = v as Record<string, unknown>;
@@ -23,24 +22,51 @@ function toSlug(v: unknown): string {
   return '';
 }
 
-/** Coerce collection and collections into a clean slug array */
-function extractSlugs(body: Record<string, unknown>): string[] {
-  const raw = Array.isArray(body.collections) ? body.collections : [];
-  const slugs = raw.map(toSlug).filter(Boolean);
-  if (slugs.length > 0) return slugs;
-  const single = toSlug(body.collection);
-  return single ? [single] : [];
-}
+function buildDbData(body: Record<string, unknown>) {
+  const rawCollections = Array.isArray(body.collections) ? body.collections : [];
+  const slugs: string[] = [];
+  for (const item of rawCollections) {
+    const s = extractString(item);
+    if (s) slugs.push(s);
+  }
+  if (slugs.length === 0) {
+    const s = extractString(body.collection);
+    if (s) slugs.push(s);
+  }
 
-async function resolveCollectionIds(slugs: string[]): Promise<{ id: string }[]> {
-  if (!slugs || slugs.length === 0) return [];
-  const unique = [...new Set(slugs.filter((s) => KNOWN_SLUGS.includes(s)))];
-  if (unique.length === 0) return [];
-  const rows = await prisma.collection.findMany({
-    where: { slug: { in: unique } },
-    select: { id: true },
-  });
-  return rows.map((r) => ({ id: r.id }));
+  const collectionOps = slugs
+    .filter((s) => KNOWN_SLUGS.has(s))
+    .map((s) => ({ slug: s }));
+
+  const scalarData = {
+    name: String(body.name ?? ''),
+    type: String(body.type || body.category || ''),
+    category: String(body.category || ''),
+    collection: slugs[0] ?? '',
+    isDraft: body.isDraft === true || body.isDraft === 'true',
+    badge: String(body.badge ?? ''),
+    notes: [body.topNotes, body.middleNotes, body.baseNotes]
+      .filter((n) => n && typeof n === 'string')
+      .join(' • '),
+    description: String(body.description ?? ''),
+    price: Number(body.price) || 0,
+    costPrice: body.costPrice !== undefined && body.costPrice !== null && body.costPrice !== ''
+      ? Number(body.costPrice)
+      : 0,
+    salePrice: body.salePrice !== undefined && body.salePrice !== null && body.salePrice !== ''
+      ? Number(body.salePrice)
+      : null,
+    images: Array.isArray(body.images) ? body.images : [],
+    videoUrl: String(body.videoUrl ?? ''),
+    stock: (() => {
+      const n = Number(body.stock);
+      return Number.isFinite(n) ? Math.floor(n) : 0;
+    })(),
+  };
+
+  const id = String(body.id ?? '');
+
+  return { scalarData, collectionOps, id };
 }
 
 function revalidateAll() {
@@ -79,42 +105,38 @@ export async function GET() {
   }
 }
 
+function upsertProduct(id: string, scalarData: Record<string, unknown>, collectionOps: { slug: string }[], isCreate: boolean) {
+  const updateData: Record<string, unknown> = { ...scalarData };
+  const createData: Record<string, unknown> = { id, ...scalarData };
+
+  if (collectionOps.length > 0) {
+    const rel = isCreate ? { connect: collectionOps } : { set: collectionOps };
+    updateData.collections = rel;
+    createData.collections = rel;
+  } else if (!isCreate) {
+    updateData.collections = { set: [] };
+  }
+
+  return prisma.product.upsert({
+    where: { id },
+    update: updateData as any,
+    create: createData as any,
+  });
+}
+
 export async function POST(request: Request) {
   try {
-    const product = await request.json();
+    const body = await request.json();
+    const { scalarData, collectionOps, id } = buildDbData(body);
 
-    const slugs = extractSlugs(product);
-    const collectionIds = await resolveCollectionIds(slugs);
-
-    const dbData = {
-      name: product.name,
-      type: product.type || product.category || '',
-      category: product.category || '',
-      collection: slugs[0] || '',
-      isDraft: product.isDraft ?? true,
-      badge: product.badge || '',
-      notes: [product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).join(' • '),
-      description: product.description || '',
-      price: parseFloat(product.price) || 0,
-      costPrice: product.costPrice ? parseFloat(product.costPrice) : 0,
-      salePrice: product.salePrice || null,
-      images: product.images || [],
-      videoUrl: product.videoUrl || '',
-      stock: product.stock !== undefined ? product.stock : 0,
-    };
-
-    const created = await prisma.product.upsert({
-      where: { id: product.id },
-      update: { ...dbData, collections: { set: collectionIds } },
-      create: { id: product.id, ...dbData, collections: { connect: collectionIds } },
-    });
+    const created = await upsertProduct(id, scalarData, collectionOps, true);
 
     revalidateAll();
     return NextResponse.json({ success: true, product: created });
   } catch (err) {
     console.error('PRODUCT ADD ERROR:', err);
     return NextResponse.json(
-      { success: false, error: err instanceof Error ? err.message : 'Failed to add product' },
+      { success: false, error: err instanceof Error ? err.message : String(err) },
       { status: 500 },
     );
   }
@@ -122,40 +144,17 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const updated = await request.json();
+    const body = await request.json();
+    const { scalarData, collectionOps, id } = buildDbData(body);
 
-    const slugs = extractSlugs(updated);
-    const collectionIds = await resolveCollectionIds(slugs);
-
-    const dbData = {
-      name: updated.name,
-      type: updated.type || updated.category || '',
-      category: updated.category || '',
-      collection: slugs[0] || '',
-      isDraft: updated.isDraft ?? false,
-      badge: updated.badge || '',
-      notes: [updated.topNotes, updated.middleNotes, updated.baseNotes].filter(Boolean).join(' • '),
-      description: updated.description || '',
-      price: parseFloat(updated.price) || 0,
-      costPrice: updated.costPrice ? parseFloat(updated.costPrice) : 0,
-      salePrice: updated.salePrice || null,
-      images: updated.images || [],
-      videoUrl: updated.videoUrl || '',
-      stock: updated.stock !== undefined ? updated.stock : 0,
-    };
-
-    const saved = await prisma.product.upsert({
-      where: { id: updated.id },
-      update: { ...dbData, collections: { set: collectionIds } },
-      create: { id: updated.id, ...dbData, collections: { connect: collectionIds } },
-    });
+    const saved = await upsertProduct(id, scalarData, collectionOps, false);
 
     revalidateAll();
     return NextResponse.json({ success: true, product: saved });
   } catch (err) {
     console.error('PRODUCT UPDATE ERROR:', err);
     return NextResponse.json(
-      { success: false, error: err instanceof Error ? err.message : 'Failed to update product' },
+      { success: false, error: err instanceof Error ? err.message : String(err) },
       { status: 500 },
     );
   }
