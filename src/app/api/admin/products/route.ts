@@ -29,6 +29,7 @@ function revalidateAll() {
   revalidateTag('products', 'max');
   revalidatePath('/');
   revalidatePath('/cashier');
+  revalidatePath('/admin');
   revalidatePath('/admin/products');
   revalidatePath('/admin/analytics');
   revalidatePath('/collections/all-fragrances');

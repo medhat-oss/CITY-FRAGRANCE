@@ -6,7 +6,10 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefi
 const getPrismaInstance = () => {
   const connectionString = process.env.DATABASE_URL!;
   const adapter = new PrismaNeon({ connectionString });
-  return new PrismaClient({ adapter, log: ['error'] });
+  return new PrismaClient({
+    adapter,
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  });
 };
 
 const prisma = globalForPrisma.prisma ?? getPrismaInstance();

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { unstable_cache } from 'next/cache';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 const getCachedProducts = unstable_cache(
   async () => {
     return prisma.product.findMany({
