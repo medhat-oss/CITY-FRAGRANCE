@@ -73,6 +73,7 @@ function revalidateAll() {
   revalidatePath('/cashier');
   revalidatePath('/admin');
   revalidatePath('/admin/products');
+  revalidatePath('/products');
   revalidatePath('/admin/analytics');
   revalidatePath('/collections/all-fragrances');
   revalidatePath('/collections/mens-collection');

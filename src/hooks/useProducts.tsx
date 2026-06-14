@@ -18,9 +18,10 @@ interface ProductsContextValue {
 
 const ProductsContext = createContext<ProductsContextValue | null>(null);
 
-async function fetchProducts(): Promise<Product[]> {
+async function fetchProducts(isAdmin: boolean): Promise<Product[]> {
   try {
-    const res = await fetch('/api/products', { cache: 'no-store' });
+    const url = isAdmin ? '/api/admin/products' : '/api/products';
+    const res = await fetch(url, { cache: 'no-store' });
     const data = await res.json() as { products: Product[] };
     return data.products;
   } catch {
@@ -73,22 +74,22 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const needsProducts = useNeedsProducts();
+  const isAdmin = useIsAdminRoute();
   const router = useRouter();
   const products = useVisibleProducts(allProducts);
   const [fetchKey, setFetchKey] = useState(0);
 
   useEffect(() => {
-    // Skip routes that don't render product cards
     if (!needsProducts) {
       setIsLoaded(true);
       return;
     }
-    fetchProducts().then((p) => {
+    fetchProducts(isAdmin).then((p) => {
       setAllProducts(p);
       setIsLoaded(true);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchKey]);
+  }, [fetchKey, isAdmin]);
 
   const addProduct = useCallback(async (product: Product) => {
     const res = await fetch('/api/admin/products', {
@@ -193,16 +194,17 @@ export function useProducts(): ProductsContextValue {
   const [isLoaded, setIsLoaded] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
   const router = useRouter();
+  const isAdmin = useIsAdminRoute();
 
   const products = useVisibleProducts(allProducts);
 
   useEffect(() => {
-    fetchProducts().then((p) => {
+    fetchProducts(isAdmin).then((p) => {
       setAllProducts(p);
       setIsLoaded(true);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchKey]);
+  }, [fetchKey, isAdmin]);
 
   const addProduct = useCallback(async (product: Product) => {
     const res = await fetch('/api/admin/products', {
