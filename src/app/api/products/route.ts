@@ -4,22 +4,33 @@ import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+function parseNotes(notes: string) {
+  const parts = (notes || '').split(' • ');
+  return {
+    topNotes: parts[0] ?? '',
+    middleNotes: parts[1] ?? '',
+    baseNotes: parts[2] ?? '',
+  };
+}
+
 const getCachedProducts = unstable_cache(
   async () => {
-    return prisma.product.findMany({
+    const raw = await prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
-      // Only select fields needed for storefront cards, POS inventory, and
-      // collection filtering. Heavy text blobs (notes, description, videoUrl,
-      // costPrice) are excluded to reduce payload size and serialization time.
       select: {
         id: true, name: true, type: true, category: true,
         collection: true, collections: true, isDraft: true,
-        badge: true,
-        price: true, salePrice: true,
-        images: true, stock: true,
+        badge: true, notes: true,
+        price: true, costPrice: true, salePrice: true,
+        images: true, videoUrl: true, stock: true,
+        description: true,
         createdAt: true, updatedAt: true,
       },
     });
+    return raw.map((p) => ({
+      ...p,
+      ...parseNotes(p.notes),
+    }));
   },
   ['api-products'],
   { revalidate: 5, tags: ['products'] }

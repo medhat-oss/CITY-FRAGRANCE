@@ -45,9 +45,7 @@ function buildDbData(body: Record<string, unknown>) {
     collection: slugs[0] ?? '',
     isDraft: body.isDraft === true || body.isDraft === 'true',
     badge: String(body.badge ?? ''),
-    notes: [body.topNotes, body.middleNotes, body.baseNotes]
-      .filter((n) => n && typeof n === 'string')
-      .join(' • '),
+    notes: [body.topNotes || '', body.middleNotes || '', body.baseNotes || ''].join(' • '),
     description: String(body.description ?? ''),
     price: Number(body.price) || 0,
     costPrice: body.costPrice !== undefined && body.costPrice !== null && body.costPrice !== ''
@@ -85,9 +83,18 @@ function revalidateAll() {
   revalidatePath('/product/[id]', 'page');
 }
 
+function parseNotes(notes: string) {
+  const parts = (notes || '').split(' • ');
+  return {
+    topNotes: parts[0] ?? '',
+    middleNotes: parts[1] ?? '',
+    baseNotes: parts[2] ?? '',
+  };
+}
+
 export async function GET() {
   try {
-    const products = await prisma.product.findMany({
+    const raw = await prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
       select: {
         id: true, name: true, type: true, category: true,
@@ -98,6 +105,10 @@ export async function GET() {
         createdAt: true, updatedAt: true,
       },
     });
+    const products = raw.map((p) => ({
+      ...p,
+      ...parseNotes(p.notes),
+    }));
     return NextResponse.json({ products });
   } catch (err) {
     console.error('PRODUCTS GET ERROR:', err);
