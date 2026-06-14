@@ -77,11 +77,11 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full mb-6 pb-4 border-b border-white/10">
+    <div className="w-full min-h-screen p-4 md:p-8 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full">
         <h1 className="text-[#f8f9fa] text-2xl font-heading font-normal m-0">Products Management</h1>
         <button onClick={handleAdd} disabled={isSaving}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border-none cursor-pointer transition-all duration-200 font-heading tracking-wide disabled:opacity-50"
+          className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border-none cursor-pointer transition-all duration-200 font-heading tracking-wide disabled:opacity-50"
           style={{
             background: 'linear-gradient(135deg, #1a3a7a, #2a4a9a)',
             color: '#ffffff',

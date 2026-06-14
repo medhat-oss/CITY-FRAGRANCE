@@ -29,10 +29,10 @@ interface Props {
 
 function ProductListInner({ rows, deletingId, onEdit, onDelete }: Props) {
   return (
-    <div className="w-full">
+    <div className="w-full bg-[#0d1527] border border-slate-800 rounded-xl overflow-hidden">
       {/* Desktop table */}
-      <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
-        <table className="w-full min-w-[1000px] table-auto text-left border-collapse">
+      <div className="hidden md:block w-full overflow-x-auto">
+        <table className="w-full min-w-full table-auto border-collapse text-left text-sm text-slate-300">
           <thead>
             <tr className="bg-[#09142E]">
               <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap">Image</th>

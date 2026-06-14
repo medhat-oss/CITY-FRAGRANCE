@@ -119,7 +119,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className={`${styles.adminMain} min-w-0`}>
+      <main className={`${styles.adminMain} w-full min-w-0`}>
         <div className="w-full">
           {children}
         </div>
