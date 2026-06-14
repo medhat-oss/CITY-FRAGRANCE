@@ -74,21 +74,11 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const needsProducts = useNeedsProducts();
   const router = useRouter();
-  // ── Fetch-lock ref: prevents the infinite loop caused by needsProducts
-  // changing on every client-side navigation (pathname changes → needsProducts
-  // recomputes → useEffect re-fires → /api/products hammered 4-5×/second).
-  // We capture the initial value once and never fetch again after first load.
-  const hasFetchedRef = useRef(false);
-
   const products = useVisibleProducts(allProducts);
+  const [fetchKey, setFetchKey] = useState(0);
 
   useEffect(() => {
-    // Already fetched (or explicitly skipped) — never re-run on navigation.
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-
-    // Skip the expensive /api/products call on routes that don't render product
-    // cards (e.g. /stores, /about, /privacy-policy, /order-payment).
+    // Skip routes that don't render product cards
     if (!needsProducts) {
       setIsLoaded(true);
       return;
@@ -97,10 +87,8 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
       setAllProducts(p);
       setIsLoaded(true);
     });
-  // Intentionally omit needsProducts from deps — it must NOT re-trigger this
-  // effect on navigation. The initial value is captured via closure on mount.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchKey]);
 
   const addProduct = useCallback(async (product: Product) => {
     const res = await fetch('/api/admin/products', {
@@ -113,9 +101,8 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
     if (!res.ok || !data.success) {
       throw new Error(data.error || 'Failed to add product');
     }
-    if (data.product) {
-      setAllProducts((prev) => [...prev, data.product!]);
-    }
+    setAllProducts((prev) => [...prev, data.product!]);
+    setFetchKey((k) => k + 1);
     router.refresh();
   }, [router]);
 
@@ -130,11 +117,10 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
     if (!res.ok || !data.success) {
       throw new Error(data.error || 'Failed to update product');
     }
-    if (data.product) {
-      setAllProducts((prev) =>
-        prev.map((p) => (p.id === data.product!.id ? data.product! : p))
-      );
-    }
+    setAllProducts((prev) =>
+      prev.map((p) => (p.id === data.product!.id ? data.product! : p))
+    );
+    setFetchKey((k) => k + 1);
     router.refresh();
   }, [router]);
 
@@ -150,6 +136,7 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
       throw new Error(data.error || 'Failed to delete product');
     }
     setAllProducts((prev) => prev.filter((p) => p.id !== id));
+    setFetchKey((k) => k + 1);
     router.refresh();
   }, [router]);
 
@@ -204,6 +191,7 @@ export function useProducts(): ProductsContextValue {
   // Fallback (rare – only when used outside ProductsProvider)
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [fetchKey, setFetchKey] = useState(0);
   const router = useRouter();
 
   const products = useVisibleProducts(allProducts);
@@ -213,7 +201,8 @@ export function useProducts(): ProductsContextValue {
       setAllProducts(p);
       setIsLoaded(true);
     });
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchKey]);
 
   const addProduct = useCallback(async (product: Product) => {
     const res = await fetch('/api/admin/products', {
@@ -224,7 +213,8 @@ export function useProducts(): ProductsContextValue {
     });
     const data = await res.json() as { success: boolean; product?: Product; error?: string };
     if (!res.ok || !data.success) throw new Error(data.error || 'Failed to add product');
-    if (data.product) setAllProducts((prev) => [...prev, data.product!]);
+    setAllProducts((prev) => [...prev, data.product!]);
+    setFetchKey((k) => k + 1);
     router.refresh();
   }, [router]);
 
@@ -237,9 +227,8 @@ export function useProducts(): ProductsContextValue {
     });
     const data = await res.json() as { success: boolean; product?: Product; error?: string };
     if (!res.ok || !data.success) throw new Error(data.error || 'Failed to update product');
-    if (data.product) {
-      setAllProducts((prev) => prev.map((p) => (p.id === data.product!.id ? data.product! : p)));
-    }
+    setAllProducts((prev) => prev.map((p) => (p.id === data.product!.id ? data.product! : p)));
+    setFetchKey((k) => k + 1);
     router.refresh();
   }, [router]);
 
@@ -253,6 +242,7 @@ export function useProducts(): ProductsContextValue {
     const data = await res.json() as { success: boolean; error?: string };
     if (!res.ok || !data.success) throw new Error(data.error || 'Failed to delete product');
     setAllProducts((prev) => prev.filter((p) => p.id !== id));
+    setFetchKey((k) => k + 1);
     router.refresh();
   }, [router]);
 

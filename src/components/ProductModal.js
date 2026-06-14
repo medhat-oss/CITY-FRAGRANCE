@@ -53,9 +53,9 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit, i
     if (productToEdit) {
       // Derive collections array: prefer explicit array, fall back to single string
       let cols = Array.isArray(productToEdit.collections) && productToEdit.collections.length > 0
-        ? productToEdit.collections
+        ? productToEdit.collections.map((c) => (typeof c === 'string' ? c : c.slug || c.name || ''))
         : productToEdit.collection
-          ? [productToEdit.collection]
+          ? [typeof productToEdit.collection === 'string' ? productToEdit.collection : (productToEdit.collection.slug || productToEdit.collection.name || '')]
           : [];
 
       setFormData({

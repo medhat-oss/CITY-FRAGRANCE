@@ -14,6 +14,24 @@ const KNOWN_SLUGS = [
   'oud-collection',
 ];
 
+function toSlug(v: unknown): string {
+  if (typeof v === 'string') return v;
+  if (v && typeof v === 'object') {
+    const o = v as Record<string, unknown>;
+    return (typeof o.slug === 'string' ? o.slug : typeof o.name === 'string' ? o.name : '') as string;
+  }
+  return '';
+}
+
+/** Coerce collection and collections into a clean slug array */
+function extractSlugs(body: Record<string, unknown>): string[] {
+  const raw = Array.isArray(body.collections) ? body.collections : [];
+  const slugs = raw.map(toSlug).filter(Boolean);
+  if (slugs.length > 0) return slugs;
+  const single = toSlug(body.collection);
+  return single ? [single] : [];
+}
+
 async function resolveCollectionIds(slugs: string[]): Promise<{ id: string }[]> {
   if (!slugs || slugs.length === 0) return [];
   const unique = [...new Set(slugs.filter((s) => KNOWN_SLUGS.includes(s)))];
@@ -26,7 +44,7 @@ async function resolveCollectionIds(slugs: string[]): Promise<{ id: string }[]> 
 }
 
 function revalidateAll() {
-  revalidateTag('products', 'max');
+  revalidateTag('products');
   revalidatePath('/');
   revalidatePath('/cashier');
   revalidatePath('/admin');
@@ -65,19 +83,14 @@ export async function POST(request: Request) {
   try {
     const product = await request.json();
 
-    const slugs: string[] = Array.isArray(product.collections)
-      ? product.collections
-      : product.collection
-        ? [product.collection]
-        : [];
-
+    const slugs = extractSlugs(product);
     const collectionIds = await resolveCollectionIds(slugs);
 
     const dbData = {
       name: product.name,
       type: product.type || product.category || '',
       category: product.category || '',
-      collection: product.collection || slugs[0] || '',
+      collection: slugs[0] || '',
       isDraft: product.isDraft ?? true,
       badge: product.badge || '',
       notes: [product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).join(' • '),
@@ -111,19 +124,14 @@ export async function PUT(request: Request) {
   try {
     const updated = await request.json();
 
-    const slugs: string[] = Array.isArray(updated.collections)
-      ? updated.collections
-      : updated.collection
-        ? [updated.collection]
-        : [];
-
+    const slugs = extractSlugs(updated);
     const collectionIds = await resolveCollectionIds(slugs);
 
     const dbData = {
       name: updated.name,
       type: updated.type || updated.category || '',
       category: updated.category || '',
-      collection: updated.collection || slugs[0] || '',
+      collection: slugs[0] || '',
       isDraft: updated.isDraft ?? false,
       badge: updated.badge || '',
       notes: [updated.topNotes, updated.middleNotes, updated.baseNotes].filter(Boolean).join(' • '),
