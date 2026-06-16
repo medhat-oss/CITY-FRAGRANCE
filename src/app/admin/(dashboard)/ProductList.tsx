@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { formatEGP } from '@/utils/currency';
 import type { Product } from '@/types';
@@ -12,7 +12,6 @@ const COLLECTION_LABELS: Record<string, string> = {
   'oud-collection': 'Oud',
   'mens-collection': "Men's",
   'womens-collection': "Women's",
-  'gift-sets': 'Gift Sets',
 };
 
 interface RowData {
@@ -27,88 +26,122 @@ interface Props {
   onDelete: (id: string) => void;
 }
 
-function ProductListInner({ rows, deletingId, onEdit, onDelete }: Props) {
+export const ProductList = React.memo(function ProductListInner({ rows, deletingId, onEdit, onDelete }: Props) {
+  if (!rows || rows.length === 0) {
+    return (
+      <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-[#16234D]/50 backdrop-blur-md p-8 text-center text-white">
+        No products found.
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full bg-[#0d1527] border border-slate-800 rounded-xl overflow-hidden">
-      {/* Desktop table */}
-      <div className="hidden md:block w-full overflow-x-auto">
-        <table className="w-full min-w-full table-auto border-collapse text-left text-sm text-slate-300">
-          <thead>
-            <tr className="bg-[#09142E]">
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap">Image</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap">Product Name</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap">Category</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap">Collections</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap">Price</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap">Sale</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap">Stock</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap text-center">Status</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap text-center">Actions</th>
+    <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-[#16234D]/50 backdrop-blur-md">
+      <table className="w-full min-w-[1000px] table-auto text-left border-collapse text-white bg-[#111B3D]">
+          <colgroup>
+            <col className="w-[8%]" />
+            <col className="w-[22%]" />
+            <col className="w-[12%]" />
+            <col className="w-[15%]" />
+            <col className="w-[8%]" />
+            <col className="w-[12%]" />
+            <col className="w-[10%]" />
+            <col className="w-[7%]" />
+            <col className="w-[6%]" />
+          </colgroup>
+          <thead className="bg-[#16234D] text-white tracking-wide text-sm font-semibold uppercase">
+            <tr>
+              <th className="p-4">Image</th>
+              <th className="p-4">Product Name</th>
+              <th className="p-4">Category</th>
+              <th className="p-4">Collections</th>
+              <th className="p-4">Price</th>
+              <th className="p-4">Sale</th>
+              <th className="p-4">Stock</th>
+              <th className="p-4">Status</th>
+              <th className="p-4 text-center">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-white/10 bg-[#111B3D]">
             {rows.map(({ product, cols }) => (
               <tr
                 key={product.id}
-                className="hover:bg-white/5 transition-opacity"
+                className="hover:bg-[#16234D]/10 transition-colors duration-150"
                 style={{ opacity: deletingId === product.id ? 0.4 : 1 }}
               >
-                <td className="p-4 border-b border-white/10 text-white whitespace-nowrap align-middle">
-                  <Image
-                    src={product.images?.[0] || '/images/product-placeholder.png'}
-                    alt={product.name}
-                    width={50}
-                    height={50}
-                    style={{ objectFit: 'cover', borderRadius: '4px' }}
-                  />
-                </td>
-                <td className="p-4 border-b border-white/10 text-white whitespace-nowrap align-middle">
-                  <strong className="text-sm">{product.name}</strong>
-                  <br />
-                  <span className="text-xs text-slate-400">
-                    {[product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).join(' • ')}
-                  </span>
-                </td>
-                <td className="p-4 border-b border-white/10 text-white whitespace-nowrap align-middle text-sm">{product.category}</td>
-                <td className="p-4 border-b border-white/10 text-white whitespace-nowrap align-middle">
-                  <div className="flex flex-wrap gap-1">
-                    {cols.length > 0
-                      ? cols.map((slug) => (
-                          <span
-                            key={slug}
-                            className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap"
-                            style={{
-                              background: 'rgba(201,169,110,0.15)',
-                              border: '1px solid rgba(201,169,110,0.35)',
-                              color: '#c9a96e',
-                            }}
-                          >
-                            {COLLECTION_LABELS[slug] || slug}
-                          </span>
-                        ))
-                      : <span className="text-xs text-slate-500">—</span>}
+                {/* Image */}
+                <td className="p-4 whitespace-nowrap align-middle">
+                  <div className="relative h-12 w-12 rounded bg-[#16234D]/30 overflow-hidden border border-white/10">
+                    <Image
+                      src={product.images?.[0] || '/images/product-placeholder.png'}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                 </td>
-                <td className="p-4 border-b border-white/10 text-white whitespace-nowrap align-middle text-sm">{formatEGP(product.price)}</td>
-                <td className="p-4 border-b border-white/10 text-white whitespace-nowrap align-middle text-sm">{product.salePrice ? formatEGP(product.salePrice) : '—'}</td>
-                <td className="p-4 border-b border-white/10 text-white whitespace-nowrap align-middle text-sm">{product.stock ?? '—'}</td>
-                <td className="p-4 border-b border-white/10 align-middle text-center whitespace-nowrap">
-                  <span style={{
-                    display: 'inline-block',
-                    fontSize: '0.68rem',
-                    fontWeight: 600,
-                    padding: '3px 9px',
-                    borderRadius: '20px',
-                    background: product.isDraft ? 'rgba(234,179,8,0.12)' : 'rgba(34,197,94,0.12)',
-                    border: `1px solid ${product.isDraft ? 'rgba(234,179,8,0.4)' : 'rgba(34,197,94,0.4)'}`,
-                    color: product.isDraft ? '#facc15' : '#4ade80',
-                    whiteSpace: 'nowrap',
-                  }}>
+
+                {/* Product Name */}
+                <td className="p-4 align-middle">
+                  <span className="font-medium text-white truncate block text-sm max-w-[200px]" title={product.name}>
+                    {product.name}
+                  </span>
+                </td>
+
+                {/* Category */}
+                <td className="p-4 whitespace-nowrap truncate text-sm text-gray-300 align-middle">
+                  {product.category || 'Unisex'}
+                </td>
+
+                {/* Collections */}
+                <td className="p-4 align-middle">
+                  {cols.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {cols.map((slug) => (
+                        <span
+                          key={slug}
+                          className="px-2 py-0.5 text-xs rounded-full bg-[#16234D] text-blue-300 border border-blue-500/20 whitespace-nowrap"
+                        >
+                          {COLLECTION_LABELS[slug] || slug}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-gray-500">—</span>
+                  )}
+                </td>
+
+                {/* Price */}
+                <td className="p-4 whitespace-nowrap text-sm font-mono text-gray-200 align-middle">
+                  {formatEGP(product.price)}
+                </td>
+
+                {/* Sale */}
+                <td className="p-4 whitespace-nowrap text-sm font-mono text-emerald-400 align-middle">
+                  {product.salePrice ? formatEGP(product.salePrice) : '—'}
+                </td>
+
+                {/* Stock */}
+                <td className="p-4 whitespace-nowrap text-sm font-mono align-middle">
+                  <span className={product.stock === 0 ? 'text-red-400 font-bold' : 'text-gray-300'}>
+                    {product.stock ?? '—'}
+                  </span>
+                </td>
+
+                {/* Status */}
+                <td className="p-4 align-middle">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    product.isDraft
+                      ? 'bg-yellow-500/10 text-yellow-400'
+                      : 'bg-emerald-500/10 text-emerald-400'
+                  }`}>
                     {product.isDraft ? 'Draft' : 'Live'}
                   </span>
                 </td>
-                <td className="p-4 border-b border-white/10 align-middle text-center whitespace-nowrap">
-                  <div className="flex items-center justify-center gap-3">
+
+                {/* Actions */}
+                <td className="p-4 text-center align-middle">
+                  <div className="flex items-center justify-center gap-2">
                     <button
                       onClick={() => onEdit(product)}
                       disabled={deletingId === product.id}
@@ -123,9 +156,7 @@ function ProductListInner({ rows, deletingId, onEdit, onDelete }: Props) {
                       className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-2 rounded transition-colors disabled:opacity-40 disabled:pointer-events-none"
                       aria-label={`Delete ${product.name}`}
                     >
-                      {deletingId === product.id
-                        ? <FaSpinner className="animate-spin" />
-                        : <FaTrashAlt />}
+                      {deletingId === product.id ? <FaSpinner className="animate-spin" /> : <FaTrashAlt />}
                     </button>
                   </div>
                 </td>
@@ -133,70 +164,6 @@ function ProductListInner({ rows, deletingId, onEdit, onDelete }: Props) {
             ))}
           </tbody>
         </table>
-      </div>
-
-      {/* Mobile stacked cards */}
-      <div className="md:hidden space-y-3">
-        {rows.map(({ product, cols }) => (
-          <div
-            key={product.id}
-            className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3"
-            style={{ opacity: deletingId === product.id ? 0.4 : 1 }}
-          >
-            <div className="flex gap-3">
-              <Image
-                src={product.images?.[0] || '/images/product-placeholder.png'}
-                alt={product.name}
-                width={60}
-                height={60}
-                className="rounded-lg flex-shrink-0"
-                style={{ objectFit: 'cover' }}
-              />
-              <div className="flex-1 min-w-0">
-                <strong className="text-sm text-white block truncate">{product.name}</strong>
-                <span className="text-xs text-slate-400 block truncate">
-                  {[product.topNotes, product.middleNotes, product.baseNotes].filter(Boolean).join(' • ')}
-                </span>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {cols.length > 0
-                    ? cols.map((slug) => (
-                        <span key={slug} className="text-[0.6rem] px-1.5 py-0.5 rounded-full"
-                          style={{ background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.35)', color: '#c9a96e' }}
-                        >{COLLECTION_LABELS[slug] || slug}</span>
-                      ))
-                    : null}
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-2 mt-2 text-center text-xs">
-              <div><span className="text-slate-400 block">Price</span><span className="text-white font-semibold block">{formatEGP(product.price)}</span></div>
-              <div><span className="text-slate-400 block">Sale</span><span className="text-white font-semibold block">{product.salePrice ? formatEGP(product.salePrice) : '—'}</span></div>
-              <div><span className="text-slate-400 block">Stock</span><span className="text-white font-semibold block">{product.stock ?? '—'}</span></div>
-            </div>
-            <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/10">
-              <span className="text-xs px-2 py-0.5 rounded-full"
-                style={{
-                  background: product.isDraft ? 'rgba(234,179,8,0.12)' : 'rgba(34,197,94,0.12)',
-                  border: `1px solid ${product.isDraft ? 'rgba(234,179,8,0.4)' : 'rgba(34,197,94,0.4)'}`,
-                  color: product.isDraft ? '#facc15' : '#4ade80',
-                }}
-              >{product.isDraft ? 'Draft' : 'Live'}</span>
-              <div className="flex gap-2">
-                <button onClick={() => onEdit(product)} disabled={deletingId === product.id}
-                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded transition-colors disabled:opacity-40"
-                  aria-label={`Edit ${product.name}`}
-                ><FaEdit /></button>
-                <button onClick={() => onDelete(product.id)} disabled={deletingId === product.id}
-                  className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-2 rounded transition-colors disabled:opacity-40"
-                  aria-label={`Delete ${product.name}`}
-                >{deletingId === product.id ? <FaSpinner className="animate-spin" /> : <FaTrashAlt />}</button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
-}
-
-export const ProductList = React.memo(ProductListInner);
+});

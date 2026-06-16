@@ -111,7 +111,7 @@ export default function Header() {
               muted
               playsInline
               preload="none"
-              poster="/images/logo.png"
+              suppressHydrationWarning
               className="h-14 w-auto object-contain"
               aria-label="City Fragrance"
             />

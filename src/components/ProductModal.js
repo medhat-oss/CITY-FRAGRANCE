@@ -11,7 +11,6 @@ const ALL_COLLECTIONS = [
   { slug: 'oud-collection',    label: 'Oud Collection' },
   { slug: 'mens-collection',   label: "Men's Collection" },
   { slug: 'womens-collection', label: "Women's Collection" },
-  { slug: 'gift-sets',         label: 'Gift Sets' },
 ];
 
 const EMPTY_FORM = {

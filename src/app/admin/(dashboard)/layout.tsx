@@ -20,38 +20,36 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const closeDrawer = () => setIsMobileSidebarOpen(false);
 
   return (
-    <div className={styles.adminLayout}>
-      {/* Desktop Sidebar: hidden on mobile, visible on md+ */}
-      <aside className={`${styles.adminSidebar} hidden md:flex`}>
-        <div>
-          <div className={styles.sidebarBrand}>
-            <h2>CITY FRAGRANCE</h2>
-            <span>ADMIN PANEL</span>
-          </div>
-          <nav className={styles.sidebarNav}>
-            <Link href="/admin" className={styles.sidebarLink} onClick={closeDrawer}>
-              <FaBoxOpen /> Products Management
-            </Link>
-            <Link href="/admin/settings" className={styles.sidebarLink} onClick={closeDrawer}>
-              <FaCog /> Site Customization
-            </Link>
-            <Link href="/admin/orders" className={styles.sidebarLink} onClick={closeDrawer}>
-               <FaClipboardList /> Orders
-            </Link>
-            <Link href="/admin/gift-sets" className={styles.sidebarLink} onClick={closeDrawer}>
-              <FaGift /> Gift Sets
-            </Link>
-            <Link href="/admin/analytics" className={styles.sidebarLink} onClick={closeDrawer}>
-              <FaChartLine /> Analytics & Inventory
-            </Link>
-            <Link href="/admin/staff" className={styles.sidebarLink} onClick={closeDrawer}>
-              <FaUsers /> Manage Staff
-            </Link>
-            <Link href="/" className={styles.sidebarLink} onClick={closeDrawer}>
-              <FaStore /> Back to Store
-            </Link>
-          </nav>
+    <div className="flex min-h-screen w-full max-w-full bg-[#111B3D] overflow-hidden">
+      {/* Desktop Sidebar */}
+      <aside className="w-[250px] shrink-0 hidden md:flex flex-col bg-[#16234D] border-r border-[#1d3573] p-8">
+        <div className="mb-12 text-center">
+          <h2 className="text-xl tracking-[0.1em] text-[#f8f9fa] mb-1">CITY FRAGRANCE</h2>
+          <span className="font-heading text-xs text-slate-400 tracking-[0.2em]">ADMIN PANEL</span>
         </div>
+        <nav className="flex flex-col gap-2 flex-1">
+          <Link href="/admin" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
+            <FaBoxOpen /> Products Management
+          </Link>
+          <Link href="/admin/settings" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
+            <FaCog /> Site Customization
+          </Link>
+          <Link href="/admin/orders" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
+             <FaClipboardList /> Orders
+          </Link>
+          <Link href="/admin/gift-sets" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
+            <FaGift /> Gift Sets
+          </Link>
+          <Link href="/admin/analytics" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
+            <FaChartLine /> Analytics & Inventory
+          </Link>
+          <Link href="/admin/staff" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
+            <FaUsers /> Manage Staff
+          </Link>
+          <Link href="/" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
+            <FaStore /> Back to Store
+          </Link>
+        </nav>
         <AdminSidebarUser />
       </aside>
 
@@ -119,10 +117,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className={`${styles.adminMain} w-full min-w-0`}>
-        <div className="w-full">
-          {children}
-        </div>
+      {/* Main Content */}
+      <main className="flex-1 min-w-0 w-full md:max-w-[calc(100vw-250px)] overflow-y-auto p-4 md:p-8">
+        {children}
       </main>
     </div>
   );

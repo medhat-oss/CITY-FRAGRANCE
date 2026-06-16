@@ -3,13 +3,13 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/types';
-import styles from './admin.module.css';
+
 import { FaPlus } from 'react-icons/fa';
 import ProductModal from '@/components/ProductModal';
 import { ProductList } from './ProductList';
 
 export default function AdminPage() {
-  const { products, isLoaded, addProduct, updateProduct, deleteProduct } = useProducts();
+  const { products, addProduct, updateProduct, deleteProduct } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -66,29 +66,12 @@ export default function AdminPage() {
     return { product, cols };
   }), [products]);
 
-  if (!isLoaded) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', color: '#94a3b8', fontFamily: 'var(--font-body)', fontSize: '0.9rem', gap: '0.75rem' }}>
-        <div style={{ width: 20, height: 20, border: '2px solid #1d3573', borderTopColor: '#ffffff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        Loading products...
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full min-h-screen p-4 md:p-8 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full">
+    <div className="bg-[#111B3D] min-h-screen w-full p-4 sm:p-6 space-y-6">
+      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-[#f8f9fa] text-2xl font-heading font-normal m-0">Products Management</h1>
         <button onClick={handleAdd} disabled={isSaving}
-          className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border-none cursor-pointer transition-all duration-200 font-heading tracking-wide disabled:opacity-50"
-          style={{
-            background: 'linear-gradient(135deg, #1a3a7a, #2a4a9a)',
-            color: '#ffffff',
-            boxShadow: '0 2px 8px rgba(26,58,122,0.3)',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, #2a4a9a, #3a5aaa)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, #1a3a7a, #2a4a9a)'; }}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border-none cursor-pointer transition-all duration-200 font-heading tracking-wide disabled:opacity-50 bg-gradient-to-r from-[#1a3a7a] to-[#2a4a9a] text-white shadow-[0_2px_8px_rgba(26,58,122,0.3)] hover:from-[#2a4a9a] hover:to-[#3a5aaa]"
         >
           <FaPlus /> Add New Product
         </button>

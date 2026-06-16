@@ -8,7 +8,6 @@ const KNOWN_SLUGS = new Set([
   'womens-collection',
   'mens-collection',
   'new-arrivals',
-  'gift-sets',
   'all-fragrances',
   'oud-collection',
 ]);

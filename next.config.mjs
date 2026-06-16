@@ -38,8 +38,8 @@ const nextConfig = {
     // of re-fetching. Shared layouts (sidebar, header) are NEVER re-fetched
     // regardless of this value — only the changing page segment is affected.
     staleTimes: {
-      dynamic: 30,   // Cache dynamic pages for 30s in client router
-      static: 300,   // Cache static pages for 5 min (default is already 5 min)
+      dynamic: 0,    // Never cache dynamic pages — forces fresh server response on every nav
+      static: 180,   // Cache static pages for 3 min
     },
   },
 
@@ -51,8 +51,9 @@ const nextConfig = {
   // Soft caching for public images and semi-static API responses.
   async headers() {
     return [
-      {
-        // Hashed JS/CSS chunks — safe to cache forever (hash changes on deploy)
+      // ── Dev: _next/static headers are SKIPPED — they break HMR/hydration ──
+      // Prod: aggressive immutable cache for hashed JS/CSS chunks
+      ...(process.env.NODE_ENV === 'development' ? [] : [{
         source: '/_next/static/(.*)',
         headers: [
           {
@@ -60,7 +61,7 @@ const nextConfig = {
             value: 'public, max-age=31536000, immutable',
           },
         ],
-      },
+      }]),
       {
         // Public image assets in /public/images/
         source: '/images/(.*)',

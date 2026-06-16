@@ -30,6 +30,7 @@ export async function GET() {
     const products = raw.map((p) => ({
       ...p,
       ...parseNotes(p.notes),
+      collections: (p.collections as any[] ?? []).map((c: any) => (typeof c === 'string' ? c : c.slug || '')),
     }));
     return NextResponse.json({ products });
   } catch (err) {
