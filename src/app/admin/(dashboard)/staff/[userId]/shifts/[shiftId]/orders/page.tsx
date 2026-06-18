@@ -244,7 +244,14 @@ export default function ShiftOrdersPage({ params }: PageProps) {
                             {isFirstItem ? <span className="font-mono text-xs text-[#64748b]">#{String(order.orderId || order.id).slice(-8)}</span> : null}
                           </td>
                           <td className="p-3 align-middle">
-                            {isFirstItem ? <span className="text-sm text-[#e2e8f0]">{order.customerName || '—'}</span> : null}
+                            {isFirstItem ? (
+                              <div>
+                                <span className="text-sm text-[#e2e8f0]">{order.customerName || '—'}</span>
+                                {order.phoneNumber && (
+                                  <span className="block text-[10px] text-[#64748b] mt-0.5">{order.phoneNumber}</span>
+                                )}
+                              </div>
+                            ) : null}
                           </td>
                           <td className="p-3 align-middle">
                             {isFirstItem ? <span className="text-sm text-[#94a3b8]">{order.paymentMethod || '—'}</span> : null}
@@ -329,7 +336,11 @@ export default function ShiftOrdersPage({ params }: PageProps) {
                       </div>
                       {/* Customer + Payment + Date */}
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs mb-2">
-                        <div><span className="text-slate-500">Customer</span><p className="text-slate-200 m-0 truncate">{order.customerName || '—'}</p></div>
+                        <div>
+                          <span className="text-slate-500">Customer</span>
+                          <p className="text-slate-200 m-0 truncate">{order.customerName || '—'}</p>
+                          {order.phoneNumber && <p className="text-slate-500 m-0 text-[10px] truncate">{order.phoneNumber}</p>}
+                        </div>
                         <div><span className="text-slate-500">Payment</span><p className="text-slate-200 m-0 truncate">{order.paymentMethod || '—'}</p></div>
                         <div className="col-span-2"><span className="text-slate-500">Date & Time</span><p className="text-slate-200 m-0 font-mono text-[10px]">{formatDateTime(order.createdAt || order.date)}</p></div>
                       </div>

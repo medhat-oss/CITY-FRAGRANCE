@@ -89,6 +89,7 @@ model GiftSet {
   isDraft     Boolean  @default(true)
   image       String   @default("")
   productIds  Json     @default("[]")
+  stock       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -173,8 +174,9 @@ model SiteSetting {
 }
 
 model CollectionImage {
-  slug  String @id
-  image String @default("")
+  slug        String @id
+  image       String @default("")
+  description String @default("")
 }
 
 enum Role {

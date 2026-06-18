@@ -1,70 +1,177 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-
-const isVercel = process.env.VERCEL === '1';
-const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-
-function getLocalDir(): string {
-  return isVercel ? '/tmp' : path.join(process.cwd(), 'data');
-}
-
-function getSourceDir(): string {
-  return path.join(process.cwd(), 'data');
-}
-
-async function readLocalFile(filePath: string): Promise<string | null> {
-  try {
-    return await fs.readFile(filePath, 'utf-8');
-  } catch {
-    return null;
-  }
-}
-
-async function readCloudinary(filename: string): Promise<string | null> {
-  if (!cloudName) return null;
-  const url = `https://res.cloudinary.com/${cloudName}/raw/upload/city-fragrance-data/${filename}`;
-  try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return null;
-    return await res.text();
-  } catch {
-    return null;
-  }
-}
+import prisma from '@/lib/prisma';
 
 export async function readJsonFile<T>(filename: string, fallback: T): Promise<T> {
-  // 1. Try local writable path (/tmp on Vercel, data/ on local)
-  const localPath = path.join(getLocalDir(), filename);
-  let raw = await readLocalFile(localPath);
-  if (raw) {
-    try { return JSON.parse(raw); } catch { /* fall through */ }
-  }
+  try {
+    switch (filename) {
+      case 'gift-sets.json': {
+        const rows = await prisma.giftSet.findMany();
+        return rows.map((r) => ({
+          id: r.id,
+          name: r.name,
+          description: r.description,
+          price: r.price,
+          costPrice: r.costPrice,
+          isDraft: r.isDraft,
+          image: r.image,
+          productIds: (r.productIds as string[]) || [],
+          stock: r.stock,
+          createdAt: r.createdAt.toISOString(),
+        })) as T;
+      }
 
-  // 2. Try Cloudinary
-  raw = await readCloudinary(filename);
-  if (raw) {
-    // Cache in local path for next read
-    try { await fs.writeFile(localPath, raw, 'utf-8'); } catch { /* ignore */ }
-    try { return JSON.parse(raw); } catch { /* fall through */ }
-  }
+      case 'products.json': {
+        const rows = await prisma.product.findMany({
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            salePrice: true,
+            images: true,
+            category: true,
+            collection: true,
+            notes: true,
+            stock: true,
+          },
+        });
+        return rows.map((r) => ({
+          ...r,
+          images: (r.images as string[]) || [],
+          salePrice: r.salePrice ?? null,
+        })) as T;
+      }
 
-  // 3. Try read-only source (build folder)
-  raw = await readLocalFile(path.join(getSourceDir(), filename));
-  if (raw) {
-    try { return JSON.parse(raw); } catch { /* fall through */ }
-  }
+      case 'site-settings.json': {
+        const row = await prisma.siteSetting.findUnique({ where: { id: 'default' } });
+        if (!row) return fallback;
+        const { id, createdAt, updatedAt, ...settings } = row;
+        return settings as T;
+      }
 
-  return fallback;
+      case 'collection-images.json': {
+        const rows = await prisma.collectionImage.findMany();
+        const record: Record<string, { image: string; description: string }> = {};
+        for (const r of rows) {
+          record[r.slug] = { image: r.image, description: r.description };
+        }
+        return record as T;
+      }
+
+      case 'subscribers.json': {
+        const rows = await prisma.subscriber.findMany();
+        return rows.map((r) => ({
+          email: r.email,
+          subscribedAt: r.createdAt.toISOString(),
+        })) as T;
+      }
+
+      default:
+        return fallback;
+    }
+  } catch (err) {
+    console.error(`readJsonFile error (${filename}):`, err);
+    return fallback;
+  }
 }
 
 export async function writeJsonFile(filename: string, data: unknown): Promise<void> {
-  const content = JSON.stringify(data, null, 2);
-
-  // Write locally — this is fast (disk I/O only)
-  const localPath = path.join(getLocalDir(), filename);
   try {
-    await fs.writeFile(localPath, content, 'utf-8');
+    switch (filename) {
+      case 'gift-sets.json': {
+        const items = data as Array<{
+          id: string;
+          name: string;
+          description?: string;
+          price: number;
+          costPrice?: number;
+          isDraft?: boolean;
+          image?: string;
+          productIds?: string[];
+          stock?: number;
+        }>;
+        await prisma.$transaction(
+          items.map((item) =>
+            prisma.giftSet.upsert({
+              where: { id: item.id },
+              update: {
+                name: item.name,
+                description: item.description ?? '',
+                price: item.price,
+                costPrice: item.costPrice ?? 0,
+                isDraft: item.isDraft ?? true,
+                image: item.image ?? '',
+                productIds: item.productIds ?? [],
+                stock: item.stock ?? 0,
+              },
+              create: {
+                id: item.id,
+                name: item.name,
+                description: item.description ?? '',
+                price: item.price,
+                costPrice: item.costPrice ?? 0,
+                isDraft: item.isDraft ?? true,
+                image: item.image ?? '',
+                productIds: item.productIds ?? [],
+                stock: item.stock ?? 0,
+              },
+            }),
+          ),
+        );
+        break;
+      }
+
+      case 'products.json': {
+        const items = data as Array<{ id: string; stock?: number }>;
+        await prisma.$transaction(
+          items.map((item) =>
+            prisma.product.update({
+              where: { id: item.id },
+              data: { stock: item.stock ?? 0 },
+            }),
+          ),
+        );
+        break;
+      }
+
+      case 'site-settings.json': {
+        const settings = data as Record<string, unknown>;
+        const { id: _ignore, createdAt: _c, updatedAt: _u, ...safe } = settings;
+        await prisma.siteSetting.upsert({
+          where: { id: 'default' },
+          update: safe,
+          create: { id: 'default', ...safe },
+        });
+        break;
+      }
+
+      case 'collection-images.json': {
+        const record = data as Record<string, { image?: string; description?: string }>;
+        await prisma.$transaction(
+          Object.entries(record).map(([slug, val]) =>
+            prisma.collectionImage.upsert({
+              where: { slug },
+              update: { image: val.image ?? '', description: val.description ?? '' },
+              create: { slug, image: val.image ?? '', description: val.description ?? '' },
+            }),
+          ),
+        );
+        break;
+      }
+
+      case 'subscribers.json': {
+        const items = data as Array<{ email: string }>;
+        await prisma.$transaction(
+          items.map((item) =>
+            prisma.subscriber.upsert({
+              where: { email: item.email },
+              update: {},
+              create: { email: item.email },
+            }),
+          ),
+        );
+        break;
+      }
+    }
   } catch (err) {
-    console.error(`LOCAL WRITE ERROR (${filename}):`, err);
+    console.error(`writeJsonFile error (${filename}):`, err);
   }
 }

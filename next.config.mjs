@@ -18,6 +18,9 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     // Cache optimized images for 24 hours on CDN/browser
     minimumCacheTTL: 86400,
+    // Cloudflare Pages has no built-in image optimizer — Cloudinary delivers
+    // auto-optimized assets (f_auto,q_auto) directly from its CDN.
+    unoptimized: true,
   },
 
   // ─── Turbopack ─────────────────────────────────────────────────────────────

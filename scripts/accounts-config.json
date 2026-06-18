@@ -1,0 +1,34 @@
+{
+  "accounts": [
+    {
+      "name": "Production (Live)",
+      "env": {
+        "DATABASE_URL": "postgresql://neondb_owner:npg_oKn1Ozwbu9hL@ep-quiet-butterfly-aphwm7rg-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require&connection_limit=10&pool_timeout=20&pgbouncer=true",
+        "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "db31fu3ob",
+        "NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "city_fragrance",
+        "CLOUDINARY_API_KEY": "646483988846637",
+        "CLOUDINARY_API_SECRET": "dBHTcG0uU-F0N9ICsWfDU3z0jnQ"
+      }
+    },
+    {
+      "name": "Staging",
+      "env": {
+        "DATABASE_URL": "postgresql://neondb_owner:npg_b2zWY3prtXSM@ep-flat-cell-at8ru755-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+        "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "dwsxotewe",
+        "NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "city_fragrance",
+        "CLOUDINARY_API_KEY": "975184521279891",
+        "CLOUDINARY_API_SECRET": "2tLmjGX1URudJdPubhpUmEjhK44"
+      }
+    },
+    {
+      "name": "Development (Local)",
+      "env": {
+        "DATABASE_URL": "postgresql://neondb_owner:npg_I3wALQD2mYin@ep-green-mud-ath5murc-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+        "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "dffrmxkq4",
+        "NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "city_fragrance",
+        "CLOUDINARY_API_KEY": "727567248246381",
+        "CLOUDINARY_API_SECRET": "gPhK1A8VkT_ldpXsZ_LRKorf67U"
+      }
+    }
+  ]
+}
