@@ -57,7 +57,7 @@ export async function GET(request: Request) {
 
       let totalCash = 0, totalInstaPay = 0, totalVodafoneCash = 0, totalVisa = 0;
       let orderCount = 0;
-      for (const row of agg) {
+      for (const row of (agg as any[])) {
         const method = (row.paymentMethod || '').toLowerCase();
         const sum = row._sum.totalPrice || 0;
         if (method.includes('cash')) totalCash = sum;
