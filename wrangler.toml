@@ -1,6 +1,4 @@
-name = "city-fragrance-app"
+name = "city-fragrance"
 compatibility_date = "2026-06-18"
 compatibility_flags = [ "nodejs_compat" ]
-
-[site]
-bucket = ".open-next/assets"
+pages_build_output_dir = ".open-next"
