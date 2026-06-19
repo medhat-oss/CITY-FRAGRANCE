@@ -1,10 +1,5 @@
-name = "city-fragrance-next"
-main = ".next/index.ts"
-compatibility_date = "2025-06-01"
-compatibility_flags = ["nodejs_compat"]
+name = "city-fragrance-app"
+compatibility_date = "2024-04-03"
+compatibility_flags = [ "nodejs_compat" ]
 
-pages_build_output_dir = ".vercel/output/static"
-
-[[services]]
-binding = "NEXT_SERVICE"
-service = "city-fragrance-next"
+[pages_build_output_dir]
