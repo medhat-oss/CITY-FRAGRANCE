@@ -126,7 +126,7 @@ export async function GET() {
     const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
     // ── Recent Transactions (latest 20) ──
-    const recentOrders = recentOrdersRaw.map((o) => ({
+    const recentOrders = recentOrdersRaw.map((o: any) => ({
       orderId: o.orderId,
       date: o.date,
       customerName: o.customerName,
