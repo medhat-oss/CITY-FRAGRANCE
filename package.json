@@ -6,16 +6,12 @@
     "seed": "node prisma/seed.mjs"
   },
   "scripts": {
-    "postinstall": "prisma generate",
     "dev": "next dev",
-    "dev:turbo": "next dev --turbopack",
-    "build": "npx @opennextjs/cloudflare build",
+    "build": "next build",
+    "build:cloudflare": "npx @opennextjs/cloudflare build",
     "start": "next start",
-    "lint": "eslint",
-    "switch": "node scripts/env-manager.js",
-    "pages:build": "npx @cloudflare/next-on-pages",
-    "pages:preview": "npx wrangler pages dev",
-    "pages:deploy": "npx wrangler pages deploy"
+    "lint": "next lint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
