@@ -122,7 +122,7 @@ async function BestSellersServer() {
   });
 
   const bestSellers = products
-    .filter((p) => p.badge && (p.badge.toUpperCase().includes('BEST SELLER') || p.badge.toUpperCase().includes('SALE')))
+    .filter((p: any) => p.badge && (p.badge.toUpperCase().includes('BEST SELLER') || p.badge.toUpperCase().includes('SALE')))
     .slice(0, 4);
 
   return <BestSellers title="Best Sellers" products={bestSellers as any} />;
