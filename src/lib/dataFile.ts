@@ -33,7 +33,7 @@ export async function readJsonFile<T>(filename: string, fallback: T): Promise<T>
             stock: true,
           },
         });
-        return rows.map((r) => ({
+        return rows.map((r: any) => ({
           ...r,
           images: (r.images as string[]) || [],
           salePrice: r.salePrice ?? null,
