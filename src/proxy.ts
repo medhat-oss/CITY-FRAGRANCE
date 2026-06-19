@@ -1,5 +1,4 @@
 export const runtime = 'experimental-edge';
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -11,7 +10,7 @@ const PUBLIC_PATHS = new Set([
   '/cashier/login',
 ]);
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (PUBLIC_PATHS.has(pathname)) return NextResponse.next();
 

@@ -51,21 +51,9 @@ const nextConfig = {
   serverExternalPackages: ['@prisma/client'],
 
   // ─── HTTP Cache Headers ─────────────────────────────────────────────────────
-  // Aggressive immutable caching for Next.js hashed static chunks.
-  // Soft caching for public images and semi-static API responses.
+  // Caching for public images and semi-static API responses.
   async headers() {
     return [
-      // ── Dev: _next/static headers are SKIPPED — they break HMR/hydration ──
-      // Prod: aggressive immutable cache for hashed JS/CSS chunks
-      ...(process.env.NODE_ENV === 'development' ? [] : [{
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      }]),
       {
         // Public image assets in /public/images/
         source: '/images/(.*)',
