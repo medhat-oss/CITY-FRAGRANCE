@@ -36,7 +36,7 @@ export async function GET() {
       }>
     >`SELECT id, email, username, name, role::text, "shiftPassword", "createdAt", "updatedAt" FROM "User" ORDER BY "createdAt" DESC`;
 
-    const staff = users.map((u) => ({
+    const staff = users.map((u: any) => ({
       id: u.id,
       email: u.email,
       username: u.username,
