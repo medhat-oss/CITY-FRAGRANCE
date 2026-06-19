@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     }));
 
     // ── Atomic order creation + stock deduction + shift resolution ──
-    const order = await prisma.$transaction(async (tx) => {
+    const order = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 0. Resolve active shift inside the transaction (avoids a separate DB roundtrip)
       if (source === 'POS' && cashierId) {
         const activeShift = await tx.shift.findFirst({
