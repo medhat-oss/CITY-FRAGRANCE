@@ -58,7 +58,7 @@ export async function readJsonFile<T>(filename: string, fallback: T): Promise<T>
 
       case 'subscribers.json': {
         const rows = await prisma.subscriber.findMany();
-        return rows.map((r) => ({
+        return rows.map((r: any) => ({
           email: r.email,
           subscribedAt: r.createdAt.toISOString(),
         })) as T;
