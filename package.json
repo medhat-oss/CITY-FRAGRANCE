@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:cloudflare": "npx @opennextjs/cloudflare build",
+    "build:cloudflare": "opennextjs-cloudflare",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate"
