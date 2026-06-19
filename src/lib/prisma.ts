@@ -1,14 +1,18 @@
 import { PrismaClient } from '@prisma/client'
+import { PrismaNeonHttp } from '@prisma/adapter-neon'
 import { withAccelerate } from '@prisma/extension-accelerate'
 
-const globalForPrisma = globalThis as unknown as { prisma: any }
+const globalForPrisma = globalThis as unknown as {
+  prisma: ReturnType<typeof prismaSingleton> | undefined
+}
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    accelerateUrl: process.env.DATABASE_URL,
-  }).$extends(withAccelerate())
+function prismaSingleton() {
+  const adapter = new PrismaNeonHttp(process.env.DATABASE_URL!, {})
+  return new PrismaClient({ adapter }).$extends(withAccelerate())
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+export const prisma = globalForPrisma.prisma ?? prismaSingleton()
+
+globalForPrisma.prisma = prisma
 
 export default prisma

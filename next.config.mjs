@@ -26,13 +26,20 @@ const nextConfig = {
   // ─── Turbopack ─────────────────────────────────────────────────────────────
   turbopack: {},
 
+  // ─── Minification ──────────────────────────────────────────────────────────
+  // Reduce chunk sizes for Cloudflare Pages 1MB edge-function limit.
+  // serverMinification strips dev-only code and dead-code from edge bundles,
+  // directly reducing Prisma + dependency bloat in each function.
+  minify: true,
+
   // ─── Turbopack Persistent FS Cache ─────────────────────────────────────────
   // This is the CRITICAL fix for the 13–16s dev cold-compilation spikes.
   // It persists the compiled module graph to .next/cache/turbopack between
-  // dev sessions — subsequent `npm run dev` starts will be warm-cache fast
+  // dev sessions — subsequent `npm run dev` starts will be warm-cache warm
   // (typically <1s per route instead of 14s).
   experimental: {
     turbopackFileSystemCacheForDev: true,
+    serverMinification: true,
 
     // ── Client-side route segment caching ────────────────────────────────────
     // By default, dynamic pages have staleTimes.dynamic = 0 (never cached in
