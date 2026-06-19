@@ -78,7 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { id: true, updatedAt: true },
     });
 
-    giftSetRoutes = giftSets.map((gs) => ({
+    giftSetRoutes = giftSets.map((gs: any) => ({
       url: `${BASE_URL}/collections/gift-sets/${gs.id}`,
       lastModified: gs.updatedAt,
       changeFrequency: 'weekly' as const,
