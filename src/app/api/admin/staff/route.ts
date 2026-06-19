@@ -22,6 +22,7 @@ async function isAdmin() {
   }
 }
 
+export const runtime = 'edge';
 export async function GET() {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: 'Access denied' }, { status: 403 });

@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { v2 as cloudinary } from 'cloudinary';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import type { CollectionData } from '@/types';
 
 const FILE = 'collection-images.json';
+const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true,
-});
+async function generateSignature(params: Record<string, string>, secret: string): Promise<string> {
+  const sortedKeys = Object.keys(params).sort();
+  const signStr = sortedKeys.map((k) => `${k}=${params[k]}`).join('&') + secret;
+  const hash = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(signStr));
+  return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 function parseImages(raw: Record<string, unknown>): Record<string, CollectionData> {
   const result: Record<string, CollectionData> = {};
@@ -27,6 +29,8 @@ function parseImages(raw: Record<string, unknown>): Record<string, CollectionDat
   }
   return result;
 }
+
+export const runtime = 'edge';
 
 export async function GET() {
   const raw = await readJsonFile<Record<string, unknown>>(FILE, {});
@@ -47,20 +51,38 @@ export async function PUT(request: Request) {
         return NextResponse.json({ success: false, error: 'Missing slug or file' }, { status: 400 });
       }
 
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const base64 = buffer.toString('base64');
-      const dataUri = `data:${file.type};base64,${base64}`;
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const folder = 'city-fragrance/collections';
 
-      const result = await cloudinary.uploader.upload(dataUri, {
-        folder: 'city-fragrance/collections',
-        resource_type: 'image',
-      });
+      const params: Record<string, string> = { timestamp, folder };
+      const signature = await generateSignature(params, apiSecret!);
+
+      const cloudinaryForm = new FormData();
+      cloudinaryForm.append('file', file);
+      cloudinaryForm.append('folder', folder);
+      cloudinaryForm.append('timestamp', timestamp);
+      cloudinaryForm.append('api_key', apiKey!);
+      cloudinaryForm.append('signature', signature);
+
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+      const uploadRes = await fetch(uploadUrl, { method: 'POST', body: cloudinaryForm });
+
+      if (!uploadRes.ok) {
+        const errorBody = await uploadRes.text();
+        console.error('CLOUDINARY UPLOAD ERROR:', uploadRes.status, errorBody);
+        return NextResponse.json(
+          { success: false, error: `Cloudinary upload failed: ${uploadRes.status}` },
+          { status: uploadRes.status },
+        );
+      }
+
+      const result = (await uploadRes.json()) as { secure_url: string };
+      const secureUrl = result.secure_url.replace('/image/upload/', '/image/upload/f_auto,q_auto:best/');
 
       const raw = await readJsonFile<Record<string, unknown>>(FILE, {});
       const images = parseImages(raw);
       images[slug] = {
-        image: result.secure_url,
+        image: secureUrl,
         description: images[slug]?.description || '',
       };
       await writeJsonFile(FILE, images);
@@ -69,7 +91,7 @@ export async function PUT(request: Request) {
       revalidatePath('/collections');
       revalidatePath('/collections/' + slug);
 
-      return NextResponse.json({ success: true, images, path: result.secure_url });
+      return NextResponse.json({ success: true, images, path: secureUrl });
     }
 
     const body = (await request.json()) as { slug: string; imageUrl?: string; description?: string };
@@ -89,11 +111,9 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: true, images });
   } catch (err: any) {
     console.error('COLLECTION UPLOAD ERROR:', err);
-    const message = err?.message || err?.error?.message || 'Failed to save collection image';
-    const status = err?.http_code || 500;
     return NextResponse.json(
-      { success: false, error: message },
-      { status }
+      { success: false, error: err?.message || 'Failed to save collection image' },
+      { status: 500 },
     );
   }
 }

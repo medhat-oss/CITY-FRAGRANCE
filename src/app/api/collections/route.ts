@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readJsonFile } from '@/lib/dataFile';
 
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 // Server-side in-memory cache with 5s TTL

@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifySession, verifySessionForPOS } from '@/lib/auth';
 
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const shiftSelect = {

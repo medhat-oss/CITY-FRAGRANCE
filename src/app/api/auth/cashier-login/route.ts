@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import prisma from '@/lib/prisma';
 import { createSession, setCashierCookie } from '@/lib/auth';
 
+export const runtime = 'edge';
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { readJsonFile } from '@/lib/dataFile';
 
 // Public storefront endpoint — only returns PUBLISHED gift sets
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
