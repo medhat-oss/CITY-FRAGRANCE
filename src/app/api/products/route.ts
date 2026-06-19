@@ -28,7 +28,7 @@ export async function GET() {
         createdAt: true, updatedAt: true,
       },
     });
-    const products = raw.map((p) => ({
+    const products = raw.map((p: any) => ({
       ...p,
       ...parseNotes(p.notes),
       collections: (p.collections as any[] ?? []).map((c: any) => (typeof c === 'string' ? c : c.slug || '')),
