@@ -3,10 +3,10 @@ import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'city-fragrance-dev-secret-key-change-in-production');
-export const ADMIN_COOKIE = 'admin_session';
+const ADMIN_COOKIE = 'admin_session';
 export const CASHIER_COOKIE = 'cashier_session';
 
-export interface SessionPayload {
+interface SessionPayload {
   id: string;
   email: string;
   username: string;
@@ -80,7 +80,7 @@ export async function verifySessionForPOS(): Promise<SessionPayload | null> {
 }
 
 /** Verify only the cashier session cookie (for cashier-specific flows) */
-export async function verifyCashierSession(): Promise<SessionPayload | null> {
+async function verifyCashierSession(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(CASHIER_COOKIE)?.value;
   if (!token) return null;
@@ -102,12 +102,6 @@ export async function clearAdminSession(): Promise<void> {
 export async function clearCashierSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set(CASHIER_COOKIE, '', { ...cookieOptions, maxAge: 0 });
-}
-
-/** Clears BOTH session cookies (full sign-out). Prefer the targeted variants above. */
-export async function clearSession(): Promise<void> {
-  await clearAdminSession();
-  await clearCashierSession();
 }
 
 /** Set the admin session cookie on a response */

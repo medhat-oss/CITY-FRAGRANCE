@@ -73,57 +73,6 @@ export async function POST(request) {
             });
         }
 
-        // ─── PRODUCTION FLOW (Paymob) ───────────────────────────────────────
-        // Step 1: Authenticate
-        // const authRes = await fetch('https://accept.paymob.com/api/auth/tokens', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ api_key: SANDBOX_KEY }),
-        // });
-        // const { token: authToken } = await authRes.json();
-        //
-        // Step 2: Create Order
-        // const orderRes = await fetch('https://accept.paymob.com/api/ecommerce/orders', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({
-        //         auth_token: authToken,
-        //         delivery_needed: false,
-        //         amount_cents: Math.round(amount * 100),
-        //         currency: 'EGP',
-        //         items: items.map(i => ({ name: i.name, amount_cents: Math.round((i.salePrice || i.price) * 100), quantity: i.quantity })),
-        //     }),
-        // });
-        // const { id: orderId } = await orderRes.json();
-        //
-        // Step 3: Get Payment Key  (use isWallet ? WALLET_INTEGRATION : CARD_INTEGRATION)
-        // const payKeyRes = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({
-        //         auth_token: authToken,
-        //         amount_cents: Math.round(amount * 100),
-        //         expiration: 3600,
-        //         order_id: orderId,
-        //         billing_data: {
-        //             first_name: firstName, last_name: lastName,
-        //             email, phone_number: phone,
-        //             country: 'EG', city: 'Cairo',
-        //             street: 'N/A', floor: 'N/A', building: 'N/A', apartment: 'N/A',
-        //         },
-        //         currency: 'EGP',
-        //         integration_id: integrationId,
-        //     }),
-        // });
-        // const { token: paymentKey } = await payKeyRes.json();
-        //
-        // For wallet: redirect to wallet page; for card: redirect to iframe
-        // const redirectUrl = isWallet
-        //     ? `https://accept.paymob.com/api/acceptance/iframes/${integrationId}?payment_token=${paymentKey}&source.identifier=${phone}&source.subtype=WALLET`
-        //     : `https://accept.paymob.com/api/acceptance/iframes/${integrationId}?payment_token=${paymentKey}`;
-        //
-        // return NextResponse.json({ success: true, mode: 'live', paymentMethod, paymentKey, redirectUrl });
-
         return NextResponse.json({ success: false, error: 'Production keys not configured.' }, { status: 503 });
 
     } catch (err) {
