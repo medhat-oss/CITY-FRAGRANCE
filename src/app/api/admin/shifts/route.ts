@@ -4,7 +4,6 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
 import { verifySession, verifySessionForPOS } from '@/lib/auth';
 
 export const runtime = 'edge';
@@ -192,7 +191,7 @@ export async function POST(request: Request) {
     }
 
     // ── Atomic shift close inside a transaction ──
-    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const result = await prisma.$transaction(async (tx) => {
       const activeShift = await tx.shift.findFirst({
         where: { cashierId: targetCashierId, status: 'OPEN' },
         select: { id: true, startTime: true, cashierName: true },

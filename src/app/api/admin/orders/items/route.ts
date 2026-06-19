@@ -4,7 +4,6 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
 import { verifySession } from '@/lib/auth';
 
 export const runtime = 'edge';
@@ -33,7 +32,7 @@ export async function PUT(request: Request) {
     }
 
     // ── Atomic item removal + stock restoration + order total recalculation ──
-    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const result = await prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({
         where: { orderId: body.orderId },
         select: { id: true, orderId: true, items: true, totalPrice: true, shiftId: true, status: true },

@@ -5,7 +5,6 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import { verifySession, verifySessionForPOS } from '@/lib/auth';
 
@@ -107,7 +106,7 @@ export async function POST(request: Request) {
     }));
 
     // ── Atomic order creation + stock deduction + shift resolution ──
-    const order = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const order = await prisma.$transaction(async (tx) => {
       // 0. Resolve active shift inside the transaction (avoids a separate DB roundtrip)
       if (source === 'POS' && cashierId) {
         const activeShift = await tx.shift.findFirst({
@@ -255,7 +254,7 @@ export async function PUT(request: Request) {
     const items = (existingOrder.items as { name: string; quantity: number; price: number }[]) || [];
 
     // ── Atomic status update + stock restoration ──
-    const order = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const order = await prisma.$transaction(async (tx) => {
       if (isNowCancelled) {
         for (const item of items) {
           const product = await tx.product.findFirst({
