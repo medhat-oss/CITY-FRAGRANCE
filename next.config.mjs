@@ -26,12 +26,6 @@ const nextConfig = {
   // ─── Turbopack ─────────────────────────────────────────────────────────────
   turbopack: {},
 
-  // ─── Minification ──────────────────────────────────────────────────────────
-  // Reduce chunk sizes for Cloudflare Pages 1MB edge-function limit.
-  // serverMinification strips dev-only code and dead-code from edge bundles,
-  // directly reducing Prisma + dependency bloat in each function.
-  minify: true,
-
   // ─── Turbopack Persistent FS Cache ─────────────────────────────────────────
   // This is the CRITICAL fix for the 13–16s dev cold-compilation spikes.
   // It persists the compiled module graph to .next/cache/turbopack between
