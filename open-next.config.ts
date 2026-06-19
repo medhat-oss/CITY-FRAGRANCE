@@ -1,3 +1,12 @@
-import { defineCloudflareConfig } from "@opennextjs/cloudflare";
+import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 
-export default defineCloudflareConfig({});
+const config = {
+  default: {
+    minify: true,
+  },
+  cloudflare: {
+    generateRoutesJson: false,
+  },
+} satisfies OpenNextConfig;
+
+export default config;
