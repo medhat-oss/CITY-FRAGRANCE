@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+export const runtime = 'edge';
+
 const ADMIN_COOKIE = 'admin_session';
 const CASHIER_COOKIE = 'cashier_session';
 
@@ -9,7 +11,7 @@ const PUBLIC_PATHS = new Set([
   '/cashier/login',
 ]);
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (PUBLIC_PATHS.has(pathname)) return NextResponse.next();
 
