@@ -22,7 +22,7 @@ const config = {
     },
   },
   cloudflare: {
-    generateRoutesJson: false,
+    generateRoutesJson: true,
   }
 };
 
