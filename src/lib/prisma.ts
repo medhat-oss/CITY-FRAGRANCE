@@ -1,18 +1,15 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaNeon } from '@prisma/adapter-neon';
+import { withAccelerate } from '@prisma/extension-accelerate';
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
+const globalForPrisma = globalThis as unknown as { prisma: ReturnType<typeof createClient> | undefined };
 
-const getPrismaInstance = () => {
-  const connectionString = process.env.DATABASE_URL!;
-  const adapter = new PrismaNeon({ connectionString });
+function createClient() {
   return new PrismaClient({
-    adapter,
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  });
-};
+  }).$extends(withAccelerate());
+}
 
-const prisma = globalForPrisma.prisma ?? getPrismaInstance();
+const prisma = globalForPrisma.prisma ?? createClient();
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;

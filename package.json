@@ -13,14 +13,15 @@
     "start": "next start",
     "lint": "eslint",
     "switch": "node scripts/env-manager.js",
-  "pages:build": "npx @cloudflare/next-on-pages",
-  "pages:preview": "npx wrangler pages dev",
-  "pages:deploy": "npx wrangler pages deploy"
+    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:preview": "npx wrangler pages dev",
+    "pages:deploy": "npx wrangler pages deploy"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@prisma/extension-accelerate": "^3.0.1",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
     "framer-motion": "^12.40.0",
