@@ -47,7 +47,7 @@ export async function GET(
     // Ensure every item in every order has a stable `id` field.
     // Items created before the id standard may lack one — inject a deterministic
     // fallback so the per-item cancel button always has a valid orderItemId.
-    const ordersWithItemIds = shift.orders.map((o) => ({
+    const ordersWithItemIds = shift.orders.map((o: any) => ({
       ...o,
       items: (Array.isArray(o.items) ? o.items as any[] : []).map(
         (it: any, idx: number) => ({
