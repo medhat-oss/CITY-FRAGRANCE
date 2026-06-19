@@ -9,7 +9,7 @@
     "postinstall": "prisma generate",
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
-    "build": "prisma generate && next build",
+    "build": "PRISMA_GENERATE_DATAPROXY=true npx prisma generate && npx @cloudflare/next-on-pages",
     "start": "next start",
     "lint": "eslint",
     "switch": "node scripts/env-manager.js",
