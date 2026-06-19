@@ -5,7 +5,7 @@ export async function readJsonFile<T>(filename: string, fallback: T): Promise<T>
     switch (filename) {
       case 'gift-sets.json': {
         const rows = await prisma.giftSet.findMany();
-        return rows.map((r) => ({
+        return rows.map((r: any) => ({
           id: r.id,
           name: r.name,
           description: r.description,
