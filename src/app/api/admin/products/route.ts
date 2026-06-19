@@ -97,7 +97,7 @@ export async function GET() {
         createdAt: true, updatedAt: true,
       },
     });
-    const products = raw.map((p) => ({
+    const products = raw.map((p: any) => ({
       ...p,
       ...parseNotes(p.notes),
     }));
