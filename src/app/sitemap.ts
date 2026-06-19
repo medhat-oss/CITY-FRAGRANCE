@@ -52,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { id: true, updatedAt: true, images: true },
     });
 
-    productRoutes = products.map((product) => {
+    productRoutes = products.map((product: any) => {
       const rawImages = product.images;
       const imageList: string[] = Array.isArray(rawImages)
         ? (rawImages as unknown[]).filter((v): v is string => typeof v === 'string')
