@@ -23,7 +23,7 @@ var config = {
     }
   },
   cloudflare: {
-    generateRoutesJson: true
+    generateRoutesJson: false
   }
 };
 var open_next_config_default = config;
