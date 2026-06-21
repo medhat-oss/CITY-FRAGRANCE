@@ -12,7 +12,7 @@ function prismaSingleton() {
       console.error('❌ [Prisma Init Error] DATABASE_URL is missing')
       throw new Error('DATABASE_URL is missing from environment bindings')
     }
-    const adapter = new PrismaNeonHttp(url)
+    const adapter = new PrismaNeonHttp(url, {})
     return new PrismaClient({ adapter })
   } catch (e) {
     console.error('❌ [Prisma Init Error]', e)
