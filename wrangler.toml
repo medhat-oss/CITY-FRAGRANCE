@@ -1,6 +1,4 @@
 name = "city-fragrance"
 compatibility_date = "2026-06-16"
 compatibility_flags = [ "nodejs_compat" ]
-
-[pages_build_output_dir]
-directory = ".open-next/dist"
+pages_build_output_dir = ".open-next/dist"
