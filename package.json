@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "clean": "node -e \"const{rmSync,existsSync}=require('fs');['.next','.open-next'].forEach(d=>{if(existsSync(d))rmSync(d,{recursive:true,force:true})})\"",
-    "build:cloudflare": "npm run clean && opennextjs-cloudflare build && node -e \"const{copyFileSync,mkdirSync,cpSync,existsSync}=require('fs');mkdirSync('.open-next/dist',{recursive:true});['assets','server-functions','cloudflare','middleware','.build','cloudflare-templates'].forEach(p=>{let s='.open-next/'+p;if(existsSync(s))cpSync(s,'.open-next/dist/'+p,{recursive:true})});if(existsSync('.open-next/worker.js'))copyFileSync('.open-next/worker.js','.open-next/dist/_worker.js')\"",
+    "build:cloudflare": "npm run clean && opennextjs-cloudflare build && node -e \"const {copyFileSync,mkdirSync,cpSync,existsSync}=require('fs');mkdirSync('.open-next/dist',{recursive:true});if(existsSync('.open-next/assets'))cpSync('.open-next/assets','.open-next/dist/assets',{recursive:true});if(existsSync('.open-next/worker.js'))copyFileSync('.open-next/worker.js','.open-next/dist/_worker.js')\"",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate" 
