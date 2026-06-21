@@ -9,7 +9,7 @@ const config = {
       queue: "dummy",
     },
   },
-  edgeExternals: ["node:crypto"],
+  edgeExternals: ["node:crypto", "@prisma/client", "@prisma/adapter-neon", "@neondatabase/serverless"],
   middleware: {
     external: true,
     override: {

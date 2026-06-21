@@ -10,25 +10,30 @@ const PUBLIC_PATHS = new Set([
 ]);
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  if (PUBLIC_PATHS.has(pathname)) return NextResponse.next();
+  try {
+    const { pathname } = request.nextUrl;
+    if (PUBLIC_PATHS.has(pathname)) return NextResponse.next();
 
-  const adminCookie = request.cookies.get(ADMIN_COOKIE);
-  const cashierCookie = request.cookies.get(CASHIER_COOKIE);
+    const adminCookie = request.cookies.get(ADMIN_COOKIE);
+    const cashierCookie = request.cookies.get(CASHIER_COOKIE);
 
-  if (pathname.startsWith('/admin')) {
-    if (!adminCookie && !cashierCookie)
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+    if (pathname.startsWith('/admin')) {
+      if (!adminCookie && !cashierCookie)
+        return NextResponse.redirect(new URL('/admin/login', request.url));
+      return NextResponse.next();
+    }
+
+    if (pathname.startsWith('/cashier')) {
+      if (!adminCookie && !cashierCookie)
+        return NextResponse.redirect(new URL('/cashier/login', request.url));
+      return NextResponse.next();
+    }
+
     return NextResponse.next();
+  } catch (e) {
+    console.error('CRITICAL_ERROR_STACK:', (e as Error).stack);
+    return new Response('Internal Server Error', { status: 500 });
   }
-
-  if (pathname.startsWith('/cashier')) {
-    if (!adminCookie && !cashierCookie)
-      return NextResponse.redirect(new URL('/cashier/login', request.url));
-    return NextResponse.next();
-  }
-
-  return NextResponse.next();
 }
 
 export const config = {
