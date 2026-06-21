@@ -11,7 +11,8 @@
     "build:cloudflare": "opennextjs-cloudflare",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "build:cloudflare": "open-next build --target cloudflare"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
