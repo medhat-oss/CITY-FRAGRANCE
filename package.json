@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:cloudflare": "opennextjs-cloudflare build",
+    "build:cloudflare": "opennextjs-cloudflare build && mkdir -p .open-next/dist && cp -r .open-next/assets/. .open-next/dist/ && cp .open-next/worker.js .open-next/dist/_worker.js",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate" 
