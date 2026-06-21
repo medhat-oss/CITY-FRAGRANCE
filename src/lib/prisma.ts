@@ -1,27 +1,13 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client/edge'
 import { PrismaNeonHttp } from '@prisma/adapter-neon'
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
 
-function prismaSingleton() {
-  try {
-    const url = process.env.DATABASE_URL
-    if (!url) {
-      console.error('❌ [Prisma Init Error] DATABASE_URL is missing')
-      throw new Error('DATABASE_URL is missing from environment bindings')
-    }
-    const adapter = new PrismaNeonHttp(url, {})
-    return new PrismaClient({ adapter })
-  } catch (e) {
-    console.error('❌ [Prisma Init Error]', e)
-    throw e
-  }
-}
+const connectionString = process.env.DATABASE_URL
+const adapter = new PrismaNeonHttp(connectionString!, {})
 
-export const prisma = globalForPrisma.prisma ?? prismaSingleton()
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter })
 
-globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export default prisma
