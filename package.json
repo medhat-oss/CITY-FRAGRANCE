@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "clean": "node -e \"const{rmSync,existsSync}=require('fs');['.next','.open-next'].forEach(d=>{if(existsSync(d))rmSync(d,{recursive:true,force:true})})\"",
-    "build:cloudflare": "npm run clean && opennextjs-cloudflare build && node -e \"const {mkdirSync,cpSync,existsSync,copyFileSync}=require('fs');mkdirSync('.open-next/dist',{recursive:true});['assets','server-functions','cloudflare','middleware','.build'].forEach(p=>{let s='.open-next/'+p;if(existsSync(s))cpSync(s,'.open-next/dist/'+p,{recursive:true,dereference:true})});if(existsSync('.open-next/worker.js'))copyFileSync('.open-next/worker.js','.open-next/dist/_worker.js')\"",
+    "build:cloudflare": "WRANGLER_VERSION=4.102.0 npm run clean && WRANGLER_VERSION=4.102.0 opennextjs-cloudflare build && node -e \"const {mkdirSync,cpSync,existsSync,copyFileSync}=require('fs');mkdirSync('.open-next/dist',{recursive:true});['assets','server-functions','cloudflare','middleware','.build'].forEach(p=>{let s='.open-next/'+p;if(existsSync(s))cpSync(s,'.open-next/dist/'+p,{recursive:true,dereference:true})});if(existsSync('.open-next/worker.js'))copyFileSync('.open-next/worker.js','.open-next/dist/_worker.js')\"",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate"
