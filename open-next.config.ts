@@ -4,7 +4,7 @@ export default defineConfig({
   default: {
     minify: true,
     build: {
-      external: ["@prisma/client", "@prisma/client/*"],
+      external: ["@prisma/client", "@prisma/client/*", "@prisma/client-*"],
     },
     override: {
       wrapper: "cloudflare-node",
