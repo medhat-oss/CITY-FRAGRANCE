@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
+import { verifyPassword } from '@/lib/password';
 import prisma from '@/lib/prisma';
 import { createSession, setCashierCookie } from '@/lib/auth';
 
-export const runtime = 'edge';
+
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const isValid = await bcrypt.compare(password, user.password);
+    const isValid = await verifyPassword(password, user.password);
     if (!isValid) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }

@@ -9,35 +9,23 @@ async function main() {
     if (fs.existsSync(d)) fs.rmSync(d, { recursive: true, force: true });
   }
 
-  // Step 2: Build Next.js app
+  // Step 2: Build Next.js app (use webpack for proper edge entry points)
   console.log('\n=== Building Next.js ===');
   execSync('npx next build', { stdio: 'inherit' });
 
   // Step 2b: Ensure standalone output exists (Windows EBUSY workaround)
   console.log('\n=== Ensuring standalone output ===');
-  const standaloneDir = '.next/standalone/.next';
-  if (!fs.existsSync(standaloneDir)) {
-    fs.mkdirSync(path.join(standaloneDir, 'server'), { recursive: true });
-    // Copy required files for OpenNext
-    const entries = [
-      ['BUILD_ID',                  '.next/BUILD_ID'],
-      ['required-server-files.json','.next/required-server-files.json'],
-      ['server/app-paths-manifest.json', '.next/server/app-paths-manifest.json'],
-    ];
-    for (const [dest, src] of entries) {
-      const dstPath = path.join(standaloneDir, dest);
-      if (!fs.existsSync(dstPath) && fs.existsSync(src)) {
-        fs.mkdirSync(path.dirname(dstPath), { recursive: true });
-        fs.copyFileSync(src, dstPath);
-      }
+  const standaloneRoot = '.next/standalone/.next';
+  if (!fs.existsSync(standaloneRoot)) {
+    fs.mkdirSync(path.join(standaloneRoot, 'server'), { recursive: true });
+    // Root manifests
+    for (const f of ['BUILD_ID', 'required-server-files.json', 'prerender-manifest.json', 'routes-manifest.json', 'images-manifest.json', 'build-manifest.json', 'app-path-routes-manifest.json', 'fallback-build-manifest.json']) {
+      const src = path.join('.next', f);
+      if (fs.existsSync(src)) fs.cpSync(src, path.join(standaloneRoot, f), { force: true });
     }
-    // Create empty manifests that OpenNext expects
-    for (const m of ['server/pages-manifest.json', 'server/middleware-manifest.json', 'server/middleware-build-manifest.js']) {
-      const mp = path.join(standaloneDir, m);
-      if (!fs.existsSync(mp)) {
-        fs.mkdirSync(path.dirname(mp), { recursive: true });
-        fs.writeFileSync(mp, m.endsWith('.js') ? 'module.exports={}' : '{}');
-      }
+    // Copy entire server/ directory (all routes, chunks, manifests, etc.)
+    if (fs.existsSync('.next/server')) {
+      fs.cpSync('.next/server', path.join(standaloneRoot, 'server'), { recursive: true, force: true });
     }
     console.log('  ✓ Standalone output created');
   } else {
@@ -47,6 +35,67 @@ async function main() {
   // Step 3: Build OpenNext Cloudflare bundle
   console.log('\n=== Building OpenNext Cloudflare bundle ===');
   execSync('npx opennextjs-cloudflare build --skipNextBuild -c wrangler.toml', { stdio: 'inherit' });
+
+  // Step 3b: Copy all manifest files (Windows workaround for OpenNext omissions)
+  console.log('\n=== Copying manifest files ===');
+  const targetRootDir = '.open-next/server-functions/default/.next';
+  const targetServerDir = path.join(targetRootDir, 'server');
+  // Helper: copy source to dest, log result
+  function copyManifest(src, dst, label) {
+    if (!fs.existsSync(src)) { console.log(`  ✗ ${label} (source not found)`); return false; }
+    if (fs.existsSync(dst)) { console.log(`  • ${label} (already exists)`); return true; }
+    fs.mkdirSync(path.dirname(dst), { recursive: true });
+    fs.copyFileSync(src, dst);
+    console.log(`  ✓ ${label}`);
+    return true;
+  }
+  // Helper: copy entire dir recursively
+  function copyDir(src, dst, label) {
+    if (!fs.existsSync(src)) { console.log(`  ✗ ${label} (source not found)`); return; }
+    if (fs.existsSync(dst)) { console.log(`  • ${label} (already exists)`); return; }
+    fs.cpSync(src, dst, { recursive: true, force: true });
+    let count = 0;
+    try { count = fs.readdirSync(dst, { recursive: true }).length; } catch { /* ignore */ }
+    console.log(`  ✓ ${label} (${count} items)`);
+  }
+  // ── Root-level manifests (loaded as /.next/<file>) ──
+  const rootManifests = [
+    'BUILD_ID',
+    'prerender-manifest.json',
+    'routes-manifest.json',
+    'images-manifest.json',
+    'build-manifest.json',
+    'required-server-files.json',
+    'app-path-routes-manifest.json',
+    'fallback-build-manifest.json',
+    'dynamic-css-manifest.json',
+    'export-marker.json',
+  ];
+  for (const file of rootManifests) {
+    copyManifest(path.join('.next', file), path.join(targetRootDir, file), `.next/${file}`);
+  }
+  // required-server-files.js (loaded via eval by Next.js)
+  copyManifest(path.join('.next', 'required-server-files.js'), path.join(targetRootDir, 'required-server-files.js'), '.next/required-server-files.js');
+  // ── Server subdirectory manifests (loaded as /.next/server/<file>) ──
+  const serverManifests = [
+    'app-paths-manifest.json',
+    'pages-manifest.json',
+    'middleware-manifest.json',
+    'middleware-build-manifest.js',
+    'next-font-manifest.js',
+    'next-font-manifest.json',
+    'server-reference-manifest.js',
+    'server-reference-manifest.json',
+    'interception-route-rewrite-manifest.js',
+    'functions-config-manifest.json',
+    'prefetch-hints.json',
+    'subresource-integrity-manifest.json',
+  ];
+  for (const file of serverManifests) {
+    copyManifest(path.join('.next/server', file), path.join(targetServerDir, file), `server/${file}`);
+  }
+  // ── Edge function directory (if any) ──
+  copyDir('.next/server/edge', path.join(targetServerDir, 'edge'), 'server/edge/');
 
   // Step 4: Copy packages not traced by OpenNext
   console.log('\n=== Copying missing packages ===');
@@ -71,19 +120,36 @@ async function main() {
     }
   }
 
-  // Step 5: Create deployment dist
-  console.log('\n=== Creating dist/ ===');
-  fs.mkdirSync('.open-next/dist', { recursive: true });
-  for (const p of ['assets', 'server-functions', 'cloudflare', 'middleware', '.build']) {
-    const src = path.join('.open-next', p);
-    if (fs.existsSync(src)) {
-      const dst = path.join('.open-next/dist', p);
-      fs.cpSync(src, dst, { recursive: true, dereference: true });
+  // Step 5: Post-build patch — inline manifest JSON files for direct require() calls
+  console.log('\n=== Patching handler.mjs to inline manifest JSON files ===');
+  const handlerPath = '.open-next/server-functions/default/handler.mjs';
+  if (fs.existsSync(handlerPath)) {
+    let handlerContent = fs.readFileSync(handlerPath, 'utf-8');
+
+    // The Next.js server's getMiddlewareManifest() uses global require() directly
+    // (NOT through __require or loadManifest, which are scoped differently).
+    // We must inline the JSON content directly at the call site.
+    const manifestJsonPath = '.open-next/server-functions/default/.next/server/middleware-manifest.json';
+    if (fs.existsSync(manifestJsonPath)) {
+      const manifestContent = JSON.stringify(JSON.parse(fs.readFileSync(manifestJsonPath, 'utf-8')));
+      const oldCall = 'require(this.middlewareManifestPath)';
+      const newCall = '(' + manifestContent + ')';
+      const replaceCount = handlerContent.split(oldCall).length - 1;
+      if (replaceCount > 0) {
+        handlerContent = handlerContent.split(oldCall).join(newCall);
+        console.log(`  ✓ Inlined ${replaceCount} instance(s) of require(this.middlewareManifestPath)`);
+      } else {
+        console.log('  ✗ Target pattern require(this.middlewareManifestPath) not found in handler.mjs');
+      }
+    } else {
+      console.log('  ✗ middleware-manifest.json not found at ' + manifestJsonPath);
     }
+
+    fs.writeFileSync(handlerPath, handlerContent, 'utf-8');
+  } else {
+    console.log('  ✗ handler.mjs not found');
   }
-  if (fs.existsSync('.open-next/worker.js')) {
-    fs.copyFileSync('.open-next/worker.js', '.open-next/dist/_worker.js');
-  }
+
   console.log('\n✅ Build complete!');
 }
 

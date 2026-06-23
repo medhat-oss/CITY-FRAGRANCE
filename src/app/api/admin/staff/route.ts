@@ -2,7 +2,7 @@
 // Admins must see all database records. Modifying this will break the Admin Panel dashboard layout.
 
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
+import { hashPassword } from '@/lib/password';
 import prisma from '@/lib/prisma';
 import { verifySession } from '@/lib/auth';
 
@@ -22,7 +22,7 @@ async function isAdmin() {
   }
 }
 
-export const runtime = 'edge';
+
 export async function GET() {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: 'Access denied' }, { status: 403 });
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Staff account already exists with this email or username' }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hashPassword(password);
     const roleEnum = role.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'CASHIER';
     const now = new Date();
 

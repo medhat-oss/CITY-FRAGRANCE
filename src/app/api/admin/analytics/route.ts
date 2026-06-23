@@ -29,7 +29,7 @@ interface GiftSetData {
   stock?: number;
 }
 
-export const runtime = 'edge';
+
 export async function GET() {
   try {
     // ── Fetch active (non-cancelled/refunded) orders for aggregation ──

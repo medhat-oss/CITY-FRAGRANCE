@@ -21,7 +21,7 @@ const jost = Jost({
   weight: ['300', '400', '500', '600', '700'],
 });
 
-export const runtime = 'edge';
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://city-fragrance-medhat-oss-projects.vercel.app'),
 

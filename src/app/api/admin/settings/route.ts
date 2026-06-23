@@ -3,7 +3,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import prisma from '@/lib/prisma';
 
-export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 const FILE = 'site-settings.json';

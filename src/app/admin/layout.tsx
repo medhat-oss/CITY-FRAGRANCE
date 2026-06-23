@@ -2,7 +2,7 @@ import { verifySession, clearAdminSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
 
-export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 export default async function AdminRootLayout({ children }: { children: React.ReactNode }) {

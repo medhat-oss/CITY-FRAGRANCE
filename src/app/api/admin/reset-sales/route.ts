@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { verifySession } from '@/lib/auth';
 
-export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 export async function POST() {

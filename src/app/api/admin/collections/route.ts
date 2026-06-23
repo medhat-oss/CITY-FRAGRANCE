@@ -30,7 +30,6 @@ function parseImages(raw: Record<string, unknown>): Record<string, CollectionDat
   return result;
 }
 
-export const runtime = 'edge';
 
 export async function GET() {
   const raw = await readJsonFile<Record<string, unknown>>(FILE, {});

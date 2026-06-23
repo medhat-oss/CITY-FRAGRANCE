@@ -58,7 +58,7 @@ async function syncToDB(gs: GiftSet) {
   }
 }
 
-export const runtime = 'edge';
+
 export async function GET() {
   noStore();
   // Admin sees ALL gift sets (including drafts)

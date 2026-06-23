@@ -45,7 +45,7 @@ async function injectProductImages(orders: any[]): Promise<any[]> {
   }));
 }
 
-export const runtime = 'edge';
+
 export async function GET() {
   try {
     const orders = await prisma.order.findMany({
