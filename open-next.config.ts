@@ -2,12 +2,20 @@ import type { OpenNextConfig } from "@opennextjs/cloudflare";
 
 const config: OpenNextConfig = {
   default: {
-    placement: "server",
-    minify: true,
-    build: {
-      external: ["@prisma/client-*", "@prisma/client/edge"],
+    override: {
+      wrapper: "cloudflare-node",
+      converter: "edge",
+      proxyExternalRequest: "fetch",
     },
   },
+  // Put prisma edge client exclusions here inside edgeExternals as required by the schema validation
+  edgeExternals: [
+    "@prisma/client",
+    "@prisma/client/*",
+    ".prisma/client",
+    ".prisma/client/*",
+    "@prisma/client-*"
+  ],
 };
 
 export default config;
