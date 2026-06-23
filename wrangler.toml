@@ -14,9 +14,3 @@ NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET = "city_fragrance"
 NEXT_PUBLIC_WHATSAPP_NUMBER = "201044415982"
 NODE_OPTIONS = "--max-old-space-size=4096"
 GENERATE_SOURCEMAP = "false"
-
-[placement]
-mode = "smart"
-
-[build]
-external_modules = ["@prisma/client", "@prisma/client/*"]

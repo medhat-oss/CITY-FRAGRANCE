@@ -1,5 +1,11 @@
-const config = {
+import { defineConfig } from "@opennextjs/cloudflare";
+
+export default defineConfig({
   default: {
+    minify: true,
+    buildConfig: {
+      external: ["@prisma/client", "@prisma/client/*"],
+    },
     override: {
       wrapper: "cloudflare-node",
       converter: "edge",
@@ -23,7 +29,5 @@ const config = {
   },
   cloudflare: {
     generateRoutesJson: false,
-  }
-};
-
-export default config;
+  },
+});
