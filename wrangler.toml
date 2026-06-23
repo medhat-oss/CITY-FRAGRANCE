@@ -1,15 +1,11 @@
 name = "city-fragrance"
 compatibility_date = "2026-06-16"
 compatibility_flags = [ "nodejs_compat" ]
-main = ".open-next/worker.js"
 pages_build_output_dir = ".open-next"
-
-[assets]
-directory = ".open-next/assets"
 
 [vars]
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = "dwsxotewe"
 NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET = "city_fragrance"
 NEXT_PUBLIC_WHATSAPP_NUMBER = "201044415982"
-NODE_OPTIONS = "--max-old-space-size=4096"
+NODE_OPTIONS = "--max-old-space-size=4048"
 GENERATE_SOURCEMAP = "false"
