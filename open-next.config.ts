@@ -2,16 +2,12 @@ import type { OpenNextConfig } from "@opennextjs/cloudflare";
 
 const config: OpenNextConfig = {
   default: {
-    placement: "node",
+    placement: "server",
     minify: true,
-    buildCommand: "npx next build",
+    build: {
+      external: ["@prisma/client-*", "@prisma/client/edge"],
+    },
   },
-  edgeExternals: [
-    "@prisma/client",
-    "@prisma/client/*",
-    ".prisma/client",
-    ".prisma/client/*",
-  ],
 };
 
 export default config;
