@@ -3,7 +3,7 @@ import { defineConfig } from "@opennextjs/cloudflare";
 export default defineConfig({
   default: {
     minify: true,
-    buildConfig: {
+    build: {
       external: ["@prisma/client", "@prisma/client/*"],
     },
     override: {
