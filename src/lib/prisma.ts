@@ -1,15 +1,15 @@
-import { PrismaClient } from '@prisma/client/edge'
-import { PrismaNeonHttp } from '@prisma/adapter-neon'
+let prismaClient: any
+let prismaInitPromise: Promise<void> | null = null
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
-
-function createRealPrisma(): PrismaClient {
+async function initPrisma(): Promise<void> {
+  const { PrismaClient } = await import('@prisma/client/edge')
+  const { PrismaNeonHttp } = await import('@prisma/adapter-neon')
   const connectionString = (process.env.DATABASE_URL ?? '').replace('postgres://', 'postgresql://')
   const adapter = new PrismaNeonHttp(connectionString, {})
-  return new PrismaClient({ adapter })
+  prismaClient = new PrismaClient({ adapter })
 }
 
-function createBuildMock(): PrismaClient {
+function createBuildMock(): any {
   const handler: ProxyHandler<any> = {
     get(_target, prop) {
       if (prop === 'then' || prop === 'catch') return undefined
@@ -20,23 +20,47 @@ function createBuildMock(): PrismaClient {
       return Promise.resolve([])
     },
   }
-  return new Proxy(function () {} as any, handler) as PrismaClient
+  return new Proxy(function () {} as any, handler)
 }
 
-function getPrisma(): PrismaClient {
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return createBuildMock()
+function createPrismaProxy(): any {
+  function getTarget(): any {
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      return createBuildMock()
+    }
+    if (!prismaInitPromise) {
+      prismaInitPromise = initPrisma()
+    }
+    return prismaInitPromise.then(() => prismaClient)
   }
-  if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = createRealPrisma()
-  }
-  return globalForPrisma.prisma
+
+  return new Proxy({} as any, {
+    get(_, prop) {
+      if (prop === 'then' || prop === 'catch') return undefined
+      const lazyFn = async (...args: any[]) => {
+        const target = await getTarget()
+        const val = target[prop]
+        return typeof val === 'function' ? val(...args) : val
+      }
+      return new Proxy(lazyFn, {
+        get(__, method) {
+          if (method === 'then' || method === 'catch') return undefined
+          return async (...args: any[]) => {
+            const target = await getTarget()
+            return target[prop][method](...args)
+          }
+        },
+        apply(__, _this, args) {
+          return (async () => {
+            const target = await getTarget()
+            const val = target[prop]
+            return typeof val === 'function' ? val(...args) : val
+          })()
+        },
+      })
+    },
+  })
 }
 
-const prisma = new Proxy({} as PrismaClient, {
-  get(_, prop) {
-    return getPrisma()[prop as keyof PrismaClient]
-  },
-})
-
+const prisma = createPrismaProxy()
 export default prisma

@@ -16,7 +16,11 @@ async function main() {
   process.env.NEXT_DISABLE_STATIC_GENERATION = '1';
   execSync('npx next build', { stdio: 'inherit' });
 
-  // Step 2b: Ensure standalone output exists (Windows EBUSY workaround)
+  // Step 2b: Regenerate Prisma client for Edge/WASM compatibility
+  console.log('\n=== Regenerating Prisma client ===');
+  execSync('npx prisma generate', { stdio: 'inherit' });
+
+  // Step 2c: Ensure standalone output exists (Windows EBUSY workaround)
   console.log('\n=== Ensuring standalone output ===');
   const standaloneRoot = '.next/standalone/.next';
   if (!fs.existsSync(standaloneRoot)) {
