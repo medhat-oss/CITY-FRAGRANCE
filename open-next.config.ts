@@ -1,6 +1,6 @@
-import { defineConfig } from "@opennextjs/cloudflare";
+import type { OpenNextConfig } from "@opennextjs/cloudflare";
 
-export default defineConfig({
+const config: OpenNextConfig = {
   default: {
     minify: true,
     build: {
@@ -30,4 +30,6 @@ export default defineConfig({
   cloudflare: {
     generateRoutesJson: false,
   },
-});
+};
+
+export default config;
