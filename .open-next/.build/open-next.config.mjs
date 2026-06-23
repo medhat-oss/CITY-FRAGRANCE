@@ -12,7 +12,6 @@ var config = {
       queue: "dummy"
     }
   },
-  edgeExternals: ["node:crypto"],
   middleware: {
     external: true,
     override: {
@@ -24,9 +23,14 @@ var config = {
       queue: "dummy"
     }
   },
-  cloudflare: {
-    generateRoutesJson: false
-  }
+  edgeExternals: [
+    "node:crypto",
+    "@prisma/client",
+    "@prisma/client/*",
+    ".prisma/client",
+    ".prisma/client/*",
+    "@prisma/client-*"
+  ]
 };
 var open_next_config_default = config;
 export {

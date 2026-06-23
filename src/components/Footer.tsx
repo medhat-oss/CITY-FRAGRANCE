@@ -211,7 +211,6 @@ export default function Footer() {
               </a>
             </p>
           </div>
-          <p>Powerd by Medhat Elaraby</p>
           <div className="flex items-center gap-4 text-xl text-white/30">
             <FaCcVisa />
             <FaCcMastercard />
