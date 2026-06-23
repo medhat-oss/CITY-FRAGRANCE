@@ -2,34 +2,16 @@ import type { OpenNextConfig } from "@opennextjs/cloudflare";
 
 const config: OpenNextConfig = {
   default: {
+    placement: "node",
     minify: true,
-    build: {
-      external: ["@prisma/client", "@prisma/client/*", "@prisma/client-*"],
-    },
-    override: {
-      wrapper: "cloudflare-node",
-      converter: "edge",
-      proxyExternalRequest: "fetch",
-      incrementalCache: "dummy",
-      tagCache: "dummy",
-      queue: "dummy",
-    },
+    buildCommand: "npx next build",
   },
-  edgeExternals: ["node:crypto"],
-  middleware: {
-    external: true,
-    override: {
-      wrapper: "cloudflare-edge",
-      converter: "edge",
-      proxyExternalRequest: "fetch",
-      incrementalCache: "dummy",
-      tagCache: "dummy",
-      queue: "dummy",
-    },
-  },
-  cloudflare: {
-    generateRoutesJson: false,
-  },
+  edgeExternals: [
+    "@prisma/client",
+    "@prisma/client/*",
+    ".prisma/client",
+    ".prisma/client/*",
+  ],
 };
 
 export default config;
