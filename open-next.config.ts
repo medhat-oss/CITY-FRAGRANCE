@@ -1,6 +1,4 @@
-import type { OpenNextConfig } from "@opennextjs/cloudflare";
-
-const config: OpenNextConfig = {
+const config = {
   default: {
     override: {
       wrapper: "cloudflare-node",
@@ -8,7 +6,6 @@ const config: OpenNextConfig = {
       proxyExternalRequest: "fetch",
     },
   },
-  // Put prisma edge client exclusions here inside edgeExternals as required by the schema validation
   edgeExternals: [
     "@prisma/client",
     "@prisma/client/*",
