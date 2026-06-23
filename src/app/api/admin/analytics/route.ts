@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { readJsonFile } from '@/lib/dataFile';
 
+export const dynamic = 'force-dynamic';
+
 interface OrderItem {
   id?: string;
   name: string;

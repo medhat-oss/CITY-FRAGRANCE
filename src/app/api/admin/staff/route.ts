@@ -6,6 +6,8 @@ import { hashPassword } from '@/lib/password';
 import prisma from '@/lib/prisma';
 import { verifySession } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 async function isAdmin() {
   const session = await verifySession();
   if (!session?.id) return false;

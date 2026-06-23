@@ -4,6 +4,8 @@ import { unstable_noStore as noStore } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 const FILE = 'gift-sets.json';
 
 interface GiftSet {

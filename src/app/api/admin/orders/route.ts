@@ -8,6 +8,8 @@ import prisma from '@/lib/prisma';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import { verifySession, verifySessionForPOS } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 interface OrderItem {
   id: string;
   name: string;

@@ -3,6 +3,7 @@ import { verifyPassword } from '@/lib/password';
 import prisma from '@/lib/prisma';
 import { createSession, setAdminCookie, CASHIER_COOKIE } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {

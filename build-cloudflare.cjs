@@ -11,6 +11,9 @@ async function main() {
 
   // Step 2: Build Next.js app (use webpack for proper edge entry points)
   console.log('\n=== Building Next.js ===');
+  // Prevent Next.js from attempting static generation of API routes that use Prisma
+  // (Prisma WASM engine fails to load during build on Windows).
+  process.env.NEXT_DISABLE_STATIC_GENERATION = '1';
   execSync('npx next build', { stdio: 'inherit' });
 
   // Step 2b: Ensure standalone output exists (Windows EBUSY workaround)
