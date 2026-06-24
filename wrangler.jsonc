@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "city-fragrance",
+  "compatibility_date": "2026-06-16",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "city-fragrance"
+    }
+  ],
+  "images": {
+    "binding": "IMAGES"
+  },
+  "vars": {
+    "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "dwsxotewe",
+    "NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "city_fragrance",
+    "NEXT_PUBLIC_WHATSAPP_NUMBER": "201044415982"
+  }
+}

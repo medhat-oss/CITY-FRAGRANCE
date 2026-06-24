@@ -41,7 +41,7 @@ async function main() {
 
   // Step 3: Build OpenNext Cloudflare bundle
   console.log('\n=== Building OpenNext Cloudflare bundle ===');
-  execSync('npx opennextjs-cloudflare build -c wrangler.toml', { stdio: 'inherit' });
+  execSync('npx opennextjs-cloudflare build -c wrangler.jsonc', { stdio: 'inherit' });
 
   // Step 3b: Copy all manifest files (Windows workaround for OpenNext omissions)
   console.log('\n=== Copying manifest files ===');
@@ -127,34 +127,110 @@ async function main() {
     }
   }
 
-  // Step 5: Post-build patch — inline manifest JSON files for direct require() calls
-  console.log('\n=== Patching handler.mjs to inline manifest JSON files ===');
-  const handlerPath = '.open-next/server-functions/default/handler.mjs';
-  if (fs.existsSync(handlerPath)) {
-    let handlerContent = fs.readFileSync(handlerPath, 'utf-8');
+  // Step 5: Copy middleware-manifest.json into deployment (for runtime access)
+  try {
+    console.log('\n=== Copying middleware manifest ===');
+    const srcManifest = '.next/server/middleware-manifest.json';
+    const dstManifest = '.open-next/server-functions/default/.next/server/middleware-manifest.json';
+    copyManifest(srcManifest, dstManifest, 'middleware-manifest.json');
+    const srcBuildManifest = '.next/server/middleware-build-manifest.js';
+    const dstBuildManifest = '.open-next/server-functions/default/.next/server/middleware-build-manifest.js';
+    copyManifest(srcBuildManifest, dstBuildManifest, 'middleware-build-manifest.js');
+  } catch (manifestErr) {
+    console.log('  • middleware manifest copy skipped: ' + manifestErr.message);
+  }
 
-    // The Next.js server's getMiddlewareManifest() uses global require() directly
-    // (NOT through __require or loadManifest, which are scoped differently).
-    // We must inline the JSON content directly at the call site.
-    const manifestJsonPath = '.open-next/server-functions/default/.next/server/middleware-manifest.json';
-    if (fs.existsSync(manifestJsonPath)) {
-      const manifestContent = JSON.stringify(JSON.parse(fs.readFileSync(manifestJsonPath, 'utf-8')));
-      const oldCall = 'require(this.middlewareManifestPath)';
-      const newCall = '(' + manifestContent + ')';
-      const replaceCount = handlerContent.split(oldCall).length - 1;
-      if (replaceCount > 0) {
-        handlerContent = handlerContent.split(oldCall).join(newCall);
-        console.log(`  ✓ Inlined ${replaceCount} instance(s) of require(this.middlewareManifestPath)`);
-      } else {
-        console.log('  ✗ Target pattern require(this.middlewareManifestPath) not found in handler.mjs');
-      }
+  // Step 6: Patch handler.mjs — remove broken Prisma WASM imports (mangled Windows paths)
+  console.log('\n=== Patching handler.mjs — fixing WASM imports ===');
+  const handlerFile = '.open-next/server-functions/default/handler.mjs';
+  if (fs.existsSync(handlerFile)) {
+    let handlerContent = fs.readFileSync(handlerFile, 'utf-8');
+    // Replace import("D:...query_compiler_fast_bg.wasm") with Promise.resolve({default:null})
+    // These are Turbopack WASM chunk references for Prisma's internal query compiler,
+    // which is never invoked at runtime when using the Neon adapter.
+    const wasmImportRegex = /await import\("D:[^"]*query_compiler_fast_bg\.wasm"\)/g;
+    const matches = handlerContent.match(wasmImportRegex);
+    if (matches) {
+      handlerContent = handlerContent.replace(wasmImportRegex, '({default:null})');
+      fs.writeFileSync(handlerFile, handlerContent, 'utf-8');
+      console.log(`  ✓ Patched ${matches.length} WASM import(s)`);
     } else {
-      console.log('  ✗ middleware-manifest.json not found at ' + manifestJsonPath);
+      console.log('  • No WASM imports to patch');
     }
-
-    fs.writeFileSync(handlerPath, handlerContent, 'utf-8');
   } else {
     console.log('  ✗ handler.mjs not found');
+  }
+
+  // Step 7: Patch middleware/handler.mjs — lazy-init instead of top-level await
+  // (top-level await fails at module evaluation in Pages bundled Worker)
+  console.log('\n=== Patching middleware/handler.mjs — lazy init ===');
+  const mwHandler = '.open-next/middleware/handler.mjs';
+  if (fs.existsSync(mwHandler)) {
+    let mw = fs.readFileSync(mwHandler, 'utf-8');
+    // Replace `var handler2 = await createGenericHandler({...});` with lazy init
+    const oldInit = `var handler2 = await createGenericHandler({
+  handler: defaultHandler,
+  type: "middleware"
+});`;
+    const newInit = `var handlerPromise;
+var handler2 = async (...args) => {
+  if (!handlerPromise) handlerPromise = createGenericHandler({ handler: defaultHandler, type: "middleware" });
+  return (await handlerPromise)(...args);
+};`;
+    if (mw.includes(oldInit)) {
+      mw = mw.replace(oldInit, newInit);
+      fs.writeFileSync(mwHandler, mw, 'utf-8');
+      console.log('  ✓ Patched middleware/handler.mjs — lazy init');
+    } else {
+      console.log('  • Pattern not found in middleware handler');
+    }
+  } else {
+    console.log('  ✗ middleware/handler.mjs not found');
+  }
+
+  // Step 8: Patch worker.js — remove DO re-exports, add await, wrap fetch in try-catch
+  console.log('\n=== Patching worker.js — fixes ===');
+  const workerFile = '.open-next/worker.js';
+  if (fs.existsSync(workerFile)) {
+    let wc = fs.readFileSync(workerFile, 'utf-8');
+    // 8a: Remove static Durable Object re-exports (not configured, module eval causes 500)
+    wc = wc.replace(/export \{.*\} from "\.\/\.build\/durable-objects\/.*";\n/g, '');
+    // 8b: Remove any previously added try blocks
+    wc = wc.replace(/\s*try \{\n/g, '\n');
+    wc = wc.replace(/\n\s*\} catch \(e\) \{\n\s*return new Response\("ERROR:.*?\(no stack\)"\),.*?\n\s*\}\n/g, '\n');
+    // 8c: Add await before runWithCloudflareRequestContext
+    wc = wc.replace('return runWithCloudflareRequestContext(', 'return await runWithCloudflareRequestContext(');
+    // 8d: Wrap fetch body in try-catch (with detailed error logging)
+    const fetchStart = 'async fetch(request, env, ctx) {';
+    const fetchWrapped = `async fetch(request, env, ctx) {
+        try {`;
+    const closePattern = `        });
+    },`;
+    const closeWrapped = `        });
+        } catch (e) {
+          return new Response("ERROR: " + (e?.constructor?.name || typeof e) + ": " + (e?.message || "").substring(0, 1000) + "\\n\\n" + (e?.stack?.substring(0, 2000) || "(no stack)"), { status: 500, headers: { "content-type": "text/plain" } });
+        }
+    },`;
+    if (wc.includes(fetchStart) && wc.includes(closePattern)) {
+      wc = wc.replace(fetchStart, fetchWrapped);
+      wc = wc.replace(closePattern, closeWrapped);
+      fs.writeFileSync(workerFile, wc, 'utf-8');
+      console.log('  ✓ Patched worker.js (DO removed, await added, error logging)');
+    } else {
+      console.log('  • Pattern not found');
+    }
+  } else {
+    console.log('  ✗ worker.js not found');
+  }
+
+  // Step 9: Deploy to Cloudflare Workers
+  console.log('\n=== Deploying to Cloudflare Workers ===');
+  try {
+    execSync('npx opennextjs-cloudflare deploy --config wrangler.jsonc', { stdio: 'inherit' });
+    console.log('  ✓ Deployed successfully');
+  } catch (deployErr) {
+    console.error('  ✗ Deploy failed: ' + deployErr.message);
+    console.error('    You can deploy manually with: npx opennextjs-cloudflare deploy --config wrangler.jsonc');
   }
 
   console.log('\n✅ Build complete!');
