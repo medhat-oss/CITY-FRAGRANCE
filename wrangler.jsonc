@@ -23,6 +23,10 @@
   "vars": {
     "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "dwsxotewe",
     "NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "city_fragrance",
-    "NEXT_PUBLIC_WHATSAPP_NUMBER": "201044415982"
+    "NEXT_PUBLIC_WHATSAPP_NUMBER": "201044415982",
+    "DATABASE_URL": "postgresql://neondb_owner:npg_b2zWY3prtXSM@ep-flat-cell-at8ru755-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+    "CLOUDINARY_API_KEY": "975184521279891",
+    "CLOUDINARY_API_SECRET": "2tLmjGX1URudJdPubhpUmEjhK44",
+    "NEXT_PUBLIC_PAYMENT_MODE": "test"
   }
 }
