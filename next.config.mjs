@@ -36,18 +36,10 @@ const nextConfig = {
   // dev sessions — subsequent `npm run dev` starts will be warm-cache warm
   // (typically <1s per route instead of 14s).
   experimental: {
-    turbopackFileSystemCacheForDev: true,
     serverMinification: true,
-
-    // ── Client-side route segment caching ────────────────────────────────────
-    // By default, dynamic pages have staleTimes.dynamic = 0 (never cached in
-    // client router). Setting it to 30s means navigating back to a recently
-    // visited admin or collection page reuses the in-memory RSC payload instead
-    // of re-fetching. Shared layouts (sidebar, header) are NEVER re-fetched
-    // regardless of this value — only the changing page segment is affected.
     staleTimes: {
-      dynamic: 0,    // Never cache dynamic pages — forces fresh server response on every nav
-      static: 180,   // Cache static pages for 3 min
+      dynamic: 0,
+      static: 180,
     },
   },
 
