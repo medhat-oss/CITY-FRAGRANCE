@@ -13,7 +13,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email/Username and password are required' }, { status: 400 });
     }
 
-    // Raw query — avoids Prisma client type-mismatch issues
     const users = await prisma.$queryRaw<Array<{
       id: string; email: string; username: string; name: string;
       role: string; password: string;
@@ -45,7 +44,6 @@ export async function POST(request: Request) {
       role: user.role,
     });
 
-    // Create OPEN shift record on successful login
     try {
       const existingShift = await prisma.shift.findFirst({
         where: { cashierId: user.id, status: 'OPEN' },

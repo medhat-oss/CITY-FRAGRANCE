@@ -1,6 +1,3 @@
-// This is a Server Component — it can export generateMetadata.
-// All client-side interactivity lives in ./product-detail.tsx.
-
 import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
 import ProductDetail from './product-detail';
@@ -11,13 +8,26 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+async function fetchProduct(id: string) {
+  const result = await Promise.race([
+    prisma.product.findUnique({
+      where: { id },
+      select: { name: true, description: true, images: true, category: true, isDraft: true },
+    }),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
+  ]);
+  return result;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
 
-  const product = await prisma.product.findUnique({
-    where: { id },
-    select: { name: true, description: true, images: true, category: true, isDraft: true },
-  });
+  let product: Awaited<ReturnType<typeof fetchProduct>>;
+  try {
+    product = await fetchProduct(id);
+  } catch {
+    return { title: 'City Fragrance' };
+  }
 
   if (!product || product.isDraft) {
     return {
@@ -26,7 +36,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  // `images` is stored as Json (array of URLs) — extract the first one safely.
   const rawImages = product?.images;
   const imageList: string[] = Array.isArray(rawImages)
     ? (rawImages as unknown[]).filter((v): v is string => typeof v === 'string')

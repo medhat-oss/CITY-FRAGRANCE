@@ -108,22 +108,29 @@ export async function GET() {
   }
 }
 
-function upsertProduct(id: string, scalarData: Record<string, unknown>, collectionOps: { slug: string }[], isCreate: boolean) {
-  const updateData: Record<string, unknown> = { ...scalarData };
-  const createData: Record<string, unknown> = { id, ...scalarData };
+async function upsertProduct(id: string, scalarData: Record<string, unknown>, collectionOps: { slug: string }[], isCreate: boolean) {
+  const data = { id, ...scalarData };
+
+  const product = await prisma.product.upsert({
+    where: { id },
+    update: data as any,
+    create: data as any,
+  });
+
+  await prisma.$executeRaw`DELETE FROM "_CollectionToProduct" WHERE "B" = ${id}`;
 
   if (collectionOps.length > 0) {
-    updateData.collections = { set: collectionOps };
-    createData.collections = { connect: collectionOps };
-  } else if (!isCreate) {
-    updateData.collections = { set: [] };
+    const slugs = collectionOps.map((c) => c.slug);
+    const collections = await prisma.collection.findMany({
+      where: { slug: { in: slugs } },
+      select: { id: true },
+    });
+    for (const c of collections) {
+      await prisma.$executeRaw`INSERT INTO "_CollectionToProduct" ("A", "B") VALUES (${c.id}, ${id})`;
+    }
   }
 
-  return prisma.product.upsert({
-    where: { id },
-    update: updateData as any,
-    create: createData as any,
-  });
+  return product;
 }
 
 export async function POST(request: Request) {

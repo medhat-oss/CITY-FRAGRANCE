@@ -107,65 +107,57 @@ export async function POST(request: Request) {
       id: item.id || generateItemId(),
     }));
 
-    // ── Atomic order creation + stock deduction + shift resolution ──
-    const order = await prisma.$transaction(async (tx) => {
-      // 0. Resolve active shift inside the transaction (avoids a separate DB roundtrip)
-      if (source === 'POS' && cashierId) {
-        const activeShift = await tx.shift.findFirst({
-          where: { cashierId, status: 'OPEN' },
-          select: { id: true },
-        });
-        if (!activeShift) {
-          throw new Error('No active shift found. Please open a shift first.');
-        }
-        shiftId = activeShift.id;
+    // ── Sequential order creation + stock deduction + shift resolution ──
+    if (source === 'POS' && cashierId) {
+      const activeShift = await prisma.shift.findFirst({
+        where: { cashierId, status: 'OPEN' },
+        select: { id: true },
+      });
+      if (!activeShift) {
+        throw new Error('No active shift found. Please open a shift first.');
       }
+      shiftId = activeShift.id;
+    }
 
-      // 1. Create the order
-      const created = await tx.order.create({
-        data: {
-          orderId: generateOrderId(source === 'POS' ? 'POS' : 'CF'),
-          customerName: body.customerName,
-          phoneNumber: body.phoneNumber,
-          email: body.email || '',
-          address: body.address,
-          apartment: body.apartment || '',
-          city: body.city,
-          governorate: body.governorate || '',
-          items: JSON.parse(JSON.stringify(itemsWithIds)),
-          totalPrice: body.totalPrice,
-          status: 'ACCEPTED',
-          date: new Date().toLocaleDateString('en-CA'),
-          paymentMethod: body.paymentMethod || null,
-          source,
-          cashierId,
-          shiftId,
-        },
+    const order = await prisma.order.create({
+      data: {
+        orderId: generateOrderId(source === 'POS' ? 'POS' : 'CF'),
+        customerName: body.customerName,
+        phoneNumber: body.phoneNumber,
+        email: body.email || '',
+        address: body.address,
+        apartment: body.apartment || '',
+        city: body.city,
+        governorate: body.governorate || '',
+        items: JSON.parse(JSON.stringify(itemsWithIds)),
+        totalPrice: body.totalPrice,
+        status: 'ACCEPTED',
+        date: new Date().toLocaleDateString('en-CA'),
+        paymentMethod: body.paymentMethod || null,
+        source,
+        cashierId,
+        shiftId,
+      },
+    });
+
+    for (const item of itemsWithIds) {
+      const product = await prisma.product.findFirst({
+        where: { name: { equals: item.name, mode: 'insensitive' } },
+        select: { id: true, stock: true, name: true },
       });
 
-      // 2. Deduct stock for each item
-      for (const item of itemsWithIds) {
-        const product = await tx.product.findFirst({
-          where: { name: { equals: item.name, mode: 'insensitive' } },
-          select: { id: true, stock: true, name: true },
-        });
-
-        if (product) {
-          if (product.stock < item.quantity) {
-            throw new Error(
-              `Insufficient stock for "${product.name}": requested ${item.quantity}, available ${product.stock}`
-            );
-          }
-          await tx.product.update({
-            where: { id: product.id },
-            data: { stock: { decrement: item.quantity } },
-          });
+      if (product) {
+        if (product.stock < item.quantity) {
+          throw new Error(
+            `Insufficient stock for "${product.name}": requested ${item.quantity}, available ${product.stock}`
+          );
         }
-        // Items not found in Product table are ignored (likely gift sets handled via JSON below)
+        await prisma.product.update({
+          where: { id: product.id },
+          data: { stock: { decrement: item.quantity } },
+        });
       }
-
-      return created;
-    });
+    }
 
     // ── JSON file sync (for legacy analytics / gift-set stock) ──
     try {
@@ -255,28 +247,25 @@ export async function PUT(request: Request) {
     const isNowCancelled = normalizedStatus === 'Cancelled';
     const items = (existingOrder.items as { name: string; quantity: number; price: number }[]) || [];
 
-    // ── Atomic status update + stock restoration ──
-    const order = await prisma.$transaction(async (tx) => {
-      if (isNowCancelled) {
-        for (const item of items) {
-          const product = await tx.product.findFirst({
-            where: { name: { equals: item.name, mode: 'insensitive' } },
-            select: { id: true },
+    // ── Sequential stock restoration + status update ──
+    if (isNowCancelled) {
+      for (const item of items) {
+        const product = await prisma.product.findFirst({
+          where: { name: { equals: item.name, mode: 'insensitive' } },
+          select: { id: true },
+        });
+        if (product) {
+          await prisma.product.update({
+            where: { id: product.id },
+            data: { stock: { increment: item.quantity } },
           });
-          if (product) {
-            await tx.product.update({
-              where: { id: product.id },
-              data: { stock: { increment: item.quantity } },
-            });
-          }
-          // Items not found (gift sets) are handled via JSON sync below
         }
       }
+    }
 
-      return tx.order.update({
-        where: { orderId: body.orderId },
-        data: { status: normalizedStatus },
-      });
+    const order = await prisma.order.update({
+      where: { orderId: body.orderId },
+      data: { status: normalizedStatus },
     });
 
     // ── JSON file sync (for legacy gift-set stock) ──

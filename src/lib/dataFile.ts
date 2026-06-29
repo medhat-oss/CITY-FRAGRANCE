@@ -88,47 +88,43 @@ export async function writeJsonFile(filename: string, data: unknown): Promise<vo
           productIds?: string[];
           stock?: number;
         }>;
-        await prisma.$transaction(
-          items.map((item) =>
-            prisma.giftSet.upsert({
-              where: { id: item.id },
-              update: {
-                name: item.name,
-                description: item.description ?? '',
-                price: item.price,
-                costPrice: item.costPrice ?? 0,
-                isDraft: item.isDraft ?? true,
-                image: item.image ?? '',
-                productIds: item.productIds ?? [],
-                stock: item.stock ?? 0,
-              },
-              create: {
-                id: item.id,
-                name: item.name,
-                description: item.description ?? '',
-                price: item.price,
-                costPrice: item.costPrice ?? 0,
-                isDraft: item.isDraft ?? true,
-                image: item.image ?? '',
-                productIds: item.productIds ?? [],
-                stock: item.stock ?? 0,
-              },
-            }),
-          ),
-        );
+        for (const item of items) {
+          await prisma.giftSet.upsert({
+            where: { id: item.id },
+            update: {
+              name: item.name,
+              description: item.description ?? '',
+              price: item.price,
+              costPrice: item.costPrice ?? 0,
+              isDraft: item.isDraft ?? true,
+              image: item.image ?? '',
+              productIds: item.productIds ?? [],
+              stock: item.stock ?? 0,
+            },
+            create: {
+              id: item.id,
+              name: item.name,
+              description: item.description ?? '',
+              price: item.price,
+              costPrice: item.costPrice ?? 0,
+              isDraft: item.isDraft ?? true,
+              image: item.image ?? '',
+              productIds: item.productIds ?? [],
+              stock: item.stock ?? 0,
+            },
+          });
+        }
         break;
       }
 
       case 'products.json': {
         const items = data as Array<{ id: string; stock?: number }>;
-        await prisma.$transaction(
-          items.map((item) =>
-            prisma.product.update({
-              where: { id: item.id },
-              data: { stock: item.stock ?? 0 },
-            }),
-          ),
-        );
+        for (const item of items) {
+          await prisma.product.update({
+            where: { id: item.id },
+            data: { stock: item.stock ?? 0 },
+          });
+        }
         break;
       }
 
@@ -145,29 +141,25 @@ export async function writeJsonFile(filename: string, data: unknown): Promise<vo
 
       case 'collection-images.json': {
         const record = data as Record<string, { image?: string; description?: string }>;
-        await prisma.$transaction(
-          Object.entries(record).map(([slug, val]) =>
-            prisma.collectionImage.upsert({
-              where: { slug },
-              update: { image: val.image ?? '', description: val.description ?? '' },
-              create: { slug, image: val.image ?? '', description: val.description ?? '' },
-            }),
-          ),
-        );
+        for (const [slug, val] of Object.entries(record)) {
+          await prisma.collectionImage.upsert({
+            where: { slug },
+            update: { image: val.image ?? '', description: val.description ?? '' },
+            create: { slug, image: val.image ?? '', description: val.description ?? '' },
+          });
+        }
         break;
       }
 
       case 'subscribers.json': {
         const items = data as Array<{ email: string }>;
-        await prisma.$transaction(
-          items.map((item) =>
-            prisma.subscriber.upsert({
-              where: { email: item.email },
-              update: {},
-              create: { email: item.email },
-            }),
-          ),
-        );
+        for (const item of items) {
+          await prisma.subscriber.upsert({
+            where: { email: item.email },
+            update: {},
+            create: { email: item.email },
+          });
+        }
         break;
       }
     }
