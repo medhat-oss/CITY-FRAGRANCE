@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FaUsers, FaPlus, FaTrashAlt, FaTimes, FaSpinner, FaUserShield, FaKey, FaEye } from 'react-icons/fa';
+import { FaTimes, FaSpinner } from 'react-icons/fa';
 import styles from '../admin.module.css';
 
 interface StaffUser {
@@ -150,13 +150,12 @@ export default function ManageStaffPage() {
     <div dir="ltr">
       <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <FaUsers style={{ color: '#ffffff', fontSize: '1.25rem' }} />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
             Manage Staff
           </h2>
         </div>
         <button onClick={openAdd} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'center' }}>
-          <FaPlus /> Create Staff Account
+          Create Staff Account
         </button>
       </div>
 
@@ -189,7 +188,6 @@ export default function ManageStaffPage() {
                           color: staff.role === 'ADMIN' ? '#a78bfa' : '#60a5fa',
                         }}
                       >
-                        {staff.role === 'ADMIN' && <FaUserShield className="text-[10px]" />}
                         {staff.role}
                       </span>
                     </td>
@@ -197,25 +195,25 @@ export default function ManageStaffPage() {
                       {new Date(staff.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
                     <td className="p-4 align-middle text-center">
-                      <div className="flex items-center justify-center gap-1">
+                      <div className="flex items-center justify-center gap-2">
                         <Link
                           href={`/admin/staff/${staff.id}/shifts`}
-                          className="text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] p-2 rounded transition-colors inline-flex items-center"
+                          className="text-xs text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] px-2.5 py-1 rounded transition-colors inline-flex items-center"
                           title="View Shifts"
                         >
-                          <FaEye />
+                          Shifts
                         </Link>
                         {staff.role === 'CASHIER' && (
                           <button
-                            className="text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] p-2 rounded transition-colors"
+                            className="text-xs text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] px-2.5 py-1 rounded transition-colors"
                             onClick={() => { setPasswordModal({ open: true, staff }); setNewShiftPassword(''); setPasswordError(''); setPasswordSuccess(''); }}
                             title="Change Shift Password"
                           >
-                            <FaKey />
+                            Password
                           </button>
                         )}
                         <button
-                          className="text-red-500 hover:bg-[rgba(239,68,68,0.12)] p-2 rounded transition-colors"
+                          className="text-xs text-red-500 hover:bg-[rgba(239,68,68,0.12)] px-2.5 py-1 rounded transition-colors"
                           onClick={() => handleDelete(staff.id, staff.email)}
                           disabled={staff.email.toLowerCase() === 'admin@cityfragrance.com'}
                           title="Delete Staff"
@@ -224,7 +222,7 @@ export default function ManageStaffPage() {
                             cursor: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 'not-allowed' : 'pointer',
                           }}
                         >
-                          <FaTrashAlt />
+                          Delete
                         </button>
                       </div>
                     </td>
@@ -252,7 +250,6 @@ export default function ManageStaffPage() {
                         color: staff.role === 'ADMIN' ? '#a78bfa' : '#60a5fa',
                       }}
                     >
-                      {staff.role === 'ADMIN' && <FaUserShield className="text-[10px]" />}
                       {staff.role}
                     </span>
                   </div>
@@ -263,16 +260,16 @@ export default function ManageStaffPage() {
                 <div className="flex items-center justify-end gap-2 mt-2 pt-2 border-t border-white/10">
                   <Link
                     href={`/admin/staff/${staff.id}/shifts`}
-                    className="text-xs text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] px-2.5 py-1.5 rounded transition-colors inline-flex items-center gap-1"
+                    className="text-xs text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] px-2.5 py-1.5 rounded transition-colors inline-flex items-center"
                   >
-                    <FaEye className="text-[10px]" /> Shifts
+                    Shifts
                   </Link>
                   {staff.role === 'CASHIER' && (
                     <button
-                      className="text-xs text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] px-2.5 py-1.5 rounded transition-colors inline-flex items-center gap-1"
+                      className="text-xs text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] px-2.5 py-1.5 rounded transition-colors inline-flex items-center"
                       onClick={() => { setPasswordModal({ open: true, staff }); setNewShiftPassword(''); setPasswordError(''); setPasswordSuccess(''); }}
                     >
-                      <FaKey className="text-[10px]" /> Password
+                      Password
                     </button>
                   )}
                   <button
@@ -284,7 +281,7 @@ export default function ManageStaffPage() {
                       cursor: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    <FaTrashAlt /> Delete
+                    Delete
                   </button>
                 </div>
               </div>
@@ -391,9 +388,7 @@ export default function ManageStaffPage() {
         <div className={`${styles.modalOverlay} ${styles.active}`} onClick={() => setPasswordModal({ open: false, staff: null })}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '460px' }}>
             <div className={styles.modalHeader}>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <FaKey style={{ color: '#fbbf24' }} /> Change Shift Password
-              </h3>
+              <h3>Change Shift Password</h3>
               <button type="button" className={styles.btnClose} onClick={() => setPasswordModal({ open: false, staff: null })}><FaTimes /></button>
             </div>
             <div className={styles.modalForm}>

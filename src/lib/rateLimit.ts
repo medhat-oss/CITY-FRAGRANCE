@@ -30,7 +30,10 @@ setInterval(() => {
 }, CLEANUP_INTERVAL);
 
 export function extractIp(request: Request): string {
+  // Prefer Cloudflare's authoritative header over spoofable x-forwarded-for
+  const cfIp = request.headers.get('cf-connecting-ip');
+  if (cfIp) return cfIp;
   const fwd = request.headers.get('x-forwarded-for');
   if (fwd) return fwd.split(',')[0].trim();
-  return request.headers.get('cf-connecting-ip') || request.headers.get('x-real-ip') || '127.0.0.1';
+  return request.headers.get('x-real-ip') || '127.0.0.1';
 }

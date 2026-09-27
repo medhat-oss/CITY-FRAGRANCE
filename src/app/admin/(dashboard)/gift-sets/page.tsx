@@ -4,10 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { useProducts } from '@/hooks/useProducts';
 import { formatEGP } from '@/utils/currency';
-import {
-  FaGift, FaPlus, FaEdit, FaTrashAlt, FaTimes,
-  FaCloudUploadAlt, FaSpinner,
-} from 'react-icons/fa';
+import { FaTimes, FaSpinner } from 'react-icons/fa';
 import styles from '../admin.module.css';
 
 interface GiftSet {
@@ -172,13 +169,12 @@ export default function AdminGiftSetsPage() {
     <div>
       <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <FaGift style={{ color: '#ffffff', fontSize: '1.25rem' }} />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
             Gift Sets Management
           </h2>
         </div>
         <button onClick={openAdd} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'center' }} disabled={isSaving}>
-          <FaPlus /> Add Gift Set
+          Add Gift Set
         </button>
       </div>
 
@@ -221,14 +217,14 @@ export default function AdminGiftSetsPage() {
                   </span>
                 </td>
                 <td className="p-4 border-b border-white/10 align-middle text-center">
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="flex items-center justify-center gap-2">
                     <button onClick={() => openEdit(gs)} disabled={deletingId === gs.id}
-                      className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded transition-colors disabled:opacity-40" aria-label={`Edit ${gs.name}`}>
-                      <FaEdit />
+                      className="text-xs text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] px-2.5 py-1 rounded transition-colors disabled:opacity-40" aria-label={`Edit ${gs.name}`}>
+                      Edit
                     </button>
                     <button onClick={() => handleDelete(gs.id)} disabled={deletingId === gs.id}
-                      className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-2 rounded transition-colors disabled:opacity-40" aria-label={`Delete ${gs.name}`}>
-                      {deletingId === gs.id ? <FaSpinner className="animate-spin" /> : <FaTrashAlt />}
+                      className="text-xs text-red-400 hover:bg-red-500/10 px-2.5 py-1 rounded transition-colors disabled:opacity-40" aria-label={`Delete ${gs.name}`}>
+                      {deletingId === gs.id ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
                 </td>
@@ -272,12 +268,12 @@ export default function AdminGiftSetsPage() {
               </span>
               <div className="flex gap-2">
                 <button onClick={() => openEdit(gs)} disabled={deletingId === gs.id}
-                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded transition-colors disabled:opacity-40" aria-label={`Edit ${gs.name}`}>
-                  <FaEdit />
+                  className="text-xs text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] px-2.5 py-1.5 rounded transition-colors disabled:opacity-40" aria-label={`Edit ${gs.name}`}>
+                  Edit
                 </button>
                 <button onClick={() => handleDelete(gs.id)} disabled={deletingId === gs.id}
-                  className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-2 rounded transition-colors disabled:opacity-40" aria-label={`Delete ${gs.name}`}>
-                  {deletingId === gs.id ? <FaSpinner className="animate-spin" /> : <FaTrashAlt />}
+                  className="text-xs text-red-400 hover:bg-red-500/10 px-2.5 py-1.5 rounded transition-colors disabled:opacity-40" aria-label={`Delete ${gs.name}`}>
+                  {deletingId === gs.id ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
             </div>
@@ -336,7 +332,7 @@ export default function AdminGiftSetsPage() {
                       </div>
                     ) : (
                       <label htmlFor="gs-image-upload" className={styles.uploadLabel}>
-                        <span className={styles.uploadPrompt}><FaCloudUploadAlt style={{ fontSize: '1.5rem' }} /><span>Upload Image</span></span>
+                        <span className={styles.uploadPrompt}><span>Upload Image</span></span>
                       </label>
                     )}
                     <input id="gs-image-upload" type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} disabled={isUploading} />
@@ -365,7 +361,7 @@ export default function AdminGiftSetsPage() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderRadius: '8px', background: form.isDraft ? 'rgba(234,179,8,0.08)' : 'rgba(34,197,94,0.08)', border: `1px solid ${form.isDraft ? 'rgba(234,179,8,0.3)' : 'rgba(34,197,94,0.3)'}`, marginBottom: '1.5rem', transition: 'all 0.2s ease' }}>
                 <div>
                   <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: form.isDraft ? '#facc15' : '#4ade80' }}>
-                    {form.isDraft ? '📝 Draft Mode — Hidden from customers' : '✅ Published — Visible on storefront'}
+                    {form.isDraft ? 'Draft Mode — Hidden from storefront' : 'Published — Visible on storefront'}
                   </p>
                   <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>
                     {form.isDraft ? 'Save as draft to work on it later without showing it publicly.' : 'Gift set is live and visible to all customers.'}

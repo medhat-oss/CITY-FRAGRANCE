@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import prisma from '@/lib/prisma';
-
+import { requireAdmin } from '@/lib/auth';
+import type { SiteSettings } from '@/types';
+import { SITE_DEFAULTS as DEFAULTS, ALL_SITE_SETTINGS_KEYS as ALL_KEYS } from '@/lib/siteDefaults';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,60 +17,6 @@ const getCachedDbSettings = unstable_cache(
   ['admin-settings'],
   { revalidate: 5, tags: ['settings'] }
 );
-
-interface SiteSettings {
-  heroTitle: string;
-  heroSubtitle: string;
-  heroDescription: string;
-  announcementText: string;
-  heroBgImage: string;
-  heroBgImageDesktop: string;
-  heroVideoUrl: string;
-  heroVideoMobile: string;
-  moodTitle: string;
-  moodSubtitle: string;
-  moodImage: string;
-  moodImageDesktop: string;
-  moodVideoUrl: string;
-  moodVideoMobile: string;
-  womenCollectionVideoUrl: string;
-  menCollectionVideoUrl: string;
-  giftSetsVideoUrl: string;
-  newArrivalsVideoUrl: string;
-  allFragrancesVideoUrl: string;
-  oudCollectionVideoUrl: string;
-}
-
-const ALL_KEYS: Array<keyof SiteSettings> = [
-  'heroTitle', 'heroSubtitle', 'heroDescription', 'announcementText',
-  'heroBgImage', 'heroBgImageDesktop', 'heroVideoUrl', 'heroVideoMobile',
-  'moodTitle', 'moodSubtitle', 'moodImage', 'moodImageDesktop', 'moodVideoUrl', 'moodVideoMobile',
-  'womenCollectionVideoUrl', 'menCollectionVideoUrl',
-  'giftSetsVideoUrl', 'newArrivalsVideoUrl', 'allFragrancesVideoUrl', 'oudCollectionVideoUrl',
-];
-
-const DEFAULTS: SiteSettings = {
-  heroTitle: 'Celebrate in Luxury & Scent',
-  heroSubtitle: 'Eid Al Adha Special',
-  heroDescription: 'Exclusive Eid collection — enjoy 20% off on all premium fragrances.',
-  announcementText: 'EID AL ADHA SALE UP TO 20% OFF ENDS SOON... SHOP NOW',
-  heroBgImage: '/images/hero-banner.png',
-  heroBgImageDesktop: '',
-  heroVideoUrl: '',
-  heroVideoMobile: '',
-  moodTitle: 'The Essence of Luxury & Elegance',
-  moodSubtitle: 'Discover timeless scents crafted for those who appreciate the finer things in life.',
-  moodImage: '/images/hero-banner.png',
-  moodImageDesktop: '',
-  moodVideoUrl: '',
-  moodVideoMobile: '',
-  womenCollectionVideoUrl: '',
-  menCollectionVideoUrl: '',
-  giftSetsVideoUrl: '',
-  newArrivalsVideoUrl: '',
-  allFragrancesVideoUrl: '',
-  oudCollectionVideoUrl: '',
-};
 
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
@@ -111,6 +59,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = (await request.json()) as Partial<SiteSettings>;
 

@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
-import { verifySession, verifySessionForPOS } from '@/lib/auth';
+import { verifySession, verifySessionForPOS, requireAdmin } from '@/lib/auth';
 import { sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
@@ -58,6 +58,9 @@ async function injectProductImages(orders: any[]): Promise<any[]> {
 
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const orders = await prisma.order.findMany({
       where: { source: { not: 'POS' } },
@@ -260,6 +263,9 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = (await request.json()) as { orderId: string; status: string };
 

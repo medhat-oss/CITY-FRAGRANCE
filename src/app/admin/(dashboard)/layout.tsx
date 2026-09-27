@@ -2,9 +2,10 @@
 
 import type { ReactNode } from 'react';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import styles from './admin.module.css';
 import Link from 'next/link';
-import { FaBoxOpen, FaStore, FaClipboardList, FaGift, FaCog, FaBars, FaTimes, FaUsers, FaChartLine } from 'react-icons/fa';
+import { FaBars, FaTimes } from 'react-icons/fa';
 import AdminSidebarUser from '@/components/AdminSidebarUser';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -22,32 +23,43 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen w-full max-w-full bg-[#111B3D] overflow-hidden">
       {/* Desktop Sidebar */}
-      <aside className="w-[250px] shrink-0 hidden md:flex flex-col bg-[#16234D] border-r border-[#1d3573] p-8">
-        <div className="mb-12 text-center">
-          <h2 className="text-xl tracking-[0.1em] text-[#f8f9fa] mb-1">CITY FRAGRANCE</h2>
-          <span className="font-heading text-xs text-slate-400 tracking-[0.2em]">ADMIN PANEL</span>
+      <aside className="w-[260px] shrink-0 hidden md:flex flex-col bg-[#16234D] border-r border-[#1d3573] px-5 py-6">
+        <div className="mb-8 flex flex-col items-center justify-center text-center">
+          <Link href="/admin" className="flex flex-col items-center group no-underline">
+            <Image
+              src="/images/admin-logo.png"
+              alt="City Fragrance Logo"
+              width={180}
+              height={48}
+              className="w-[160px] h-auto object-contain mix-blend-screen transition-opacity group-hover:opacity-90"
+              priority
+            />
+            <span className="font-heading text-[10px] font-semibold text-slate-400 tracking-[0.3em] uppercase mt-2">
+              ADMIN PANEL
+            </span>
+          </Link>
         </div>
-        <nav className="flex flex-col gap-2 flex-1">
-          <Link href="/admin" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
-            <FaBoxOpen /> Products Management
+        <nav className="flex flex-col gap-1.5 flex-1">
+          <Link href="/admin" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
+            Products Management
           </Link>
-          <Link href="/admin/settings" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
-            <FaCog /> Site Customization
+          <Link href="/admin/settings" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
+            Site Customization
           </Link>
-          <Link href="/admin/orders" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
-             <FaClipboardList /> Orders
+          <Link href="/admin/orders" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
+            Orders
           </Link>
-          <Link href="/admin/gift-sets" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
-            <FaGift /> Gift Sets
+          <Link href="/admin/gift-sets" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
+            Gift Sets
           </Link>
-          <Link href="/admin/analytics" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
-            <FaChartLine /> Analytics & Inventory
+          <Link href="/admin/analytics" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
+            Analytics & Inventory
           </Link>
-          <Link href="/admin/staff" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
-            <FaUsers /> Manage Staff
+          <Link href="/admin/staff" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
+            Manage Staff
           </Link>
-          <Link href="/" className="flex items-center gap-4 p-4 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm" onClick={closeDrawer}>
-            <FaStore /> Back to Store
+          <Link href="/" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
+            Back to Store
           </Link>
         </nav>
         <AdminSidebarUser />
@@ -62,9 +74,18 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         >
           <FaBars className="text-lg" />
         </button>
-        <Link href="/admin" className="flex flex-col items-center justify-center">
-          <span className="text-xl font-bold tracking-widest text-white uppercase font-serif">City Fragrance</span>
-          <span className="text-[9px] font-medium text-white/60 uppercase tracking-[0.2em] mt-0.5">Admin Panel</span>
+        <Link href="/admin" className="flex flex-col items-center justify-center no-underline">
+          <Image
+            src="/images/admin-logo.png"
+            alt="City Fragrance Logo"
+            width={130}
+            height={35}
+            className="w-[125px] h-auto object-contain mix-blend-screen"
+            priority
+          />
+          <span className="text-[8.5px] font-semibold text-white/70 uppercase tracking-[0.25em] mt-1 font-heading">
+            Admin Panel
+          </span>
         </Link>
         <div className="w-8" />
       </header>
@@ -77,9 +98,18 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       {/* Mobile Drawer Panel */}
       <aside className={`${styles.mobileDrawer} ${isMobileSidebarOpen ? styles.mobileDrawerOpen : ''}`}>
         <div className={styles.mobileDrawerHeader}>
-          <div className={`${styles.mobileDrawerBrand} hidden`}>
-            <h2>CITY FRAGRANCE</h2>
-            <span>ADMIN PANEL</span>
+          <div className="flex flex-col items-center">
+            <Image
+              src="/images/admin-logo.png"
+              alt="City Fragrance Logo"
+              width={140}
+              height={37}
+              className="w-[130px] h-auto object-contain mix-blend-screen"
+              priority
+            />
+            <span className="font-heading text-[9.5px] font-semibold text-slate-400 tracking-[0.28em] uppercase mt-1">
+              Admin Panel
+            </span>
           </div>
           <button
             className={styles.mobileDrawerClose}
@@ -91,25 +121,25 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </div>
         <nav className={styles.mobileDrawerNav}>
           <Link href="/admin" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            <FaBoxOpen /> Products Management
+            Products Management
           </Link>
           <Link href="/admin/settings" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            <FaCog /> Site Customization
+            Site Customization
           </Link>
           <Link href="/admin/orders" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            <FaClipboardList /> Orders
+            Orders
           </Link>
           <Link href="/admin/gift-sets" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            <FaGift /> Gift Sets
+            Gift Sets
           </Link>
           <Link href="/admin/analytics" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            <FaChartLine /> Analytics & Inventory
+            Analytics & Inventory
           </Link>
           <Link href="/admin/staff" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            <FaUsers /> Manage Staff
+            Manage Staff
           </Link>
           <Link href="/" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            <FaStore /> Back to Store
+            Back to Store
           </Link>
         </nav>
         <div className={styles.mobileDrawerFooter}>

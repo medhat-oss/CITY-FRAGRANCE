@@ -1,38 +1,7 @@
 import prisma from '@/lib/prisma';
 import { readJsonFile } from '@/lib/dataFile';
 import type { SiteSettings, CollectionData } from '@/types';
-
-const DEFAULTS: SiteSettings = {
-  heroTitle: 'Celebrate in Luxury & Scent',
-  heroSubtitle: 'Eid Al Adha Special',
-  heroDescription: 'Exclusive Eid collection — enjoy 20% off on all premium fragrances.',
-  announcementText: 'EID AL ADHA SALE UP TO 20% OFF ENDS SOON... SHOP NOW',
-  heroBgImage: '/images/hero-banner.png',
-  heroBgImageDesktop: '',
-  heroVideoUrl: '',
-  heroVideoMobile: '',
-  moodTitle: 'The Essence of Luxury & Elegance',
-  moodSubtitle: 'Discover timeless scents crafted for those who appreciate the finer things in life.',
-  moodImage: '/images/hero-banner.png',
-  moodImageDesktop: '',
-  moodVideoUrl: '',
-  moodVideoMobile: '',
-  womenCollectionVideoUrl: '',
-  menCollectionVideoUrl: '',
-  giftSetsVideoUrl: '',
-  newArrivalsVideoUrl: '',
-  allFragrancesVideoUrl: '',
-  oudCollectionVideoUrl: '',
-};
-
-const SLUG_TO_VIDEO_FIELD: Record<string, string> = {
-  'womens-collection': 'womenCollectionVideoUrl',
-  'mens-collection': 'menCollectionVideoUrl',
-  'gift-sets': 'giftSetsVideoUrl',
-  'new-arrivals': 'newArrivalsVideoUrl',
-  'all-fragrances': 'allFragrancesVideoUrl',
-  'oud-collection': 'oudCollectionVideoUrl',
-};
+import { SITE_DEFAULTS as DEFAULTS, SLUG_TO_VIDEO_FIELD } from '@/lib/siteDefaults';
 
 export interface HomepageData {
   settings: SiteSettings;

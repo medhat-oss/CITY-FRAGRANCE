@@ -51,6 +51,16 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // ─── Security headers for all routes ─────────────────────────────────
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+      {
         // Public image assets in /public/images/
         source: '/images/(.*)',
         headers: [

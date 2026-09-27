@@ -2,18 +2,13 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import type { CollectionData } from '@/types';
+import { requireAdmin } from '@/lib/auth';
+import { generateSignature } from '@/lib/cloudinary';
 
 const FILE = 'collection-images.json';
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const apiKey = process.env.CLOUDINARY_API_KEY;
 const apiSecret = process.env.CLOUDINARY_API_SECRET;
-
-async function generateSignature(params: Record<string, string>, secret: string): Promise<string> {
-  const sortedKeys = Object.keys(params).sort();
-  const signStr = sortedKeys.map((k) => `${k}=${params[k]}`).join('&') + secret;
-  const hash = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(signStr));
-  return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, '0')).join('');
-}
 
 function parseImages(raw: Record<string, unknown>): Record<string, CollectionData> {
   const result: Record<string, CollectionData> = {};
@@ -32,12 +27,18 @@ function parseImages(raw: Record<string, unknown>): Record<string, CollectionDat
 
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   const raw = await readJsonFile<Record<string, unknown>>(FILE, {});
   const images = parseImages(raw);
   return NextResponse.json({ images });
 }
 
 export async function PUT(request: Request) {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const contentType = request.headers.get('content-type') || '';
 

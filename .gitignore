@@ -37,6 +37,7 @@ yarn-error.log*
 .env*
 .env.local
 scripts/accounts-config.json
+data/admin-users.json
 
 # vercel
 .vercel

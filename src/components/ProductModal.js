@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { FaTimes, FaCloudUploadAlt, FaSpinner } from 'react-icons/fa';
+import { FaTimes, FaSpinner } from 'react-icons/fa';
 import Image from 'next/image';
 import styles from '../app/admin/(dashboard)/admin.module.css';
 import { getOptimizedVideoUrl } from '../lib/videoUtils';
@@ -369,7 +369,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit, i
               <label htmlFor="image-upload" className={styles.uploadLabel}>
                 {isUploading
                   ? <span className={styles.uploadSpinner}><FaSpinner className={styles.spinIcon} /> Uploading...</span>
-                  : <span className={styles.uploadPrompt}><FaCloudUploadAlt style={{ fontSize: '1.5rem' }} /><span>Click to upload image</span></span>}
+                  : <span className={styles.uploadPrompt}><span>Click to upload image</span></span>}
               </label>
               <input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} disabled={isUploading} />
               {uploadError && <p className={styles.uploadError}>{uploadError}</p>}
@@ -393,7 +393,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit, i
               <label htmlFor="video-upload" className={styles.uploadLabel}>
                 {isVideoUploading
                   ? <span className={styles.uploadSpinner}><FaSpinner className={styles.spinIcon} /> Uploading...</span>
-                  : <span className={styles.uploadPrompt}><FaCloudUploadAlt style={{ fontSize: '1.5rem' }} /><span>Click to upload product video</span></span>}
+                  : <span className={styles.uploadPrompt}><span>Click to upload product video</span></span>}
               </label>
               <input id="video-upload" type="file" accept="video/*" onChange={handleVideoUpload} style={{ display: 'none' }} disabled={isVideoUploading} />
               {videoUploadError && <p className={styles.uploadError}>{videoUploadError}</p>}
@@ -422,7 +422,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit, i
           }}>
             <div>
               <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: formData.isDraft ? '#facc15' : '#4ade80' }}>
-                {formData.isDraft ? '📝 Draft Mode — Hidden from customers' : '✅ Published — Visible on storefront'}
+                {formData.isDraft ? 'Draft Mode — Hidden from storefront' : 'Published — Visible on storefront'}
               </p>
               <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>
                 {formData.isDraft ? 'Save as draft to work on it later without showing it publicly.' : 'Product is live and visible to all customers.'}
@@ -473,7 +473,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit, i
               alignItems: 'center',
               gap: '8px',
             }}>
-              ⚠ {saveError}
+              {saveError}
             </div>
           )}
 

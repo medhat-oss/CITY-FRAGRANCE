@@ -1,18 +1,16 @@
 
 import { NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth';
+import { generateSignature } from '@/lib/cloudinary';
 
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const apiKey = process.env.CLOUDINARY_API_KEY;
 const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-async function generateSignature(params: Record<string, string>, secret: string): Promise<string> {
-  const sortedKeys = Object.keys(params).sort();
-  const signStr = sortedKeys.map((k) => `${k}=${params[k]}`).join('&') + secret;
-  const hash = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(signStr));
-  return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, '0')).join('');
-}
-
 export async function POST(request: Request) {
+  const auth = await requireAuth();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;

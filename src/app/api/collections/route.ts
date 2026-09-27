@@ -1,22 +1,12 @@
 import { NextResponse } from 'next/server';
 import { readJsonFile } from '@/lib/dataFile';
-
+import { SLUG_TO_VIDEO_FIELD } from '@/lib/siteDefaults';
 
 export const dynamic = 'force-dynamic';
 
 // Server-side in-memory cache with 5s TTL
 let serverCache: { data: any; expiresAt: number } | null = null;
 const SERVER_CACHE_TTL = 5_000;
-
-// Maps collection slugs to the settings key that holds their video URL
-const SLUG_TO_VIDEO_FIELD: Record<string, string> = {
-  'womens-collection': 'womenCollectionVideoUrl',
-  'mens-collection': 'menCollectionVideoUrl',
-  'gift-sets': 'giftSetsVideoUrl',
-  'new-arrivals': 'newArrivalsVideoUrl',
-  'all-fragrances': 'allFragrancesVideoUrl',
-  'oud-collection': 'oudCollectionVideoUrl',
-};
 
 export async function GET() {
   const now = Date.now();

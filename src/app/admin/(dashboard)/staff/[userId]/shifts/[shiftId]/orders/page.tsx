@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
-import { FaArrowLeft, FaSpinner, FaListAlt } from 'react-icons/fa';
+import { FaSpinner } from 'react-icons/fa';
 import styles from '../../../../../admin.module.css';
 
 interface PageProps {
@@ -176,10 +176,9 @@ export default function ShiftOrdersPage({ params }: PageProps) {
             href={`/admin/staff/${staffId}/shifts`}
             className="text-[#94a3b8] hover:text-[#e2e8f0] flex items-center gap-1.5 no-underline text-sm transition-colors"
           >
-            <FaArrowLeft /> Back to Shift History
+            ← Back to Shift History
           </Link>
           <span className="text-[#1d3573] text-base">|</span>
-          <FaListAlt className="text-[#60a5fa] text-base" />
           <h2 className="font-heading text-xl font-medium text-[#f8f9fa] m-0 whitespace-nowrap">
             Shift Orders — {employeeName}
           </h2>

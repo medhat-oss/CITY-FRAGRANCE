@@ -31,7 +31,7 @@ export async function GET() {
   try {
     const users = await prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
-      select: { id: true, email: true, username: true, name: true, role: true, shiftPassword: true, createdAt: true, updatedAt: true },
+      select: { id: true, email: true, username: true, name: true, role: true, createdAt: true, updatedAt: true },
     });
 
     const staff = users.map((u: any) => ({

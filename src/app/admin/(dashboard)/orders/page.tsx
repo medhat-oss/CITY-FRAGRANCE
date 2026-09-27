@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatEGP } from '@/utils/currency';
 import type { Order } from '@/types';
-import { FaClipboardList, FaTimes, FaEye, FaSpinner, FaImage } from 'react-icons/fa';
+import { FaTimes, FaSpinner } from 'react-icons/fa';
 import styles from '../admin.module.css';
 
 const STATUS_FLOW: Record<string, string[]> = {
@@ -180,14 +180,13 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-        <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:gap-0.75rem">
-          <div className="flex items-center gap-3">
-            <FaClipboardList style={{ color: '#ffffff', fontSize: '1.25rem' }} />
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
-              Orders Management
-            </h2>
-          </div>
+      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:gap-0.75rem">
+        <div className="flex items-center gap-3">
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
+            Orders Management
+          </h2>
         </div>
+      </div>
 
       {/* Revenue Badge */}
       <div
@@ -308,7 +307,7 @@ export default function AdminOrdersPage() {
                       onClick={() => setSelectedOrder(order)}
                       className="bg-none border border-white/20 rounded px-2.5 py-1.5 cursor-pointer text-[#e2e8f0] text-xs inline-flex items-center gap-1 transition-all hover:bg-white hover:text-[#09142E] hover:border-white"
                     >
-                      <FaEye /> View
+                      View
                     </button>
                   </Td>
                 </tr>
@@ -368,10 +367,10 @@ export default function AdminOrdersPage() {
                           type="button"
                           disabled={isCancelling}
                           onClick={(e) => { e.stopPropagation(); handleCancelSingleItem(item.id, order.orderId); }}
-                          className="w-6 h-6 inline-flex items-center justify-center text-red-500 bg-[rgba(127,29,29,0.2)] border border-[rgba(127,29,29,0.3)] rounded-md cursor-pointer transition-all hover:bg-[rgba(127,29,29,0.7)] hover:text-white disabled:opacity-50 shrink-0 ml-1"
+                          className="px-2 py-0.5 inline-flex items-center justify-center text-[10px] text-red-400 bg-[rgba(127,29,29,0.2)] border border-[rgba(127,29,29,0.3)] rounded-md cursor-pointer transition-all hover:bg-[rgba(127,29,29,0.7)] hover:text-white disabled:opacity-50 shrink-0 ml-1 font-semibold"
                           title="Cancel this item"
                         >
-                          {isCancelling ? <FaSpinner className="animate-spin text-[10px]" /> : '✕'}
+                          {isCancelling ? 'Cancelling...' : 'Cancel'}
                         </button>
                       )}
                     </div>
@@ -396,7 +395,7 @@ export default function AdminOrdersPage() {
                   onClick={() => setSelectedOrder(order)}
                   className="bg-none border border-white/20 rounded px-2.5 py-1.5 cursor-pointer text-[#e2e8f0] text-xs inline-flex items-center gap-1 transition-all hover:bg-white hover:text-[#09142E] hover:border-white"
                 >
-                  <FaEye className="text-[10px]" /> View
+                  View
                 </button>
               </div>
             </div>
@@ -489,9 +488,7 @@ export default function AdminOrdersPage() {
                             {item.image ? (
                               <img src={item.image} alt={item.name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', background: '#1d3573', flexShrink: 0 }} />
                             ) : (
-                              <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: '#1d3573', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                <FaImage style={{ color: '#4a5e8a', fontSize: '1rem' }} />
-                              </div>
+                              <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: '#1d3573', flexShrink: 0 }} />
                             )}
                             <span style={{ color: '#e2e8f0' }}>{item.name}</span>
                           </td>
@@ -572,7 +569,7 @@ export default function AdminOrdersPage() {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
               <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#c5a880', fontSize: '1rem', letterSpacing: '0.05em' }}>
-                 🔔 New Order Received!
+                New Order Received!
               </div>
             </div>
 

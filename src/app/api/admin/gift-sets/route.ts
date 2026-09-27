@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { unstable_noStore as noStore } from 'next/cache';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import prisma from '@/lib/prisma';
+import { requireAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,6 +65,9 @@ async function syncToDB(gs: GiftSet) {
 
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   noStore();
   // Admin sees ALL gift sets (including drafts)
   const data = await readJsonFile<GiftSet[]>(FILE, []);
@@ -71,6 +75,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await request.json();
     const giftSet: GiftSet = {
@@ -102,6 +109,9 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await request.json();
     const data = await readJsonFile<GiftSet[]>(FILE, []);
@@ -131,6 +141,9 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const { id } = await request.json();
     const data = await readJsonFile<GiftSet[]>(FILE, []);

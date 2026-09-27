@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { readJsonFile } from '@/lib/dataFile';
+import { requireAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,9 @@ interface GiftSetData {
 
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     // ── Fetch active (non-cancelled/refunded) orders for aggregation ──
     const [activeOrders, recentOrdersRaw] = await Promise.all([

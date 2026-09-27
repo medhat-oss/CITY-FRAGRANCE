@@ -4,7 +4,6 @@ import { Instrument_Sans, Jost } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/context/CartContext';
 import { LocaleProvider } from '@/context/LocaleContext';
-import { ThemeProvider } from '@/context/ThemeContext';
 import { ProductsProvider } from '@/hooks/useProducts';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -170,18 +169,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             }),
           }}
         />
-        <ThemeProvider>
-          <LocaleProvider>
-            <CartProvider>
-              <ProductsProvider>
-                {children}
-                <WhatsAppButton />
-                <ScrollToTop />
-                <DisclaimerModal />
-              </ProductsProvider>
-            </CartProvider>
-          </LocaleProvider>
-        </ThemeProvider>
+        <LocaleProvider>
+          <CartProvider>
+            <ProductsProvider>
+              {children}
+              <WhatsAppButton />
+              <ScrollToTop />
+              <DisclaimerModal />
+            </ProductsProvider>
+          </CartProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

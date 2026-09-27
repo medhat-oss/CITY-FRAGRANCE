@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
-
+import { requireAdmin } from '@/lib/auth';
+import { parseNotes } from '@/lib/productUtils';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,16 +76,10 @@ function revalidateAll() {
   revalidatePath('/api/products');
 }
 
-function parseNotes(notes: string) {
-  const parts = (notes || '').split(' • ');
-  return {
-    topNotes: parts[0] ?? '',
-    middleNotes: parts[1] ?? '',
-    baseNotes: parts[2] ?? '',
-  };
-}
-
 export async function GET() {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const raw = await prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
@@ -151,6 +146,9 @@ async function upsertProduct(id: string, scalarData: Record<string, unknown>, co
 }
 
 export async function POST(request: Request) {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await request.json();
     const { scalarData, collectionOps, id } = buildDbData(body);
@@ -169,6 +167,9 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await request.json();
     const { scalarData, collectionOps, id } = buildDbData(body);
@@ -187,6 +188,9 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const { id } = (await request.json()) as { id: string };
 

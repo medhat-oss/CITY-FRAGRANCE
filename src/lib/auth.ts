@@ -2,7 +2,16 @@ import { NextResponse } from 'next/server';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'city-fragrance-dev-secret-key-change-in-production');
+let _secret: Uint8Array | null = null;
+function getSecret(): Uint8Array {
+  if (!_secret) {
+    if (!process.env.JWT_SECRET) {
+      throw new Error('FATAL: JWT_SECRET environment variable is not set. Refusing to start with an insecure default.');
+    }
+    _secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  }
+  return _secret;
+}
 const ADMIN_COOKIE = 'admin_session';
 export const CASHIER_COOKIE = 'cashier_session';
 
@@ -26,7 +35,7 @@ export async function createSession(payload: SessionPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('8h')
-    .sign(SECRET);
+    .sign(getSecret());
   return token;
 }
 
@@ -41,7 +50,7 @@ export async function verifySession(): Promise<SessionPayload | null> {
   const adminToken = cookieStore.get(ADMIN_COOKIE)?.value;
   if (adminToken) {
     try {
-      const { payload } = await jwtVerify(adminToken, SECRET);
+      const { payload } = await jwtVerify(adminToken, getSecret());
       return payload as unknown as SessionPayload;
     } catch {
       // Admin token expired / invalid → fall through and try cashier token
@@ -52,7 +61,7 @@ export async function verifySession(): Promise<SessionPayload | null> {
   const cashierToken = cookieStore.get(CASHIER_COOKIE)?.value;
   if (cashierToken) {
     try {
-      const { payload } = await jwtVerify(cashierToken, SECRET);
+      const { payload } = await jwtVerify(cashierToken, getSecret());
       return payload as unknown as SessionPayload;
     } catch {
       return null;
@@ -85,7 +94,7 @@ async function verifyCashierSession(): Promise<SessionPayload | null> {
   const token = cookieStore.get(CASHIER_COOKIE)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, SECRET);
+    const { payload } = await jwtVerify(token, getSecret());
     return payload as unknown as SessionPayload;
   } catch {
     return null;
@@ -114,3 +123,29 @@ export function setCashierCookie(response: ReturnType<typeof NextResponse.json>,
   response.cookies.set(CASHIER_COOKIE, token, cookieOptions);
 }
 
+/**
+ * Guard: require a valid session (any role).
+ * Returns the session payload, or a 401 NextResponse.
+ */
+export async function requireAuth(): Promise<SessionPayload | NextResponse> {
+  const session = await verifySession();
+  if (!session) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
+  return session;
+}
+
+/**
+ * Guard: require a valid admin session.
+ * Returns the session payload, or a 401/403 NextResponse.
+ */
+export async function requireAdmin(): Promise<SessionPayload | NextResponse> {
+  const session = await verifySession();
+  if (!session) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
+  if (session.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+  }
+  return session;
+}

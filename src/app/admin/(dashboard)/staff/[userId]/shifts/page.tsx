@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { FaArrowLeft, FaSpinner, FaBan, FaCalendarAlt, FaListAlt } from 'react-icons/fa';
+import { FaSpinner } from 'react-icons/fa';
 import styles from '../../../admin.module.css';
 
 interface ShiftRecord {
@@ -81,10 +81,9 @@ export default function StaffShiftsPage() {
             href="/admin/staff"
             className="text-[#94a3b8] hover:text-[#e2e8f0] flex items-center gap-1.5 no-underline text-sm transition-colors"
           >
-            <FaArrowLeft /> Back to Staff
+            ← Back to Staff
           </Link>
           <span className="text-[#1d3573] text-base">|</span>
-          <FaCalendarAlt className="text-[#60a5fa] text-base" />
           <h2 className="font-heading text-xl font-medium text-[#f8f9fa] m-0 whitespace-nowrap">
             Shift History — {staffName || 'Staff Member'}
           </h2>
@@ -98,12 +97,10 @@ export default function StaffShiftsPage() {
           </div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-            <FaBan style={{ color: '#ef4444', fontSize: '2rem', marginBottom: '0.75rem' }} />
             <p style={{ color: '#f87171', fontSize: '0.95rem', margin: 0 }}>{error}</p>
           </div>
         ) : shifts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-            <FaCalendarAlt style={{ color: '#64748b', fontSize: '2rem', marginBottom: '0.75rem' }} />
             <p style={{ color: '#94a3b8', fontSize: '0.95rem', margin: 0 }}>
               No shift logs found for this employee.
             </p>
@@ -192,7 +189,6 @@ export default function StaffShiftsPage() {
                           href={`/admin/staff/${staffId}/shifts/${shift.id}/orders`}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[rgba(197,168,128,0.4)] text-[#c5a880] text-xs font-semibold font-heading tracking-wide whitespace-nowrap no-underline transition-all hover:bg-[rgba(197,168,128,0.1)] hover:border-[#c5a880]"
                         >
-                          <FaListAlt className="text-[10px]" />
                           View Orders
                         </Link>
                       </td>
@@ -271,7 +267,6 @@ export default function StaffShiftsPage() {
                       href={`/admin/staff/${staffId}/shifts/${shift.id}/orders`}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[rgba(197,168,128,0.4)] text-[#c5a880] text-xs font-semibold font-heading tracking-wide whitespace-nowrap no-underline transition-all hover:bg-[rgba(197,168,128,0.1)] hover:border-[#c5a880]"
                     >
-                      <FaListAlt className="text-[10px]" />
                       View Orders
                     </Link>
                   </div>

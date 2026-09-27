@@ -4,7 +4,6 @@ import { useState, useCallback, useMemo } from 'react';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/types';
 
-import { FaPlus } from 'react-icons/fa';
 import ProductModal from '@/components/ProductModal';
 import { ProductList } from './ProductList';
 
@@ -73,7 +72,7 @@ export default function AdminPage() {
         <button onClick={handleAdd} disabled={isSaving}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border-none cursor-pointer transition-all duration-200 font-heading tracking-wide disabled:opacity-50 bg-gradient-to-r from-[#1a3a7a] to-[#2a4a9a] text-white shadow-[0_2px_8px_rgba(26,58,122,0.3)] hover:from-[#2a4a9a] hover:to-[#3a5aaa]"
         >
-          <FaPlus /> Add New Product
+          Add New Product
         </button>
       </div>
 

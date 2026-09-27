@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { formatEGP } from '@/utils/currency';
 import type { Product } from '@/types';
-import { FaEdit, FaTrashAlt, FaSpinner } from 'react-icons/fa';
+import { FaSpinner } from 'react-icons/fa';
 
 const COLLECTION_LABELS: Record<string, string> = {
   'new-arrivals': 'New Arrivals',
@@ -113,14 +113,14 @@ export const ProductList = React.memo(function ProductListInner({ rows, deleting
                 disabled={deletingId === product.id}
                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-[#1a3a7a]/50 text-white border border-white/10 hover:bg-[#1a3a7a] hover:border-white/20 transition-all disabled:opacity-40 disabled:pointer-events-none"
               >
-                <FaEdit className="text-xs" /> Edit
+                Edit
               </button>
               <button
                 onClick={() => onDelete(product.id)}
                 disabled={deletingId === product.id}
                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/30 transition-all disabled:opacity-40 disabled:pointer-events-none"
               >
-                {deletingId === product.id ? <FaSpinner className="animate-spin text-xs" /> : <FaTrashAlt className="text-xs" />}
+                {deletingId === product.id ? <FaSpinner className="animate-spin text-xs" /> : null}
                 Delete
               </button>
             </div>
