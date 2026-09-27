@@ -4,6 +4,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifySession } from '@/lib/auth';
+import { computeShiftTotals } from '@/lib/shiftTotals';
 
 
 export const dynamic = 'force-dynamic';
@@ -15,11 +16,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Verify admin role directly from DB
-    const rows = await prisma.$queryRaw<Array<{ role: string }>>`
-      SELECT role::text FROM "User" WHERE id = ${session.id} LIMIT 1
-    `;
-    if (rows.length === 0 || rows[0].role !== 'ADMIN') {
+    const adminUser = await prisma.user.findUnique({
+      where: { id: session.id },
+      select: { role: true },
+    });
+    if (!adminUser || adminUser.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -42,7 +43,26 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, shifts });
+    // OPEN shifts store no totals (they are only written at close time) —
+    // aggregate live from their orders so the admin history shows a running
+    // expected total without requiring the shift to be closed first.
+    const shiftsWithLiveTotals = await Promise.all(
+      shifts.map(async (shift: any) => {
+        if (shift.status !== 'OPEN') return shift;
+        const totals = await computeShiftTotals(shift.id);
+        return {
+          ...shift,
+          totalCash: totals.totalCash,
+          totalInstaPay: totals.totalInstaPay,
+          totalVodafoneCash: totals.totalVodafoneCash,
+          totalVisa: totals.totalVisa,
+          expectedTotal: totals.expectedTotal,
+          orderCount: totals.orderCount,
+        };
+      }),
+    );
+
+    return NextResponse.json({ success: true, shifts: shiftsWithLiveTotals });
   } catch (err) {
     console.error('[STAFF SHIFTS API]', err);
     return NextResponse.json(

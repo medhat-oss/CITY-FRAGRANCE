@@ -90,16 +90,33 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
       select: {
         id: true, name: true, type: true, category: true,
-        collection: true, collections: true, isDraft: true,
+        collection: true, isDraft: true,
         badge: true, notes: true, description: true,
         price: true, costPrice: true, salePrice: true,
         images: true, videoUrl: true, stock: true,
         createdAt: true, updatedAt: true,
       },
     });
+
+    // Fetch collection relations via raw SQL (avoids WASM engine for many-to-many)
+    let collectionMap = new Map<string, string[]>();
+    try {
+      const rows = (await prisma.$queryRawUnsafe(
+        'SELECT ctp."A" AS product_id, c.slug FROM "_CollectionToProduct" ctp JOIN "Collection" c ON ctp."B" = c.id'
+      )) as Array<{ product_id: string; slug: string }>;
+      for (const row of rows) {
+        const arr = collectionMap.get(row.product_id) || [];
+        arr.push(row.slug);
+        collectionMap.set(row.product_id, arr);
+      }
+    } catch {
+      // If the join table query fails, serve products without collections
+    }
+
     const products = raw.map((p: any) => ({
       ...p,
       ...parseNotes(p.notes),
+      collections: collectionMap.get(p.id) || [],
     }));
     return NextResponse.json({ products });
   } catch (err) {
@@ -117,7 +134,7 @@ async function upsertProduct(id: string, scalarData: Record<string, unknown>, co
     create: data as any,
   });
 
-  await prisma.$executeRaw`DELETE FROM "_CollectionToProduct" WHERE "B" = ${id}`;
+  await prisma.$executeRawUnsafe('DELETE FROM "_CollectionToProduct" WHERE "B" = $1', id);
 
   if (collectionOps.length > 0) {
     const slugs = collectionOps.map((c) => c.slug);
@@ -126,7 +143,7 @@ async function upsertProduct(id: string, scalarData: Record<string, unknown>, co
       select: { id: true },
     });
     for (const c of collections) {
-      await prisma.$executeRaw`INSERT INTO "_CollectionToProduct" ("A", "B") VALUES (${c.id}, ${id})`;
+      await prisma.$executeRawUnsafe('INSERT INTO "_CollectionToProduct" ("A", "B") VALUES ($1, $2)', c.id, id);
     }
   }
 

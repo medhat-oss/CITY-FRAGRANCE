@@ -190,72 +190,69 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Incorrect shift password' }, { status: 401 });
     }
 
-    // ── Atomic shift close inside a transaction ──
-    const result = await prisma.$transaction(async (tx) => {
-      const activeShift = await tx.shift.findFirst({
-        where: { cashierId: targetCashierId, status: 'OPEN' },
-        select: { id: true, startTime: true, cashierName: true },
-      });
+    // ── Sequential shift close ──
+    const activeShift = await prisma.shift.findFirst({
+      where: { cashierId: targetCashierId, status: 'OPEN' },
+      select: { id: true, startTime: true, cashierName: true },
+    });
 
-      if (!activeShift) {
-        throw new Error('No active shift found');
-      }
+    if (!activeShift) {
+      return NextResponse.json({ success: false, error: 'No active shift found' }, { status: 400 });
+    }
 
-      const cancelledFilter = { notIn: ['Cancelled', 'CANCELLED', 'cancelled'] };
+    const cancelledFilter = { notIn: ['Cancelled', 'CANCELLED', 'cancelled'] };
 
-      // Aggregate all payment methods in a single groupBy query
-      const agg = await tx.order.groupBy({
-        by: ['paymentMethod'],
-        _sum: { totalPrice: true },
-        _count: true,
-        where: { shiftId: activeShift.id, status: cancelledFilter },
-      });
+    const agg = await prisma.order.groupBy({
+      by: ['paymentMethod'],
+      _sum: { totalPrice: true },
+      _count: true,
+      where: { shiftId: activeShift.id, status: cancelledFilter },
+    });
 
-      let totalCash = 0, totalInstaPay = 0, totalVodafoneCash = 0, totalVisa = 0;
-      let orderCount = 0;
-      for (const row of (agg as any[])) {
-        const method = (row.paymentMethod || '').toLowerCase();
-        const sum = row._sum.totalPrice || 0;
-        if (method.includes('cash')) totalCash = sum;
-        else if (method.includes('instapay')) totalInstaPay = sum;
-        else if (method.includes('vodafone')) totalVodafoneCash = sum;
-        else if (method.includes('visa')) totalVisa = sum;
-        orderCount += row._count;
-      }
-      const expectedTotal = totalCash + totalInstaPay + totalVodafoneCash + totalVisa;
-      const actualCashValue = body.actualCash ?? 0;
-      const discrepancy = actualCashValue - expectedTotal;
+    let totalCash = 0, totalInstaPay = 0, totalVodafoneCash = 0, totalVisa = 0;
+    let orderCount = 0;
+    for (const row of (agg as any[])) {
+      const method = (row.paymentMethod || '').toLowerCase();
+      const sum = row._sum.totalPrice || 0;
+      if (method.includes('cash')) totalCash = sum;
+      else if (method.includes('instapay')) totalInstaPay = sum;
+      else if (method.includes('vodafone')) totalVodafoneCash = sum;
+      else if (method.includes('visa')) totalVisa = sum;
+      orderCount += row._count;
+    }
+    const expectedTotal = totalCash + totalInstaPay + totalVodafoneCash + totalVisa;
+    const actualCashValue = body.actualCash ?? 0;
+    const discrepancy = actualCashValue - expectedTotal;
 
-      await tx.shift.update({
-        where: { id: activeShift.id },
-        data: {
-          status: 'CLOSED',
-          endTime: new Date(),
-          totalCash,
-          totalInstaPay,
-          totalVodafoneCash,
-          totalVisa,
-          actualCash: actualCashValue,
-          expectedTotal,
-          discrepancy,
-          orderCount,
-        },
-      });
-
-      return {
-        orderCount,
-        expectedTotal,
+    await prisma.shift.update({
+      where: { id: activeShift.id },
+      data: {
+        status: 'CLOSED',
+        endTime: new Date(),
         totalCash,
         totalInstaPay,
         totalVodafoneCash,
         totalVisa,
         actualCash: actualCashValue,
+        expectedTotal,
         discrepancy,
-        shiftId: activeShift.id,
-        shiftStartedAt: activeShift.startTime,
-        cashierName: activeShift.cashierName || cashier?.username || 'Cashier',
-      };
+        orderCount,
+      },
     });
+
+    const result = {
+      orderCount,
+      expectedTotal,
+      totalCash,
+      totalInstaPay,
+      totalVodafoneCash,
+      totalVisa,
+      actualCash: actualCashValue,
+      discrepancy,
+      shiftId: activeShift.id,
+      shiftStartedAt: activeShift.startTime,
+      cashierName: activeShift.cashierName || cashier?.username || 'Cashier',
+    };
 
     // Record in ShiftLog OUTSIDE transaction to avoid blocking shift close
     try {

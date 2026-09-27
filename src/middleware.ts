@@ -7,6 +7,7 @@ const CASHIER_COOKIE = 'cashier_session';
 const PUBLIC_PATHS = new Set([
   '/admin/login',
   '/cashier/login',
+  '/robots.txt',
 ]);
 
 export function middleware(request: NextRequest) {

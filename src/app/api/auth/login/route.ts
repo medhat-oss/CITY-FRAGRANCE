@@ -2,29 +2,38 @@ import { NextResponse } from 'next/server';
 import { verifyPassword } from '@/lib/password';
 import prisma from '@/lib/prisma';
 import { createSession, setAdminCookie, CASHIER_COOKIE } from '@/lib/auth';
+import { rateLimit, extractIp } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
+    const ip = extractIp(request);
+    const check = rateLimit(`login:${ip}`, 5, 60000);
+    if (!check.allowed) {
+      return NextResponse.json(
+        { error: `Too many login attempts. Try again in ${check.retryAfter} seconds.` },
+        { status: 429, headers: { 'Retry-After': String(check.retryAfter) } }
+      );
+    }
+
     const { email, password } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    // Raw query — avoids Prisma client type-mismatch issues
-    const users = await prisma.$queryRaw<Array<{
-      id: string; email: string; username: string; name: string;
-      role: string; password: string;
-    }>>`
-      SELECT id, email, username, name, role::text, password
-      FROM "User"
-      WHERE email = ${email} OR username = ${email}
-      LIMIT 1
-    `;
-
-    const user = users[0];
+    const lowerEmail = email.toLowerCase();
+    let user = await prisma.user.findFirst({
+      where: { email: lowerEmail },
+      select: { id: true, email: true, username: true, name: true, role: true, password: true },
+    });
+    if (!user) {
+      user = await prisma.user.findFirst({
+        where: { username: lowerEmail },
+        select: { id: true, email: true, username: true, name: true, role: true, password: true },
+      });
+    }
     if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }

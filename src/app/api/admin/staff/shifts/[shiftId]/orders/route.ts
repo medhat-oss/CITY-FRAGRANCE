@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifySession } from '@/lib/auth';
+import { computeShiftTotals } from '@/lib/shiftTotals';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,10 +14,11 @@ export async function GET(
     if (!session?.id) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
-    const rows = await prisma.$queryRaw<Array<{ role: string }>>`
-      SELECT role::text FROM "User" WHERE id = ${session.id} LIMIT 1
-    `;
-    if (rows.length === 0 || rows[0].role !== 'ADMIN') {
+    const adminUser = await prisma.user.findUnique({
+      where: { id: session.id },
+      select: { role: true },
+    });
+    if (!adminUser || adminUser.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -27,15 +29,11 @@ export async function GET(
 
     const shift = await prisma.shift.findUnique({
       where: { id: shiftId },
-      include: {
-        orders: {
-          select: {
-            id: true, orderId: true, date: true, customerName: true,
-            phoneNumber: true, createdAt: true,
-            totalPrice: true, paymentMethod: true, status: true,
-            items: true, address: true,
-          },
-        },
+      select: {
+        id: true, cashierId: true, cashierName: true,
+        startTime: true, endTime: true, status: true,
+        totalCash: true, totalInstaPay: true, totalVodafoneCash: true,
+        totalVisa: true, expectedTotal: true, orderCount: true,
       },
     });
 
@@ -43,10 +41,26 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Shift not found' }, { status: 404 });
     }
 
+    // OPEN shifts store no totals (they are only written at close time) —
+    // aggregate live from the shift's orders so the totals header and the
+    // payment-method breakdown reflect the running shift.
+    const shiftWithLiveTotals =
+      shift.status === 'OPEN'
+        ? { ...shift, ...(await computeShiftTotals(shift.id)) }
+        : shift;
+
+    const orders = await prisma.order.findMany({
+      where: { shiftId },
+      select: {
+        id: true, orderId: true, date: true, customerName: true,
+        phoneNumber: true, createdAt: true,
+        totalPrice: true, paymentMethod: true, status: true,
+        items: true, address: true,
+      },
+    });
+
     // Ensure every item in every order has a stable `id` field.
-    // Items created before the id standard may lack one — inject a deterministic
-    // fallback so the per-item cancel button always has a valid orderItemId.
-    const ordersWithItemIds = shift.orders.map((o: any) => ({
+    const ordersWithItemIds = orders.map((o: any) => ({
       ...o,
       items: (Array.isArray(o.items) ? o.items as any[] : []).map(
         (it: any, idx: number) => ({
@@ -58,20 +72,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      shift: {
-        id: shift.id,
-        cashierId: shift.cashierId,
-        cashierName: shift.cashierName,
-        startTime: shift.startTime,
-        endTime: shift.endTime,
-        status: shift.status,
-        totalCash: shift.totalCash,
-        totalInstaPay: shift.totalInstaPay,
-        totalVodafoneCash: shift.totalVodafoneCash,
-        totalVisa: shift.totalVisa,
-        expectedTotal: shift.expectedTotal,
-        orderCount: shift.orderCount,
-      },
+      shift: shiftWithLiveTotals,
       orders: ordersWithItemIds,
     });
   } catch (err) {

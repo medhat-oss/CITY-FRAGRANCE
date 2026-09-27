@@ -157,7 +157,7 @@ export async function POST(request: Request) {
         create: createPayload,
       });
       // Bust the settings unstable_cache and the root layout in one shot
-      revalidateTag('settings', 'max');
+      revalidateTag('settings');
       revalidatePath('/', 'layout');
     } catch (dbErr: any) {
       console.error('PRISMA UPSERT ERROR:', dbErr?.message || dbErr);

@@ -1,50 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { HiLockClosed, HiChevronDown, HiTag } from 'react-icons/hi2';
 import { useCart } from '@/context/CartContext';
 import { formatEGP } from '@/utils/currency';
-
-const EGYPT_GOVERNORATES = [
-  'Cairo', 'Giza', 'Alexandria', 'Dakahlia', 'Red Sea', 'Beheira',
-  'Fayoum', 'Gharbiya', 'Ismailia', 'Menofia', 'Minya', 'Qaliubiya',
-  'New Valley', 'Suez', 'Aswan', 'Assiut', 'Beni Suef', 'Port Said',
-  'Damietta', 'Sharkia', 'South Sinai', 'Kafr Al sheikh', 'Matrouh',
-  'Luxor', 'Qena', 'North Sinai', 'Sohag',
-];
-
-const SHIPPING_RATES: Record<string, number> = {
-  Cairo: 85,
-  Giza: 85,
-  Qaliubiya: 70,
-  Alexandria: 130,
-  Suez: 130,
-  Beheira: 140,
-  Ismailia: 140,
-  'Port Said': 140,
-  Damietta: 140,
-  Dakahlia: 140,
-  Gharbiya: 140,
-  'Kafr Al sheikh': 140,
-  Fayoum: 140,
-  'Beni Suef': 140,
-  Menofia: 100,
-  Sharkia: 100,
-  Matrouh: 180,
-  Minya: 160,
-  Assiut: 160,
-  Sohag: 160,
-  Qena: 160,
-  Luxor: 160,
-  Aswan: 160,
-  'North Sinai': 200,
-  'South Sinai': 200,
-  'Red Sea': 200,
-  'New Valley': 200,
-};
+import {
+  DEFAULT_GOVERNORATES,
+  DEFAULT_SHIPPING_RATES,
+} from '@/data/defaults';
 
 interface FormState {
   email: string;
@@ -66,6 +32,9 @@ export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const router = useRouter();
 
+  const [governorates, setGovernorates] = useState<string[]>(DEFAULT_GOVERNORATES);
+  const [shippingRates, setShippingRates] = useState<Record<string, number>>(DEFAULT_SHIPPING_RATES);
+
   const [form, setForm] = useState<FormState>({
     email: '',
     emailOffers: false,
@@ -82,10 +51,36 @@ export default function CheckoutPage() {
     discountCode: '',
   });
   const [discountApplied, setDiscountApplied] = useState(false);
+  const [discountPct, setDiscountPct] = useState(0);
+  const [discountError, setDiscountError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState('');
   const [selectedPayment, setSelectedPayment] = useState<'vodafone' | 'instapay' | 'cod' | null>(null);
   const [shippingCost, setShippingCost] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/api/settings', { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.shippingRates && Object.keys(data.shippingRates).length > 0) {
+          const rates = data.shippingRates as Record<string, number>;
+          setShippingRates(rates);
+          setGovernorates(Object.keys(rates));
+          if (form.governorate && rates[form.governorate] !== undefined) {
+            setShippingCost(rates[form.governorate]);
+          }
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setForm((prev) => ({ ...prev, governorate: '' }));
+    setShippingCost(0);
+  }, [governorates]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -96,13 +91,38 @@ export default function CheckoutPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
 
     if (name === 'governorate' && typeof value === 'string') {
-      setShippingCost(SHIPPING_RATES[value] ?? 0);
+      setShippingCost(shippingRates[value] ?? 0);
     }
   };
 
-  const handleApplyDiscount = () => {
-    if (form.discountCode.trim()) setDiscountApplied(true);
+  const handleApplyDiscount = async () => {
+    const code = form.discountCode.trim();
+    if (!code) return;
+    setDiscountError('');
+    try {
+      const res = await fetch('/api/validate-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setDiscountPct(data.discountPct);
+        setDiscountApplied(true);
+      } else {
+        setDiscountError(data.error || 'Invalid coupon code');
+        setDiscountApplied(false);
+        setDiscountPct(0);
+      }
+    } catch {
+      setDiscountError('Failed to validate coupon. Please try again.');
+      setDiscountApplied(false);
+      setDiscountPct(0);
+    }
   };
+
+  const discountAmount = discountApplied ? Math.round(cartTotal * (discountPct / 100)) : 0;
+  const total = cartTotal + shippingCost - discountAmount;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,9 +153,10 @@ export default function CheckoutPage() {
         items,
         totalPrice: total,
         paymentMethod: selectedPayment,
+        discountCode: discountApplied ? form.discountCode.trim().toUpperCase() : '',
+        discountAmount,
       };
 
-      // Save order
       const res = await fetch('/api/admin/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -144,13 +165,12 @@ export default function CheckoutPage() {
 
       const data = await res.json();
       if (!data.success) {
-        throw new Error('Failed to save order');
+        throw new Error(data.error || 'Failed to save order');
       }
 
       const orderId = data.order.orderId;
       clearCart();
 
-      // Redirect to the correct page based on payment method
       if (selectedPayment === 'instapay') {
         router.push(`/order-payment/instapay?orderId=${orderId}`);
       } else if (selectedPayment === 'vodafone') {
@@ -163,8 +183,6 @@ export default function CheckoutPage() {
       setIsProcessing(false);
     }
   };
-
-  const total = cartTotal + shippingCost;
 
   if (cartItems.length === 0) {
     return (
@@ -311,7 +329,7 @@ export default function CheckoutPage() {
                   className="w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-sm font-body text-sm text-ink dark:text-white bg-white dark:bg-slate-900 appearance-none cursor-pointer focus:outline-none focus:border-navy transition-colors"
                 >
                   <option value="">Governorate</option>
-                  {EGYPT_GOVERNORATES.map((g) => (
+                  {governorates.map((g) => (
                     <option key={g} value={g}>{g}</option>
                   ))}
                 </select>
@@ -499,7 +517,8 @@ export default function CheckoutPage() {
                 placeholder="Discount code"
                 value={form.discountCode}
                 onChange={handleChange}
-                className="w-full pl-9 pr-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-sm font-body text-sm text-ink dark:text-white bg-white dark:bg-slate-900 placeholder:text-gray-300 dark:placeholder-slate-400 focus:outline-none focus:border-navy transition-colors"
+                disabled={discountApplied}
+                className="w-full pl-9 pr-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-sm font-body text-sm text-ink dark:text-white bg-white dark:bg-slate-900 placeholder:text-gray-300 dark:placeholder-slate-400 focus:outline-none focus:border-navy transition-colors disabled:opacity-50"
               />
             </div>
             <button
@@ -511,6 +530,9 @@ export default function CheckoutPage() {
               {discountApplied ? 'Applied' : 'Apply'}
             </button>
           </div>
+          {discountError && (
+            <p className="font-body text-xs text-red-500 mb-4">{discountError}</p>
+          )}
 
           <div className="h-px bg-gray-200 dark:bg-slate-800 my-4" />
 
@@ -524,10 +546,10 @@ export default function CheckoutPage() {
               <span>Shipping</span>
               <span>{shippingCost > 0 ? formatEGP(shippingCost) : '—'}</span>
             </div>
-            {discountApplied && (
+            {discountApplied && discountAmount > 0 && (
               <div className="flex justify-between font-body text-sm text-green-600">
-                <span>Discount ({form.discountCode})</span>
-                <span>&minus; {formatEGP(0)}</span>
+                <span>Discount ({form.discountCode} &minus;{discountPct}%)</span>
+                <span>&minus; {formatEGP(discountAmount)}</span>
               </div>
             )}
           </div>

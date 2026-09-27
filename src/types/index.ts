@@ -42,6 +42,8 @@ export interface Order {
   governorate: string;
   items: { id: string; name: string; quantity: number; price: number; image?: string }[];
   totalPrice: number;
+  discountCode?: string;
+  discountAmount?: number;
   status: string;
   date: string;
   paymentMethod?: string;

@@ -9,7 +9,7 @@
       "new-arrivals",
       "gift-sets"
     ],
-    "isDraft": true,
+    "isDraft": false,
     "badge": "BEST SELLER",
     "topNotes": "Damascus Rose",
     "middleNotes": "Peony",
@@ -21,7 +21,7 @@
       "/images/product-placeholder.png"
     ],
     "videoUrl": "",
-    "stock": 0
+    "stock": 30
   },
   {
     "id": "p9",
@@ -42,7 +42,7 @@
       "/images/product-placeholder.png"
     ],
     "videoUrl": "",
-    "stock": 1
+    "stock": 30
   },
   {
     "id": "p10",
@@ -58,8 +58,9 @@
     ],
     "badge": "BEST SELLER",
     "collection": "mens-collection",
-    "stock": 0,
+    "stock": 30,
     "isDraft": false,
+    "videoUrl": "",
     "collections": [
       "mens-collection",
       "all-fragrances"
@@ -87,7 +88,7 @@
       "/images/product-placeholder.png"
     ],
     "videoUrl": "",
-    "stock": 1
+    "stock": 30
   },
   {
     "id": "p12",
@@ -104,11 +105,12 @@
     "badge": "BEST SELLER",
     "collection": "oud-collection",
     "isDraft": false,
+    "videoUrl": "",
     "collections": [
       "oud-collection",
       "all-fragrances"
     ],
-    "stock": 0
+    "stock": 30
   },
   {
     "id": "p13",
@@ -125,11 +127,12 @@
     "badge": "SALE",
     "collection": "mens-collection",
     "isDraft": false,
+    "videoUrl": "",
     "collections": [
       "mens-collection",
       "all-fragrances"
     ],
-    "stock": 0
+    "stock": 30
   },
   {
     "id": "p14",
@@ -146,10 +149,11 @@
     "badge": "BEST SELLER",
     "collection": "gift-sets",
     "isDraft": false,
+    "videoUrl": "",
     "collections": [
       "gift-sets"
     ],
-    "stock": 0
+    "stock": 30
   },
   {
     "id": "p15",
@@ -165,8 +169,9 @@
     ],
     "badge": "NEW",
     "collection": "new-arrivals",
-    "stock": 0,
+    "stock": 30,
     "isDraft": false,
+    "videoUrl": "",
     "collections": [
       "new-arrivals",
       "all-fragrances"

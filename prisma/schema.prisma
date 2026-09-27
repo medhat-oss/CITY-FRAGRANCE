@@ -18,6 +18,8 @@ model Order {
   governorate    String   @default("")
   items          Json
   totalPrice     Float
+  discountCode   String   @default("")
+  discountAmount Float    @default(0)
   status         String   @default("Pending")
   date           String
   paymentMethod  String?
@@ -131,8 +133,21 @@ model ShiftLog {
   @@index([userId])
 }
 
+model Coupon {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  discountPct Float
+  maxUses     Int      @default(0)
+  usedCount   Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
 model SiteSetting {
   id                      String @id @default("default")
+  paymentDetails          Json   @default("{}")
+  shippingRates           Json   @default("{}")
+  whatsappNumber          String @default("")
   heroTitle               String @default("")
   heroSubtitle            String @default("")
   heroDescription         String @default("")

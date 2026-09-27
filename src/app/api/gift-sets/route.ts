@@ -9,5 +9,7 @@ export async function GET() {
   const all = await readJsonFile<any[]>('gift-sets.json', []);
   // filter out drafts; also accept missing isDraft field (treated as published for legacy data)
   const published = all.filter((gs) => gs.isDraft !== true);
-  return NextResponse.json({ giftSets: published });
+  return NextResponse.json({ giftSets: published }, {
+    headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
+  });
 }

@@ -21,7 +21,9 @@ const SLUG_TO_VIDEO_FIELD: Record<string, string> = {
 export async function GET() {
   const now = Date.now();
   if (serverCache && now < serverCache.expiresAt) {
-    return NextResponse.json(serverCache.data);
+    return NextResponse.json(serverCache.data, {
+      headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120' },
+    });
   }
 
   const [images, settings] = await Promise.all([
@@ -39,5 +41,7 @@ export async function GET() {
 
   const data = { images };
   serverCache = { data, expiresAt: now + SERVER_CACHE_TTL };
-  return NextResponse.json(data);
+  return NextResponse.json(data, {
+    headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120' },
+  });
 }

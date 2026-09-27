@@ -65,6 +65,9 @@ async function main() {
         price: p.price,
         salePrice: p.salePrice || null,
         images: p.images || [],
+        isDraft: p.isDraft !== undefined ? p.isDraft : false,
+        stock: typeof p.stock === 'number' ? p.stock : 0,
+        videoUrl: p.videoUrl || '',
       },
       create: {
         id: p.id,
@@ -81,6 +84,9 @@ async function main() {
         price: p.price,
         salePrice: p.salePrice || null,
         images: p.images || [],
+        isDraft: p.isDraft !== undefined ? p.isDraft : false,
+        stock: typeof p.stock === 'number' ? p.stock : 0,
+        videoUrl: p.videoUrl || '',
       },
     });
     console.log(`  Product: ${p.name}`);
@@ -97,6 +103,8 @@ async function main() {
         price: gs.price,
         image: gs.image || '',
         productIds: gs.productIds || [],
+        isDraft: gs.isDraft !== undefined ? gs.isDraft : false,
+        stock: typeof gs.stock === 'number' ? gs.stock : 0,
       },
       create: {
         id: gs.id,
@@ -105,6 +113,8 @@ async function main() {
         price: gs.price,
         image: gs.image || '',
         productIds: gs.productIds || [],
+        isDraft: gs.isDraft !== undefined ? gs.isDraft : false,
+        stock: typeof gs.stock === 'number' ? gs.stock : 0,
       },
     });
     console.log(`  Gift Set: ${gs.name}`);
@@ -125,6 +135,20 @@ async function main() {
   await prisma.siteSetting.upsert({
     where: { id: 'default' },
     update: {
+      paymentDetails: {
+        instapay: { title: 'InstaPay Account', number: '01092748940', note: 'Send the exact order amount to the InstaPay account above, then confirm via WhatsApp.' },
+        'vodafone-cash': { title: 'Vodafone Cash Number', number: '01044415982', note: 'Send the exact order amount to the Vodafone Cash number above, then confirm via WhatsApp.' },
+      },
+      shippingRates: {
+        Cairo: 85, Giza: 85, Qaliubiya: 70, Alexandria: 130, Suez: 130,
+        Beheira: 140, Ismailia: 140, 'Port Said': 140, Damietta: 140,
+        Dakahlia: 140, Gharbiya: 140, 'Kafr Al sheikh': 140, Fayoum: 140,
+        'Beni Suef': 140, Menofia: 100, Sharkia: 100, Matrouh: 180,
+        Minya: 160, Assiut: 160, Sohag: 160, Qena: 160, Luxor: 160,
+        Aswan: 160, 'North Sinai': 200, 'South Sinai': 200, 'Red Sea': 200,
+        'New Valley': 200,
+      },
+      whatsappNumber: '201044415982',
       heroTitle: settings.heroTitle || '',
       heroSubtitle: settings.heroSubtitle || '',
       announcementText: settings.announcementText || '',
@@ -135,6 +159,20 @@ async function main() {
     },
     create: {
       id: 'default',
+      paymentDetails: {
+        instapay: { title: 'InstaPay Account', number: '01092748940', note: 'Send the exact order amount to the InstaPay account above, then confirm via WhatsApp.' },
+        'vodafone-cash': { title: 'Vodafone Cash Number', number: '01044415982', note: 'Send the exact order amount to the Vodafone Cash number above, then confirm via WhatsApp.' },
+      },
+      shippingRates: {
+        Cairo: 85, Giza: 85, Qaliubiya: 70, Alexandria: 130, Suez: 130,
+        Beheira: 140, Ismailia: 140, 'Port Said': 140, Damietta: 140,
+        Dakahlia: 140, Gharbiya: 140, 'Kafr Al sheikh': 140, Fayoum: 140,
+        'Beni Suef': 140, Menofia: 100, Sharkia: 100, Matrouh: 180,
+        Minya: 160, Assiut: 160, Sohag: 160, Qena: 160, Luxor: 160,
+        Aswan: 160, 'North Sinai': 200, 'South Sinai': 200, 'Red Sea': 200,
+        'New Valley': 200,
+      },
+      whatsappNumber: '201044415982',
       heroTitle: settings.heroTitle || '',
       heroSubtitle: settings.heroSubtitle || '',
       announcementText: settings.announcementText || '',
@@ -184,6 +222,20 @@ async function main() {
     } else {
       console.log(`  Order exists: ${o.orderId}`);
     }
+  }
+
+  // 8. Coupons
+  const coupons = [
+    { code: 'WELCOME10', discountPct: 10, maxUses: 100, active: true },
+    { code: 'SAVE20', discountPct: 20, maxUses: 50, active: true },
+  ];
+  for (const c of coupons) {
+    await prisma.coupon.upsert({
+      where: { code: c.code },
+      update: { discountPct: c.discountPct, maxUses: c.maxUses, active: c.active },
+      create: { code: c.code, discountPct: c.discountPct, maxUses: c.maxUses, active: c.active },
+    });
+    console.log(`  Coupon: ${c.code} (${c.discountPct}% off)`);
   }
 
   console.log('\nDatabase seeded successfully!');

@@ -20,7 +20,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
       select: {
         id: true, name: true, type: true, category: true,
-        collection: true, collections: true, isDraft: true,
+        collection: true, isDraft: true,
         badge: true, notes: true,
         price: true, costPrice: true, salePrice: true,
         images: true, videoUrl: true, stock: true,
@@ -31,11 +31,12 @@ export async function GET() {
     const products = raw.map((p: any) => ({
       ...p,
       ...parseNotes(p.notes),
-      collections: (p.collections as any[] ?? []).map((c: any) => (typeof c === 'string' ? c : c.slug || '')),
     }));
-    return NextResponse.json({ products });
+    return NextResponse.json({ products }, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
+    });
   } catch (err) {
     console.error('PRODUCTS FETCH ERROR:', err);
-    return NextResponse.json({ products: [] });
+    return NextResponse.json({ products: [], error: 'Failed to fetch products' }, { status: 200 });
   }
 }

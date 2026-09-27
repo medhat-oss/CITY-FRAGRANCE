@@ -140,18 +140,23 @@ async function main() {
     console.log('  • middleware manifest copy skipped: ' + manifestErr.message);
   }
 
-  // Step 6: Patch handler.mjs — remove broken Prisma WASM imports (mangled Windows paths)
-  console.log('\n=== Patching handler.mjs — fixing WASM imports ===');
+  // Step 6: Patch handler.mjs — fix broken Prisma WASM import paths (mangled Windows absolute paths)
+  // esbuild generates absolute Windows paths like import("D:\\city-fragrance-next\\...wasm") which
+  // are unreachable in the deployed Cloudflare Worker.  We rewrite them to the correct relative path
+  // from handler.mjs into the deployment copy of node_modules/.prisma/client/.
+  console.log('\n=== Patching handler.mjs — fixing WASM import paths ===');
   const handlerFile = '.open-next/server-functions/default/handler.mjs';
   if (fs.existsSync(handlerFile)) {
     let handlerContent = fs.readFileSync(handlerFile, 'utf-8');
-    // Replace import("D:...query_compiler_fast_bg.wasm") with Promise.resolve({default:null})
-    // These are Turbopack WASM chunk references for Prisma's internal query compiler,
-    // which is never invoked at runtime when using the Neon adapter.
-    const wasmImportRegex = /await import\("D:[^"]*query_compiler_fast_bg\.wasm"\)/g;
+    // The WASM file deployed at .open-next/server-functions/default/node_modules/.prisma/client/
+    // is reachable via the relative path from handler.mjs (which lives one level up from node_modules/).
+    const wasmImportRegex = /import\("D:[^"]*query_compiler_fast_bg\.wasm"\)/g;
     const matches = handlerContent.match(wasmImportRegex);
     if (matches) {
-      handlerContent = handlerContent.replace(wasmImportRegex, '({default:null})');
+      handlerContent = handlerContent.replace(
+        wasmImportRegex,
+        'import("./node_modules/.prisma/client/query_compiler_fast_bg.wasm?module")'
+      );
       fs.writeFileSync(handlerFile, handlerContent, 'utf-8');
       console.log(`  ✓ Patched ${matches.length} WASM import(s)`);
     } else {

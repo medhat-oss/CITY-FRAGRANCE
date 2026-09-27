@@ -61,23 +61,32 @@ const nextConfig = {
         ],
       },
       {
-        // Products API — revalidate every 60s; serve stale for 5 min
-        // while a fresh fetch runs in the background (no loading flash)
+        // Products API — cache at CDN edge for 60s; serve stale for 5 min
         source: '/api/products',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=60, stale-while-revalidate=300',
+            value: 'public, s-maxage=60, stale-while-revalidate=300',
           },
         ],
       },
       {
-        // Collections metadata rarely changes
+        // Collections metadata — cache at CDN edge for 30s; serve stale for 2 min
         source: '/api/collections',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=300, stale-while-revalidate=3600',
+            value: 'public, s-maxage=30, stale-while-revalidate=120',
+          },
+        ],
+      },
+      {
+        // Sitemap — 24h cache; strict Content-Type for Google Search Console
+        source: '/sitemap.xml',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, s-maxage=86400',
           },
         ],
       },

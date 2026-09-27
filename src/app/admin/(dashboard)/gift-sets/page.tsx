@@ -52,12 +52,21 @@ export default function AdminGiftSetsPage() {
   const [isSaving, setIsSaving]   = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch('/api/admin/gift-sets')
-      .then((r) => r.json())
-      .then((d) => { setGiftSets(d.giftSets || []); setLoading(false); })
-      .catch(() => setLoading(false));
+  const loadGiftSets = useCallback(async () => {
+    try {
+      const r = await fetch('/api/admin/gift-sets');
+      const d = await r.json();
+      setGiftSets(d.giftSets || []);
+    } catch {
+      /* keep previous list */
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadGiftSets();
+  }, [loadGiftSets]);
 
   const openAdd = useCallback(() => {
     setEditing(null);
@@ -113,11 +122,12 @@ export default function AdminGiftSetsPage() {
             ? prev.map((g) => (g.id === editingSnapshot.id ? data.giftSet : g))
             : [data.giftSet, ...prev]
         );
+        loadGiftSets();
       }
     } finally {
       setIsSaving(false);
     }
-  }, [editing, form]);
+  }, [editing, form, loadGiftSets]);
 
   const handleDelete = useCallback(async (id: string) => {
     if (!confirm('Delete this gift set?')) return;
@@ -125,11 +135,14 @@ export default function AdminGiftSetsPage() {
     try {
       const res  = await fetch('/api/admin/gift-sets', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
       const data = await res.json();
-      if (data.success) setGiftSets((prev) => prev.filter((g) => g.id !== id));
+      if (data.success) {
+        setGiftSets((prev) => prev.filter((g) => g.id !== id));
+        loadGiftSets();
+      }
     } finally {
       setDeletingId(null);
     }
-  }, []);
+  }, [loadGiftSets]);
 
   const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

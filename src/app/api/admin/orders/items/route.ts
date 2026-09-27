@@ -15,73 +15,83 @@ export async function PUT(request: Request) {
     if (!session?.id) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
-    const adminCheck = await prisma.$queryRaw<Array<{ role: string }>>`
-      SELECT role::text FROM "User" WHERE id = ${session.id} LIMIT 1
-    `;
-    if (adminCheck.length === 0 || adminCheck[0].role !== 'ADMIN') {
+    const adminUser = await prisma.user.findUnique({
+      where: { id: session.id },
+      select: { role: true },
+    });
+    if (!adminUser || adminUser.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    const body = (await request.json()) as { orderId: string; orderItemId: string };
+    const body = (await request.json()) as { orderId: string; orderItemId?: string; itemId?: string };
+    const orderItemId = body.orderItemId || body.itemId || '';
 
-    if (!body.orderId || !body.orderItemId) {
+    if (!body.orderId || !orderItemId) {
       return NextResponse.json(
         { success: false, error: 'orderId and orderItemId are required' },
         { status: 400 }
       );
     }
 
-    // ── Atomic item removal + stock restoration + order total recalculation ──
-    const result = await prisma.$transaction(async (tx) => {
-      const order = await tx.order.findUnique({
-        where: { orderId: body.orderId },
-        select: { id: true, orderId: true, items: true, totalPrice: true, shiftId: true, status: true },
-      });
+    // ── Sequential item removal + stock restoration + order total recalculation ──
+    const order = await prisma.order.findUnique({
+      where: { orderId: body.orderId },
+      select: { id: true, orderId: true, items: true, totalPrice: true, shiftId: true, status: true },
+    });
 
-      if (!order) {
-        throw new Error('Order not found');
-      }
+    if (!order) {
+      return NextResponse.json({ success: false, error: 'Order not found' }, { status: 400 });
+    }
 
-      if (order.status.toLowerCase() === 'cancelled') {
-        throw new Error('Cannot modify a cancelled order');
-      }
+    const orderStatus = (order.status || '').toUpperCase();
+    if (orderStatus === 'CANCELLED' || orderStatus === 'DELIVERED') {
+      return NextResponse.json(
+        { success: false, error: `Cannot modify an order with status "${order.status}".` },
+        { status: 400 }
+      );
+    }
 
-      const items = (order.items as { id: string; name: string; quantity: number; price: number }[]) || [];
+    const items = (order.items as { id: string; name: string; quantity: number; price: number }[]) || [];
 
-      const itemIdx = items.findIndex((it) => it.id === body.orderItemId);
-      if (itemIdx === -1) {
-        throw new Error('Item not found in order');
-      }
+    const legacyIdOf = (it: { name: string; price: number }) =>
+      'legacy-' + String(it.name).toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + it.price;
 
-      const removedItem = items.splice(itemIdx, 1)[0];
+    let itemIdx = items.findIndex((it) => it.id === orderItemId);
+    if (itemIdx === -1) {
+      itemIdx = items.findIndex((it) => legacyIdOf(it) === orderItemId);
+    }
+    if (itemIdx === -1) {
+      return NextResponse.json({ success: false, error: 'Item not found in order' }, { status: 400 });
+    }
 
-      // Restore stock for the removed item
-      const product = await tx.product.findFirst({
-        where: { name: { equals: removedItem.name, mode: 'insensitive' } },
+    const removedItem = items.splice(itemIdx, 1)[0];
+
+    // Restore stock for the removed item
+      const product = await prisma.product.findFirst({
+        where: { name: removedItem.name },
         select: { id: true },
       });
-      if (product) {
-        await tx.product.update({
-          where: { id: product.id },
-          data: { stock: { increment: removedItem.quantity } },
-        });
-      }
-
-      // Recalculate total price from remaining items
-      const newTotal = items.reduce((sum, it) => sum + it.price * it.quantity, 0);
-
-      // Update the order
-      const updated = await tx.order.update({
-        where: { orderId: body.orderId },
-        data: {
-          items: JSON.parse(JSON.stringify(items)),
-          totalPrice: newTotal,
-        },
-        select: { id: true, orderId: true, totalPrice: true, items: true, shiftId: true, status: true },
+    if (product) {
+      await prisma.product.update({
+        where: { id: product.id },
+        data: { stock: { increment: removedItem.quantity } },
       });
+    }
 
-      return { updated, removedItem, newTotal };
+    // Recalculate total price from remaining items
+    const newTotal = items.reduce((sum, it) => sum + it.price * it.quantity, 0);
+
+    // Update the order
+    const updated = await prisma.order.update({
+      where: { orderId: body.orderId },
+      data: {
+        items: JSON.parse(JSON.stringify(items)),
+        totalPrice: newTotal,
+      },
+      select: { id: true, orderId: true, totalPrice: true, items: true, shiftId: true, status: true },
     });
+
+    const result = { updated, removedItem, newTotal };
 
     // --- Recalculate Shift Totals (if order is tied to a shift) ---
     if (result.updated.shiftId) {
@@ -123,7 +133,7 @@ export async function PUT(request: Request) {
     const itemsArr = result.updated.items as { id: string; name: string; quantity: number; price: number }[];
     const names = [...new Set(itemsArr.map((i) => i.name))];
     const products = await prisma.product.findMany({
-      where: { name: { in: names, mode: 'insensitive' } },
+      where: { name: { in: names } },
       select: { name: true, images: true },
     });
     const imageMap = new Map<string, string>();

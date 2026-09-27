@@ -138,6 +138,7 @@ export default function StaffShiftsPage() {
                   const actual = shift.actualCash ?? 0;
                   const discrepancy = shift.discrepancy ?? (actual - expected);
                   const isOpen = shift.status === 'OPEN';
+                  const isActive = shift.status === 'OPEN' || shift.status === 'ACTIVE';
 
                   return (
                     <tr key={shift.id} className="hover:bg-white/5 transition-colors border-b border-white/10">
@@ -181,10 +182,10 @@ export default function StaffShiftsPage() {
                       </td>
                       <td className="p-4 align-middle text-right font-heading font-semibold whitespace-nowrap"
                         style={{
-                          color: Math.abs(discrepancy) < 0.01 ? '#94a3b8' : discrepancy > 0 ? '#22c55e' : '#ef4444',
+                          color: isActive ? '#94a3b8' : Math.abs(discrepancy) < 0.01 ? '#94a3b8' : discrepancy > 0 ? '#22c55e' : '#ef4444',
                         }}
                       >
-                        {discrepancy >= 0 ? '+' : ''}{discrepancy.toFixed(2)}
+                        {isActive ? '—' : `${discrepancy >= 0 ? '+' : ''}${discrepancy.toFixed(2)}`}
                       </td>
                       <td className="p-4 align-middle text-right">
                         <Link
@@ -213,6 +214,7 @@ export default function StaffShiftsPage() {
               const actual = shift.actualCash ?? 0;
               const discrepancy = shift.discrepancy ?? (actual - expected);
               const isOpen = shift.status === 'OPEN';
+              const isActive = shift.status === 'OPEN' || shift.status === 'ACTIVE';
 
               return (
                 <div key={shift.id} className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3">
@@ -260,10 +262,10 @@ export default function StaffShiftsPage() {
                   <div className="flex items-center justify-between pt-2 border-t border-white/10">
                     <span className="font-heading font-semibold text-xs"
                       style={{
-                        color: Math.abs(discrepancy) < 0.01 ? '#94a3b8' : discrepancy > 0 ? '#22c55e' : '#ef4444',
+                        color: isActive ? '#94a3b8' : Math.abs(discrepancy) < 0.01 ? '#94a3b8' : discrepancy > 0 ? '#22c55e' : '#ef4444',
                       }}
                     >
-                      {discrepancy >= 0 ? '+' : ''}{discrepancy.toFixed(2)}
+                      {isActive ? '—' : `${discrepancy >= 0 ? '+' : ''}${discrepancy.toFixed(2)}`}
                     </span>
                     <Link
                       href={`/admin/staff/${staffId}/shifts/${shift.id}/orders`}

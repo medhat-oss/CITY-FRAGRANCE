@@ -1,11 +1,19 @@
 import { verifySession, clearAdminSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
-
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminRootLayout({ children }: { children: React.ReactNode }) {
+  const headerList = await headers();
+  const pathname = headerList.get('x-pathname') || '';
+
+  // Don't intercept login page to prevent infinite redirect loop
+  if (pathname.includes('/admin/login')) {
+    return <>{children}</>;
+  }
+
   const session = await verifySession();
 
   if (!session || session.role !== 'ADMIN') {

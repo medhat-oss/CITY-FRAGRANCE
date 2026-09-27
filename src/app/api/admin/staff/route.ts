@@ -12,13 +12,11 @@ async function isAdmin() {
   const session = await verifySession();
   if (!session?.id) return false;
   try {
-    // DO NOT refactor this back to standard Prisma ORM.
-    // Raw SQL is strictly required here to bypass PostgreSQL Enum string serialization
-    // issues that trigger false 403 Forbidden errors.
-    const rows = await prisma.$queryRaw<Array<{ role: string }>>`
-      SELECT role::text FROM "User" WHERE id = ${session.id} LIMIT 1
-    `;
-    return rows.length > 0 && rows[0].role === 'ADMIN';
+    const user = await prisma.user.findUnique({
+      where: { id: session.id },
+      select: { role: true },
+    });
+    return user?.role === 'ADMIN';
   } catch {
     return false;
   }
@@ -31,18 +29,13 @@ export async function GET() {
   }
 
   try {
-    const users = await prisma.$queryRaw<
-      Array<{
-        id: string; email: string; username: string; name: string;
-        role: string; shiftPassword: string; createdAt: Date; updatedAt: Date;
-      }>
-    >`SELECT id, email, username, name, role::text, "shiftPassword", "createdAt", "updatedAt" FROM "User" ORDER BY "createdAt" DESC`;
+    const users = await prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, email: true, username: true, name: true, role: true, shiftPassword: true, createdAt: true, updatedAt: true },
+    });
 
     const staff = users.map((u: any) => ({
-      id: u.id,
-      email: u.email,
-      username: u.username,
-      name: u.name,
+      ...u,
       role: u.role || 'CASHIER',
       createdAt: u.createdAt,
     }));
@@ -66,29 +59,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
-    const existing = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id FROM "User" WHERE LOWER(email) = LOWER(${email}) OR LOWER(username) = LOWER(${username}) LIMIT 1
-    `;
+    let existingUser = await prisma.user.findFirst({
+      where: { email: email.toLowerCase() },
+      select: { id: true },
+    });
+    if (!existingUser) {
+      existingUser = await prisma.user.findFirst({
+        where: { username: username.toLowerCase() },
+        select: { id: true },
+      });
+    }
 
-    if (existing.length > 0) {
+    if (existingUser) {
       return NextResponse.json({ error: 'Staff account already exists with this email or username' }, { status: 400 });
     }
 
     const hashedPassword = await hashPassword(password);
     const roleEnum = role.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'CASHIER';
-    const now = new Date();
 
-    await prisma.$executeRaw`
-      INSERT INTO "User" (id, email, username, password, name, role, "shiftPassword", "createdAt", "updatedAt")
-      VALUES (gen_random_uuid()::text, ${email.toLowerCase()}, ${username.toLowerCase()}, ${hashedPassword}, ${username}, ${roleEnum}::"Role", '123456', ${now}, ${now})
-    `;
+    const newUser = await prisma.user.create({
+      data: {
+        email: email.toLowerCase(),
+        username: username.toLowerCase(),
+        password: hashedPassword,
+        name: username,
+        role: roleEnum,
+        shiftPassword: '123456',
+      },
+      select: { id: true, email: true, username: true, name: true, role: true, createdAt: true },
+    });
 
-    const newUser = await prisma.$queryRaw<Array<{
-      id: string; email: string; username: string; name: string;
-      role: string; createdAt: Date;
-    }>>`SELECT id, email, username, name, role::text, "createdAt" FROM "User" WHERE email = ${email.toLowerCase()} LIMIT 1`;
-
-    return NextResponse.json({ success: true, user: newUser[0] });
+    return NextResponse.json({ success: true, user: newUser });
   } catch (err) {
     console.error('STAFF POST ERROR:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -106,19 +107,17 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Staff ID is required' }, { status: 400 });
     }
 
-    const rows = await prisma.$queryRaw<Array<{ email: string }>>`
-      SELECT email FROM "User" WHERE id = ${id} LIMIT 1
-    `;
+    const staffUser = await prisma.user.findUnique({ where: { id }, select: { id: true, email: true } });
 
-    if (rows.length === 0) {
+    if (!staffUser) {
       return NextResponse.json({ error: 'Staff member not found' }, { status: 404 });
     }
 
-    if (rows[0].email.toLowerCase() === 'admin@cityfragrance.com') {
+    if (staffUser.email.toLowerCase() === 'admin@cityfragrance.com') {
       return NextResponse.json({ error: 'The primary Admin account cannot be deleted.' }, { status: 400 });
     }
 
-    await prisma.$executeRaw`DELETE FROM "User" WHERE id = ${id}`;
+    await prisma.user.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('STAFF DELETE ERROR:', err);
@@ -141,15 +140,13 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Shift password must be at least 3 characters' }, { status: 400 });
     }
 
-    const existing = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id FROM "User" WHERE id = ${id} LIMIT 1
-    `;
+    const staffUser = await prisma.user.findUnique({ where: { id }, select: { id: true } });
 
-    if (existing.length === 0) {
+    if (!staffUser) {
       return NextResponse.json({ error: 'Staff member not found' }, { status: 404 });
     }
 
-    await prisma.$executeRaw`UPDATE "User" SET "shiftPassword" = ${shiftPassword} WHERE id = ${id}`;
+    await prisma.user.update({ where: { id }, data: { shiftPassword } });
     return NextResponse.json({ success: true, message: 'Shift password updated successfully' });
   } catch (err) {
     console.error('STAFF PATCH ERROR:', err);

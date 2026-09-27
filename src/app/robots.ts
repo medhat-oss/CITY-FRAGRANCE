@@ -16,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://city-fragrance-medhat-oss-projects.vercel.app/sitemap.xml',
+    sitemap: 'https://city-fragrance.malk35t-754.workers.dev/sitemap.xml',
   };
 }

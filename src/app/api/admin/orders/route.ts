@@ -7,8 +7,17 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
 import { verifySession, verifySessionForPOS } from '@/lib/auth';
+import { sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
+
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  ACCEPTED: ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED: ['SHIPPED', 'CANCELLED'],
+  SHIPPED: ['DELIVERED', 'CANCELLED'],
+  DELIVERED: [],
+  CANCELLED: [],
+};
 
 interface OrderItem {
   id: string;
@@ -29,7 +38,7 @@ async function injectProductImages(orders: any[]): Promise<any[]> {
   const names = [...new Set(orders.flatMap((o) => (o.items as any[])?.map((i: any) => i.name) || []))];
   if (!names.length) return orders;
   const products = await prisma.product.findMany({
-    where: { name: { in: names, mode: 'insensitive' } },
+      where: { name: { in: names } },
     select: { name: true, images: true },
   });
   const imageMap = new Map<string, string>();
@@ -41,7 +50,7 @@ async function injectProductImages(orders: any[]): Promise<any[]> {
     ...o,
     items: (o.items as any[])?.map((item: any) => ({
       ...item,
-      id: item.id || Math.random().toString(36).substring(2, 10),
+      id: item.id || 'legacy-' + String(item.name).toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + item.price,
       image: imageMap.get(item.name.toLowerCase()) || '',
     })) || [],
   }));
@@ -55,6 +64,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
       select: {
         orderId: true, customerName: true, totalPrice: true,
+        discountCode: true, discountAmount: true,
         status: true, paymentMethod: true, date: true,
         createdAt: true, source: true, items: true,
         phoneNumber: true, address: true, city: true,
@@ -86,6 +96,8 @@ export async function POST(request: Request) {
       totalPrice: number;
       paymentMethod?: string;
       source?: string;
+      discountCode?: string;
+      discountAmount?: number;
     };
 
     // Determine source and cashierId from session
@@ -131,6 +143,8 @@ export async function POST(request: Request) {
         governorate: body.governorate || '',
         items: JSON.parse(JSON.stringify(itemsWithIds)),
         totalPrice: body.totalPrice,
+        discountCode: body.discountCode || '',
+        discountAmount: body.discountAmount || 0,
         status: 'ACCEPTED',
         date: new Date().toLocaleDateString('en-CA'),
         paymentMethod: body.paymentMethod || null,
@@ -140,18 +154,28 @@ export async function POST(request: Request) {
       },
     });
 
-    for (const item of itemsWithIds) {
-      const product = await prisma.product.findFirst({
-        where: { name: { equals: item.name, mode: 'insensitive' } },
-        select: { id: true, stock: true, name: true },
-      });
+    // ── Batch stock check + deduction ──
+    const itemNames = itemsWithIds.map(i => i.name);
+    const allProducts: any[] = await prisma.product.findMany({
+      where: { name: { in: itemNames } },
+      select: { id: true, name: true, stock: true },
+    });
+    const productMap = new Map(allProducts.map((p: any) => [p.name.toLowerCase(), p]));
 
+    for (const item of itemsWithIds) {
+      const product = productMap.get(item.name.toLowerCase());
       if (product) {
         if (product.stock < item.quantity) {
           throw new Error(
             `Insufficient stock for "${product.name}": requested ${item.quantity}, available ${product.stock}`
           );
         }
+      }
+    }
+
+    for (const item of itemsWithIds) {
+      const product = productMap.get(item.name.toLowerCase());
+      if (product) {
         await prisma.product.update({
           where: { id: product.id },
           data: { stock: { decrement: item.quantity } },
@@ -159,38 +183,36 @@ export async function POST(request: Request) {
       }
     }
 
+    // ── Increment coupon usage count ──
+    if (body.discountCode) {
+      try {
+        await prisma.coupon.update({
+          where: { code: body.discountCode.toUpperCase() },
+          data: { usedCount: { increment: 1 } },
+        });
+      } catch (couponErr) {
+        console.error('COUPON INCREMENT ERROR (non-blocking):', couponErr);
+      }
+    }
+
     // ── JSON file sync (for legacy analytics / gift-set stock) ──
+    // Product stock is already decremented in the main loop above; only
+    // gift-set stock (stored separately, not in the products table) needs syncing.
     try {
-      const [products, giftSets] = await Promise.all([
-        readJsonFile<any[]>('products.json', []),
-        readJsonFile<any[]>('gift-sets.json', []),
-      ]);
-      let updatedProducts = false;
+      const giftSets = await readJsonFile<any[]>('gift-sets.json', []);
       let updatedGiftSets = false;
 
       for (const item of itemsWithIds) {
-        const pIdx = products.findIndex(
-          (p) => p.name && p.name.toLowerCase() === item.name.toLowerCase()
+        const gIdx = giftSets.findIndex(
+          (g) => g.name && g.name.toLowerCase() === item.name.toLowerCase()
         );
-        if (pIdx !== -1) {
-          const currentStock = typeof products[pIdx].stock === 'number' ? products[pIdx].stock : 0;
-          products[pIdx].stock = Math.max(0, currentStock - item.quantity);
-          updatedProducts = true;
-        } else {
-          const gIdx = giftSets.findIndex(
-            (g) => g.name && g.name.toLowerCase() === item.name.toLowerCase()
-          );
-          if (gIdx !== -1) {
-            const currentStock = typeof giftSets[gIdx].stock === 'number' ? giftSets[gIdx].stock : 0;
-            giftSets[gIdx].stock = Math.max(0, currentStock - item.quantity);
-            updatedGiftSets = true;
-          }
+        if (gIdx !== -1) {
+          const currentStock = typeof giftSets[gIdx].stock === 'number' ? giftSets[gIdx].stock : 0;
+          giftSets[gIdx].stock = Math.max(0, currentStock - item.quantity);
+          updatedGiftSets = true;
         }
       }
 
-      if (updatedProducts) {
-        await writeJsonFile('products.json', products);
-      }
       if (updatedGiftSets) {
         await writeJsonFile('gift-sets.json', giftSets);
       }
@@ -202,6 +224,26 @@ export async function POST(request: Request) {
       revalidatePath('/collections/all-fragrances');
     } catch (stockErr) {
       console.error('JSON STOCK SYNC ERROR (non-blocking):', stockErr);
+    }
+
+    // ── Notification email (non-blocking) ──
+    if (body.email) {
+      sendOrderConfirmation({
+        orderId: order.orderId,
+        customerName: order.customerName,
+        email: order.email,
+        phoneNumber: order.phoneNumber,
+        address: order.address,
+        apartment: order.apartment,
+        city: order.city,
+        governorate: order.governorate,
+        items: itemsWithIds,
+        totalPrice: order.totalPrice,
+        discountCode: body.discountCode,
+        discountAmount: body.discountAmount,
+        status: order.status,
+        paymentMethod: order.paymentMethod || undefined,
+      }).catch(() => {});
     }
 
     return NextResponse.json({ success: true, order });
@@ -230,30 +272,42 @@ export async function PUT(request: Request) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
     }
 
-    const newStatus = body.status;
-    const prevStatus = existingOrder.status;
+    const newStatus = body.status?.toUpperCase();
+    const prevStatus = (existingOrder.status || '').toUpperCase();
 
-    // Normalize status to title case for consistent filtering
-    const normalizedStatus = newStatus.charAt(0).toUpperCase() + newStatus.slice(1).toLowerCase();
-
-    // Lock: once Cancelled, status can never be changed again
-    if (prevStatus.toLowerCase() === 'cancelled') {
+    // Validate transition
+    const allowedNext = VALID_TRANSITIONS[prevStatus];
+    if (!allowedNext || allowedNext.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Cancelled orders cannot be modified.' },
+        { success: false, error: `Orders with status "${prevStatus}" cannot be modified.` },
         { status: 400 }
       );
     }
 
-    const isNowCancelled = normalizedStatus === 'Cancelled';
+    if (!newStatus || !allowedNext.includes(newStatus)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Invalid status transition from "${prevStatus}" to "${newStatus}". Allowed: ${allowedNext.join(', ')}.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    const isNowCancelled = newStatus === 'CANCELLED';
     const items = (existingOrder.items as { name: string; quantity: number; price: number }[]) || [];
 
     // ── Sequential stock restoration + status update ──
     if (isNowCancelled) {
+      const itemNames = items.map(i => i.name);
+      const allProducts: any[] = await prisma.product.findMany({
+        where: { name: { in: itemNames } },
+        select: { id: true, name: true },
+      });
+      const productMap = new Map(allProducts.map((p: any) => [p.name.toLowerCase(), p]));
+
       for (const item of items) {
-        const product = await prisma.product.findFirst({
-          where: { name: { equals: item.name, mode: 'insensitive' } },
-          select: { id: true },
-        });
+        const product = productMap.get(item.name.toLowerCase());
         if (product) {
           await prisma.product.update({
             where: { id: product.id },
@@ -265,36 +319,27 @@ export async function PUT(request: Request) {
 
     const order = await prisma.order.update({
       where: { orderId: body.orderId },
-      data: { status: normalizedStatus },
+      data: { status: newStatus },
     });
 
     // ── JSON file sync (for legacy gift-set stock) ──
+    // Product stock is already restored in the main loop above; only
+    // gift-set stock (stored separately, not in the products table) needs syncing.
     if (isNowCancelled) {
       try {
-        const products = await readJsonFile<any[]>('products.json', []);
         const giftSets = await readJsonFile<any[]>('gift-sets.json', []);
-        let updatedProducts = false;
         let updatedGiftSets = false;
 
         for (const item of items) {
-          const pIdx = products.findIndex(
-            (p) => p.name && p.name.toLowerCase() === item.name.toLowerCase()
+          const gIdx = giftSets.findIndex(
+            (g) => g.name && g.name.toLowerCase() === item.name.toLowerCase()
           );
-          if (pIdx !== -1) {
-            products[pIdx].stock = (products[pIdx].stock || 0) + item.quantity;
-            updatedProducts = true;
-          } else {
-            const gIdx = giftSets.findIndex(
-              (g) => g.name && g.name.toLowerCase() === item.name.toLowerCase()
-            );
-            if (gIdx !== -1) {
-              giftSets[gIdx].stock = (giftSets[gIdx].stock || 0) + item.quantity;
-              updatedGiftSets = true;
-            }
+          if (gIdx !== -1) {
+            giftSets[gIdx].stock = (giftSets[gIdx].stock || 0) + item.quantity;
+            updatedGiftSets = true;
           }
         }
 
-        if (updatedProducts) await writeJsonFile('products.json', products);
         if (updatedGiftSets) await writeJsonFile('gift-sets.json', giftSets);
 
         revalidatePath('/');
@@ -346,6 +391,27 @@ export async function PUT(request: Request) {
       } catch (recalcErr) {
         console.error('[SHIFT RECALC ERROR]', recalcErr);
       }
+    }
+
+    // ── Notification email (non-blocking) ──
+    const notifyStatuses = ['CONFIRMED', 'SHIPPED', 'DELIVERED'];
+    if (existingOrder.email && notifyStatuses.includes(newStatus)) {
+      sendOrderStatusUpdate({
+        orderId: order.orderId,
+        customerName: order.customerName,
+        email: order.email,
+        phoneNumber: order.phoneNumber,
+        address: order.address,
+        apartment: order.apartment,
+        city: order.city,
+        governorate: order.governorate,
+        items: items,
+        totalPrice: order.totalPrice,
+        discountCode: order.discountCode || undefined,
+        discountAmount: order.discountAmount || 0,
+        status: order.status,
+        paymentMethod: order.paymentMethod || undefined,
+      }).catch(() => {});
     }
 
     return NextResponse.json({ success: true, order });

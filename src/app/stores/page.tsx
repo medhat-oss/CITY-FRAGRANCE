@@ -1,52 +1,39 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-const staggerItem = (delay: number) => ({
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, delay, ease: [0.0, 0.0, 0.58, 1.0] as [number, number, number, number] },
-});
-
 export default function StoresPage() {
   return (
-    <div className="bg-[#09142E] text-white min-h-screen" style={{ backgroundColor: '#09142E' }}>
+    <div className="bg-[#09142E] text-white min-h-screen">
       <Header />
-      <main className="flex flex-col items-center justify-center px-4 py-32" style={{ backgroundColor: '#09142E' }}>
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="w-full max-w-xl mx-auto bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-10 md:p-14 text-center"
-          style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
+      <main className="flex flex-col items-center justify-center px-4 py-32">
+        <div
+          className="w-full max-w-xl mx-auto bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-10 md:p-14 text-center animate-fade-up"
         >
-          <motion.p {...staggerItem(0.15)} className="font-heading text-xs tracking-[0.3em] uppercase text-white/50 mb-6">
+          <p className="font-heading text-xs tracking-[0.3em] uppercase text-white/50 mb-6 animate-fade-up" style={{ animationDelay: '0.15s' }}>
             CITY FRAGRANCE
-          </motion.p>
+          </p>
 
-          <motion.h1 {...staggerItem(0.25)} className="font-heading text-4xl sm:text-5xl font-light text-white tracking-widest mb-8">
+          <h1 className="font-heading text-4xl sm:text-5xl font-light text-white tracking-widest mb-8 animate-fade-up" style={{ animationDelay: '0.25s' }}>
             OUR STORE
-          </motion.h1>
+          </h1>
 
-          <motion.h2 {...staggerItem(0.35)} className="font-heading text-xl font-normal text-white mb-2">
+          <h2 className="font-heading text-xl font-normal text-white mb-2 animate-fade-up" style={{ animationDelay: '0.35s' }}>
             City Fragrance
-          </motion.h2>
+          </h2>
 
-          <motion.p {...staggerItem(0.45)} className="font-body text-white/70 text-sm mb-1">
+          <p className="font-body text-white/70 text-sm mb-1 animate-fade-up" style={{ animationDelay: '0.45s' }}>
             Main Branch, Cairo, Egypt
-          </motion.p>
+          </p>
 
-          <motion.p {...staggerItem(0.55)} className="font-body text-white/70 text-sm mb-1">
+          <p className="font-body text-white/70 text-sm mb-1 animate-fade-up" style={{ animationDelay: '0.55s' }}>
             Phone: +20 10 0444 1598
-          </motion.p>
+          </p>
 
-          <motion.p {...staggerItem(0.65)} className="font-body text-white/70 text-sm mb-10">
+          <p className="font-body text-white/70 text-sm mb-10 animate-fade-up" style={{ animationDelay: '0.65s' }}>
             Hours: Everyday: 10:00 AM – 10:00 PM
-          </motion.p>
+          </p>
 
-          <motion.div {...staggerItem(0.75)}>
+          <div className="animate-fade-up" style={{ animationDelay: '0.75s' }}>
             <a
               href="https://maps.app.goo.gl/cKe1LUbsALMnyu9U8?g_st=aw"
               target="_blank"
@@ -58,8 +45,8 @@ export default function StoresPage() {
               </svg>
               GET DIRECTIONS
             </a>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </main>
       <Footer />
     </div>

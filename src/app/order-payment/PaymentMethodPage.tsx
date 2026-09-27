@@ -1,27 +1,33 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { DEFAULT_PAYMENT_DETAILS } from '@/data/defaults';
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '201044415982';
-
-const ACCOUNT_DETAILS: Record<string, { title: string; number: string; note: string }> = {
-  instapay: {
-    title: 'InstaPay Account',
-    number: '01092748940',
-    note: 'Send the exact order amount to the InstaPay account above, then confirm via WhatsApp.',
-  },
-  'vodafone-cash': {
-    title: 'Vodafone Cash Number',
-    number: '01044415982',
-    note: 'Send the exact order amount to the Vodafone Cash number above, then confirm via WhatsApp.',
-  },
-};
 
 export default function PaymentMethodPage({ method }: { method: string }) {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId') || '';
-  const details = ACCOUNT_DETAILS[method];
+
+  const [accountDetails, setAccountDetails] =
+    useState<Record<string, { title: string; number: string; note: string }>>(DEFAULT_PAYMENT_DETAILS);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/api/settings', { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.paymentDetails && data.paymentDetails[method]) {
+          setAccountDetails(data.paymentDetails);
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [method]);
+
+  const details = accountDetails[method];
 
   const waText = encodeURIComponent(
     `Hello, I have completed the payment for order #${orderId} (${method})`

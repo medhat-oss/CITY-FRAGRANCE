@@ -1,5 +1,11 @@
 import prisma from '@/lib/prisma';
 
+function safeDate(v: unknown): string {
+  if (v instanceof Date && !isNaN(v.getTime())) return v.toISOString();
+  if (typeof v === 'string') return v;
+  return '';
+}
+
 export async function readJsonFile<T>(filename: string, fallback: T): Promise<T> {
   try {
     switch (filename) {
@@ -13,9 +19,9 @@ export async function readJsonFile<T>(filename: string, fallback: T): Promise<T>
           costPrice: r.costPrice,
           isDraft: r.isDraft,
           image: r.image,
-          productIds: (r.productIds as string[]) || [],
+          productIds: Array.isArray(r.productIds) ? r.productIds : [],
           stock: r.stock,
-          createdAt: r.createdAt.toISOString(),
+          createdAt: safeDate(r.createdAt),
         })) as T;
       }
 
@@ -35,7 +41,7 @@ export async function readJsonFile<T>(filename: string, fallback: T): Promise<T>
         });
         return rows.map((r: any) => ({
           ...r,
-          images: (r.images as string[]) || [],
+          images: Array.isArray(r.images) ? r.images : [],
           salePrice: r.salePrice ?? null,
         })) as T;
       }
@@ -51,7 +57,7 @@ export async function readJsonFile<T>(filename: string, fallback: T): Promise<T>
         const rows = await prisma.collectionImage.findMany();
         const record: Record<string, { image: string; description: string }> = {};
         for (const r of rows) {
-          record[r.slug] = { image: r.image, description: r.description };
+          record[r.slug] = { image: String(r.image ?? ''), description: String(r.description ?? '') };
         }
         return record as T;
       }
@@ -59,8 +65,8 @@ export async function readJsonFile<T>(filename: string, fallback: T): Promise<T>
       case 'subscribers.json': {
         const rows = await prisma.subscriber.findMany();
         return rows.map((r: any) => ({
-          email: r.email,
-          subscribedAt: r.createdAt.toISOString(),
+          email: String(r.email ?? ''),
+          subscribedAt: safeDate(r.createdAt),
         })) as T;
       }
 
@@ -165,5 +171,6 @@ export async function writeJsonFile(filename: string, data: unknown): Promise<vo
     }
   } catch (err) {
     console.error(`writeJsonFile error (${filename}):`, err);
+    throw err;
   }
 }

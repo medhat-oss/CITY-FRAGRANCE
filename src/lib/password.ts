@@ -32,9 +32,8 @@ export async function hashPassword(password: string): Promise<string> {
   return `${bytesToBase64(salt)}:${bytesToBase64(hash)}`
 }
 
-export async function verifyPassword(password: string, stored: string): Promise<boolean> {
-  // PBKDF2 format (new): "base64salt:base64hash"
-  if (stored.includes(':')) {
+async function pbkdf2Verify(password: string, stored: string): Promise<boolean> {
+  try {
     const colon = stored.indexOf(':')
     const salt = base64ToBytes(stored.slice(0, colon))
     const expected = base64ToBytes(stored.slice(colon + 1))
@@ -52,11 +51,20 @@ export async function verifyPassword(password: string, stored: string): Promise<
     )
     const actual = new Uint8Array(derived)
     return actual.length === expected.length && actual.every((b, i) => b === expected[i])
+  } catch {
+    return false
   }
-  // bcrypt format (legacy): "$2b$..." — dynamic import to keep edge compat
+}
+
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+  if (stored.includes(':')) return pbkdf2Verify(password, stored)
   if (stored.startsWith('$2')) {
-    const { default: bcrypt } = await import('bcryptjs')
-    return bcrypt.compare(password, stored)
+    try {
+      const { default: bcrypt } = await import('bcryptjs')
+      return bcrypt.compare(password, stored)
+    } catch {
+      return false
+    }
   }
   return false
 }

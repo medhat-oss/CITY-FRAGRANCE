@@ -43,6 +43,7 @@ async function syncToDB(gs: GiftSet) {
         isDraft: gs.isDraft,
         image: gs.image || '',
         productIds: gs.productIds || [],
+        stock: gs.stock ?? 0,
       },
       create: {
         id: gs.id,
@@ -53,6 +54,7 @@ async function syncToDB(gs: GiftSet) {
         isDraft: gs.isDraft,
         image: gs.image || '',
         productIds: gs.productIds || [],
+        stock: gs.stock ?? 0,
       },
     });
   } catch (e) {

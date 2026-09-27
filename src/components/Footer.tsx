@@ -73,7 +73,7 @@ export default function Footer() {
     <footer className="bg-navy dark:bg-[#09142E] text-white" dir={dir}>
       <div className="max-w-container mx-auto px-4 sm:px-8 py-16">
         {/* Top Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1.5fr_1fr_1fr] gap-8 lg:gap-16 mb-12 pb-8 border-b border-white/10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] gap-8 lg:gap-16 mb-12 pb-8 border-b border-white/10">
           {/* Brand */}
           <div>
             <h3 className="font-heading text-2xl sm:text-3xl font-light tracking-[0.1em] mb-1">
@@ -97,27 +97,37 @@ export default function Footer() {
               Subscribe for exclusive access to new collections and special offers.
             </p>
             <form
-              className="flex"
+              className="flex w-full max-w-full flex-col gap-3 sm:flex-row sm:gap-0"
               onSubmit={handleSubscribe}
+              noValidate={false}
+              aria-label="Newsletter subscription form"
             >
               <input
+                id="newsletter-email"
+                name="email"
                 type="email"
                 placeholder="Email Address"
                 required
+                autoComplete="email"
+                aria-label="Email Address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={status === 'loading'}
-                className="flex-1 px-4 py-3 bg-white/5 border border-white/20 text-white font-body text-base rounded-l-sm placeholder:text-white/40 focus:outline-none focus:border-white transition-colors disabled:opacity-50"
+                className="w-full min-w-0 sm:w-auto sm:flex-1 px-4 py-3 bg-white/5 border border-white/20 text-white font-body text-base rounded-sm sm:rounded-l-sm sm:rounded-r-none placeholder:text-white/40 focus:outline-none focus:border-white transition-colors disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="px-6 bg-white text-[#09142E] border border-white font-heading font-semibold uppercase tracking-[0.1em] cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-r-sm flex items-center"
+                aria-label="Subscribe to newsletter"
+                className="w-full sm:w-auto shrink-0 px-6 bg-white text-[#09142E] border border-white font-heading font-semibold uppercase tracking-[0.1em] cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#E5E7EB] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-sm sm:rounded-l-none sm:rounded-r-sm flex items-center justify-center gap-2"
               >
                 {status === 'loading' ? (
                   <span className="inline-block w-4 h-4 border-2 border-navy/30 border-t-navy rounded-full animate-spin" />
                 ) : (
-                  <HiOutlineEnvelope className="text-lg" />
+                  <>
+                    <HiOutlineEnvelope className="text-lg" aria-hidden="true" />
+                    <span>Subscribe</span>
+                  </>
                 )}
               </button>
             </form>

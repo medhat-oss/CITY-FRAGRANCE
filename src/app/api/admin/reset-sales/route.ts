@@ -13,11 +13,9 @@ export async function POST() {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Atomically delete orders (frees FK references) then all shifts
-    const [deleteResult] = await prisma.$transaction([
-      prisma.order.deleteMany(),
-      prisma.shift.deleteMany(),
-    ]);
+    // Delete orders (frees FK references) then all shifts
+    const deleteResult = await prisma.order.deleteMany();
+    await prisma.shift.deleteMany();
     const deletedOrders = deleteResult.count;
 
     // Purge caches so analytics & cashier pages reflect instantly

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rateLimit, extractIp } from '@/lib/rateLimit';
 
 /**
  * POST /api/checkout
@@ -28,6 +29,15 @@ const IS_TEST_MODE       = process.env.NEXT_PUBLIC_PAYMENT_MODE === 'test' || !H
 
 export async function POST(request) {
     try {
+        const ip = extractIp(request);
+        const check = rateLimit(`checkout:${ip}`, 5, 60000);
+        if (!check.allowed) {
+            return NextResponse.json(
+                { success: false, error: `Too many requests. Try again in ${check.retryAfter} seconds.` },
+                { status: 429, headers: { 'Retry-After': String(check.retryAfter) } }
+            );
+        }
+
         const body = await request.json();
         const { amount, firstName, lastName, email, phone, items, paymentMethod = 'card' } = body;
 

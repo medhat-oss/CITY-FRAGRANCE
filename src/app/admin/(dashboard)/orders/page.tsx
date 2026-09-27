@@ -7,15 +7,20 @@ import type { Order } from '@/types';
 import { FaClipboardList, FaTimes, FaEye, FaSpinner, FaImage } from 'react-icons/fa';
 import styles from '../admin.module.css';
 
-const STATUSES = ['ACCEPTED', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+const STATUS_FLOW: Record<string, string[]> = {
+  ACCEPTED: ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED: ['SHIPPED', 'CANCELLED'],
+  SHIPPED: ['DELIVERED', 'CANCELLED'],
+  DELIVERED: [],
+  CANCELLED: [],
+};
 
 const STATUS_COLORS: Record<string, string> = {
-  'ACCEPTED': 'bg-green-100 text-green-800',
-  'Confirmed': 'bg-blue-100 text-blue-800',
-  'Processing': 'bg-indigo-100 text-indigo-800',
-  'Shipped': 'bg-purple-100 text-purple-800',
-  'Delivered': 'bg-green-100 text-green-800',
-  'Cancelled': 'bg-red-100 text-red-800',
+  ACCEPTED: 'bg-green-100 text-green-800',
+  CONFIRMED: 'bg-blue-100 text-blue-800',
+  SHIPPED: 'bg-purple-100 text-purple-800',
+  DELIVERED: 'bg-green-100 text-green-800',
+  CANCELLED: 'bg-red-100 text-red-800',
 };
 
 function playWebAudioChime() {
@@ -224,7 +229,9 @@ export default function AdminOrdersPage() {
           </thead>
           <tbody>
             {orders.map((order) => {
-              const isNew = order.status && (order.status === 'ACCEPTED' || order.status.toLowerCase() === 'pending');
+              const orderStatus = (order.status || '').toUpperCase();
+    const allowedStatuses = STATUS_FLOW[orderStatus] || [];
+    const isNew = orderStatus === 'ACCEPTED';
               return (
                 <tr
                   key={order.orderId}
@@ -248,7 +255,7 @@ export default function AdminOrdersPage() {
                     <div className="flex flex-col gap-1">
                       {order.items.map((item) => {
                         const isCancelling = cancellingItemId === item.id;
-                        const showCancelBtn = order.status !== 'CANCELLED' && order.status !== 'COMPLETED' && order.items.length > 1;
+                        const showCancelBtn = orderStatus !== 'CANCELLED' && orderStatus !== 'DELIVERED' && order.items.length > 1;
                         return (
                           <div key={item.id} className="flex items-center justify-between bg-[rgba(24,24,27,0.5)] px-2 py-1.5 rounded-lg border border-[rgba(63,63,70,0.4)] min-w-[180px]">
                             <span className="text-[#e4e4e7]">{item.quantity}x {item.name}</span>
@@ -277,10 +284,11 @@ export default function AdminOrdersPage() {
                       <select
                         value={order.status}
                         onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
-                        className={`text-xs font-semibold rounded-sm px-2 py-1 border-none ${order.status.toLowerCase() === 'cancelled' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}
-                        disabled={updatingId === order.orderId || order.status.toLowerCase() === 'cancelled'}
+                        className={`text-xs font-semibold rounded-sm px-2 py-1 border-none ${allowedStatuses.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${STATUS_COLORS[orderStatus] || 'bg-gray-100 text-gray-800'}`}
+                        disabled={updatingId === order.orderId || allowedStatuses.length === 0}
                       >
-                        {STATUSES.map((s) => (
+                        <option value={order.status}>{order.status}</option>
+                        {allowedStatuses.map((s) => (
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
@@ -317,7 +325,9 @@ export default function AdminOrdersPage() {
       {/* ── Mobile order cards ── */}
       <div className="md:hidden space-y-3">
         {orders.map((order) => {
-          const isNew = order.status && (order.status === 'ACCEPTED' || order.status.toLowerCase() === 'pending');
+          const orderStatus = (order.status || '').toUpperCase();
+          const allowedStatuses = STATUS_FLOW[orderStatus] || [];
+          const isNew = orderStatus === 'ACCEPTED';
           return (
             <div key={order.orderId} className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3">
               {/* Card header */}
@@ -349,7 +359,7 @@ export default function AdminOrdersPage() {
                 <span className="text-xs text-slate-500 block mb-1">Items</span>
                 {order.items.map((item) => {
                   const isCancelling = cancellingItemId === item.id;
-                  const showCancelBtn = order.status !== 'CANCELLED' && order.status !== 'COMPLETED' && order.items.length > 1;
+                  const showCancelBtn = orderStatus !== 'CANCELLED' && orderStatus !== 'DELIVERED' && order.items.length > 1;
                   return (
                     <div key={item.id} className="flex items-center justify-between bg-[rgba(24,24,27,0.5)] px-2 py-1.5 rounded-lg border border-[rgba(63,63,70,0.4)] mb-1 last:mb-0 text-xs">
                       <span className="text-[#e4e4e7]">{item.quantity}x {item.name}</span>
@@ -373,10 +383,11 @@ export default function AdminOrdersPage() {
                 <select
                   value={order.status}
                   onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
-                  className={`text-xs font-semibold rounded-sm px-2 py-1 border-none max-w-[120px] ${order.status.toLowerCase() === 'cancelled' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}
-                  disabled={updatingId === order.orderId || order.status.toLowerCase() === 'cancelled'}
+                  className={`text-xs font-semibold rounded-sm px-2 py-1 border-none max-w-[140px] ${allowedStatuses.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${STATUS_COLORS[orderStatus] || 'bg-gray-100 text-gray-800'}`}
+                  disabled={updatingId === order.orderId || allowedStatuses.length === 0}
                 >
-                  {STATUSES.map((s) => (
+                  <option value={order.status}>{order.status}</option>
+                  {allowedStatuses.map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
@@ -418,6 +429,7 @@ export default function AdminOrdersPage() {
                 />
               )}
               <DetailRow label="Status" value={selectedOrder.status} />
+              {selectedOrder.source && <DetailRow label="Source" value={selectedOrder.source} />}
 
               <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.25rem 0' }} />
 
@@ -449,6 +461,8 @@ export default function AdminOrdersPage() {
                 Payment & Items
               </h4>
               <DetailRow label="Payment Method" value={selectedOrder.paymentMethod || '\u2014'} />
+              <DetailRow label="Discount Code" value={selectedOrder.discountCode || '\u2014'} />
+              <DetailRow label="Discount Amount" value={selectedOrder.discountAmount && selectedOrder.discountAmount > 0 ? `- ${formatEGP(selectedOrder.discountAmount)}` : formatEGP(0)} />
               <DetailRow label="Total" value={formatEGP(selectedOrder.totalPrice)} />
               <div>
                 <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#f8f9fa', display: 'block', marginBottom: '0.3rem' }}>
@@ -466,7 +480,8 @@ export default function AdminOrdersPage() {
                   </thead>
                   <tbody>
                     {selectedOrder.items.map((item) => {
-                      const orderLocked = selectedOrder.status.toLowerCase() === 'cancelled' || selectedOrder.status.toLowerCase() === 'completed';
+                      const orderStatus = (selectedOrder.status || '').toUpperCase();
+                      const orderLocked = orderStatus === 'CANCELLED' || orderStatus === 'DELIVERED';
                       const isCancelling = cancellingItemId === item.id;
                       return (
                         <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
