@@ -15,13 +15,18 @@ const styleInject = `
   }
 `;
 
+import { sanitizeHtml } from '@/utils/sanitize';
+
 export default function AnnouncementBar({
   announcementText = '',
+}: {
+  announcementText?: string;
 }) {
   const isHidden = !announcementText || announcementText === 'HIDDEN' || announcementText.trim() === '';
   if (isHidden) return null;
 
-  const dots = `<span class="px-4 opacity-40" aria-hidden="true">&#8226;</span>`;
+  const cleanText = sanitizeHtml(announcementText);
+  const dotElement = <span className="px-4 opacity-40" aria-hidden="true">&#8226;</span>;
 
   return (
     <div className="w-full bg-[#09142E] text-white overflow-hidden py-2.5 select-none font-body text-xs font-medium tracking-wider uppercase">
@@ -30,17 +35,17 @@ export default function AnnouncementBar({
       <div className="forced-marquee-right" aria-label={announcementText.replace(/<[^>]*>/g, '')}>
         {/* Track 1 */}
         <div className="flex items-center shrink-0 px-8">
-          <span dangerouslySetInnerHTML={{ __html: announcementText }} />
-          <span dangerouslySetInnerHTML={{ __html: dots }} />
-          <span dangerouslySetInnerHTML={{ __html: announcementText }} />
-          <span dangerouslySetInnerHTML={{ __html: dots }} />
+          <span dangerouslySetInnerHTML={{ __html: cleanText }} />
+          {dotElement}
+          <span dangerouslySetInnerHTML={{ __html: cleanText }} />
+          {dotElement}
         </div>
         {/* Track 2 */}
         <div className="flex items-center shrink-0 px-8" aria-hidden="true">
-          <span dangerouslySetInnerHTML={{ __html: announcementText }} />
-          <span dangerouslySetInnerHTML={{ __html: dots }} />
-          <span dangerouslySetInnerHTML={{ __html: announcementText }} />
-          <span dangerouslySetInnerHTML={{ __html: dots }} />
+          <span dangerouslySetInnerHTML={{ __html: cleanText }} />
+          {dotElement}
+          <span dangerouslySetInnerHTML={{ __html: cleanText }} />
+          {dotElement}
         </div>
       </div>
     </div>

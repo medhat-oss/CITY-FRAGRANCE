@@ -23,17 +23,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email/Username and password are required' }, { status: 400 });
     }
 
-    const lowerEmail = email.toLowerCase();
-    let user = await prisma.user.findFirst({
-      where: { email: lowerEmail },
+    const identifier = email.trim().toLowerCase();
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { username: identifier },
+        ],
+      },
       select: { id: true, email: true, username: true, name: true, role: true, password: true },
     });
-    if (!user) {
-      user = await prisma.user.findFirst({
-        where: { username: lowerEmail },
-        select: { id: true, email: true, username: true, name: true, role: true, password: true },
-      });
-    }
     if (!user || !user.password) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }

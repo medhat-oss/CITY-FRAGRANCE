@@ -29,6 +29,10 @@ model Order {
   shift          Shift?   @relation(fields: [shiftId], references: [id])
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  @@index([shiftId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Shift {
@@ -49,6 +53,10 @@ model Shift {
   orders            Order[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  @@index([cashierId, status])
+  @@index([status])
+  @@index([startTime])
 }
 
 model Product {

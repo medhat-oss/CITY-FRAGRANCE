@@ -4,29 +4,13 @@
 import { NextResponse } from 'next/server';
 import { hashPassword } from '@/lib/password';
 import prisma from '@/lib/prisma';
-import { verifySession } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-async function isAdmin() {
-  const session = await verifySession();
-  if (!session?.id) return false;
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: session.id },
-      select: { role: true },
-    });
-    return user?.role === 'ADMIN';
-  } catch {
-    return false;
-  }
-}
-
-
 export async function GET() {
-  if (!(await isAdmin())) {
-    return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-  }
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
 
   try {
     const users = await prisma.user.findMany({
@@ -48,27 +32,28 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!(await isAdmin())) {
-    return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-  }
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
 
   try {
-    const { email, username, password, role } = await request.json();
+    const { email, username, password, role, shiftPassword } = await request.json();
 
     if (!email || !username || !password || !role) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
-    let existingUser = await prisma.user.findFirst({
-      where: { email: email.toLowerCase() },
+    const lowerEmail = email.toLowerCase().trim();
+    const lowerUsername = username.toLowerCase().trim();
+
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: lowerEmail },
+          { username: lowerUsername },
+        ],
+      },
       select: { id: true },
     });
-    if (!existingUser) {
-      existingUser = await prisma.user.findFirst({
-        where: { username: username.toLowerCase() },
-        select: { id: true },
-      });
-    }
 
     if (existingUser) {
       return NextResponse.json({ error: 'Staff account already exists with this email or username' }, { status: 400 });
@@ -76,15 +61,18 @@ export async function POST(request: Request) {
 
     const hashedPassword = await hashPassword(password);
     const roleEnum = role.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'CASHIER';
+    const cleanShiftPassword = typeof shiftPassword === 'string' && shiftPassword.trim().length >= 3
+      ? shiftPassword.trim()
+      : null;
 
     const newUser = await prisma.user.create({
       data: {
-        email: email.toLowerCase(),
-        username: username.toLowerCase(),
+        email: lowerEmail,
+        username: lowerUsername,
         password: hashedPassword,
         name: username,
         role: roleEnum,
-        shiftPassword: '123456',
+        shiftPassword: cleanShiftPassword,
       },
       select: { id: true, email: true, username: true, name: true, role: true, createdAt: true },
     });
@@ -97,9 +85,8 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!(await isAdmin())) {
-    return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-  }
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
 
   try {
     const { id } = await request.json();
@@ -126,9 +113,8 @@ export async function DELETE(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  if (!(await isAdmin())) {
-    return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-  }
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
 
   try {
     const { id, shiftPassword } = await request.json();
@@ -136,7 +122,8 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Staff ID and new shift password are required' }, { status: 400 });
     }
 
-    if (shiftPassword.length < 3) {
+    const trimmedPassword = shiftPassword.trim();
+    if (trimmedPassword.length < 3) {
       return NextResponse.json({ error: 'Shift password must be at least 3 characters' }, { status: 400 });
     }
 
@@ -146,7 +133,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Staff member not found' }, { status: 404 });
     }
 
-    await prisma.user.update({ where: { id }, data: { shiftPassword } });
+    await prisma.user.update({ where: { id }, data: { shiftPassword: trimmedPassword } });
     return NextResponse.json({ success: true, message: 'Shift password updated successfully' });
   } catch (err) {
     console.error('STAFF PATCH ERROR:', err);

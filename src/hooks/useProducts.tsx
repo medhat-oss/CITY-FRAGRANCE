@@ -29,8 +29,11 @@ async function fetchProducts(isAdmin: boolean): Promise<Product[]> {
         'Expires': '0',
       },
     });
+    if (!res.ok) {
+      return defaultProducts;
+    }
     const data = await res.json() as { products: Product[] };
-    return data.products;
+    return data?.products || defaultProducts;
   } catch {
     return defaultProducts;
   }

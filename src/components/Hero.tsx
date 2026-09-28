@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
 import type { SiteSettings } from '@/types';
 import { getOptimizedImageUrl, getOptimizedVideoUrl } from '@/lib/videoUtils';
+import { sanitizeHtml } from '@/utils/sanitize';
 
 interface HeroProps {
   settings: SiteSettings | null;
@@ -97,19 +98,19 @@ export default function Hero({ settings }: HeroProps) {
           {!hiddenSubtitle && (
             <span
               className="font-heading text-xs sm:text-sm md:text-base uppercase tracking-[0.25em] text-white block animate-fade-up opacity-0 [animation-delay:0.2s]"
-              dangerouslySetInnerHTML={{ __html: heroSubtitle }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(heroSubtitle) }}
             />
           )}
           {!hiddenTitle && (
             <h1
               className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light leading-[1.15] animate-fade-up opacity-0 [animation-delay:0.4s] drop-shadow-[0_4px_15px_rgba(0,0,0,0.35)]"
-              dangerouslySetInnerHTML={{ __html: heroTitle }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(heroTitle) }}
             />
           )}
           {!hiddenDescription && (
             <p
               className="font-body text-sm sm:text-base md:text-lg font-light max-w-md animate-fade-up opacity-0 [animation-delay:0.6s] text-white/90"
-              dangerouslySetInnerHTML={{ __html: heroDescription }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(heroDescription) }}
             />
           )}
         </div>

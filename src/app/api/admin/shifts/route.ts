@@ -5,6 +5,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifySession, verifySessionForPOS } from '@/lib/auth';
+import { computeShiftTotals } from '@/lib/shiftTotals';
 
 
 export const dynamic = 'force-dynamic';
@@ -46,30 +47,11 @@ export async function GET(request: Request) {
         return NextResponse.json({ shift: null });
       }
 
-      // Aggregate all payment methods in a single groupBy query
-      const cancelledFilter = { notIn: ['Cancelled', 'CANCELLED', 'cancelled'] };
-      const agg = await prisma.order.groupBy({
-        by: ['paymentMethod'],
-        _sum: { totalPrice: true },
-        _count: true,
-        where: { shiftId: shift.id, status: cancelledFilter },
-      });
-
-      let totalCash = 0, totalInstaPay = 0, totalVodafoneCash = 0, totalVisa = 0;
-      let orderCount = 0;
-      for (const row of (agg as any[])) {
-        const method = (row.paymentMethod || '').toLowerCase();
-        const sum = row._sum.totalPrice || 0;
-        if (method.includes('cash')) totalCash = sum;
-        else if (method.includes('instapay')) totalInstaPay = sum;
-        else if (method.includes('vodafone')) totalVodafoneCash = sum;
-        else if (method.includes('visa')) totalVisa = sum;
-        orderCount += row._count;
-      }
-      const expectedTotal = totalCash + totalInstaPay + totalVodafoneCash + totalVisa;
+      // Compute shift totals using shared single source of truth
+      const totals = await computeShiftTotals(shift.id);
 
       return NextResponse.json({
-        shift: { ...shift, totalCash, totalInstaPay, totalVodafoneCash, totalVisa, expectedTotal, orderCount },
+        shift: { ...shift, ...totals },
       });
     }
 
@@ -172,8 +154,10 @@ export async function POST(request: Request) {
       if (!cashier) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
-      const expectedPassword = cashier.shiftPassword || '123456';
-      if (expectedPassword !== body.shiftPassword) {
+      if (!cashier.shiftPassword) {
+        return NextResponse.json({ error: 'Shift password not configured for this account. Please set a shift password in staff management.' }, { status: 403 });
+      }
+      if (cashier.shiftPassword !== body.shiftPassword) {
         return NextResponse.json({ error: 'Incorrect shift password' }, { status: 401 });
       }
       return NextResponse.json({ success: true });
@@ -185,8 +169,10 @@ export async function POST(request: Request) {
     if (!cashier) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    const expectedPassword = cashier.shiftPassword || '123456';
-    if (expectedPassword !== body.shiftPassword) {
+    if (!cashier.shiftPassword) {
+      return NextResponse.json({ error: 'Shift password not configured for this account. Please set a shift password in staff management.' }, { status: 403 });
+    }
+    if (cashier.shiftPassword !== body.shiftPassword) {
       return NextResponse.json({ error: 'Incorrect shift password' }, { status: 401 });
     }
 
@@ -200,53 +186,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'No active shift found' }, { status: 400 });
     }
 
-    const cancelledFilter = { notIn: ['Cancelled', 'CANCELLED', 'cancelled'] };
-
-    const agg = await prisma.order.groupBy({
-      by: ['paymentMethod'],
-      _sum: { totalPrice: true },
-      _count: true,
-      where: { shiftId: activeShift.id, status: cancelledFilter },
-    });
-
-    let totalCash = 0, totalInstaPay = 0, totalVodafoneCash = 0, totalVisa = 0;
-    let orderCount = 0;
-    for (const row of (agg as any[])) {
-      const method = (row.paymentMethod || '').toLowerCase();
-      const sum = row._sum.totalPrice || 0;
-      if (method.includes('cash')) totalCash = sum;
-      else if (method.includes('instapay')) totalInstaPay = sum;
-      else if (method.includes('vodafone')) totalVodafoneCash = sum;
-      else if (method.includes('visa')) totalVisa = sum;
-      orderCount += row._count;
-    }
-    const expectedTotal = totalCash + totalInstaPay + totalVodafoneCash + totalVisa;
+    const totals = await computeShiftTotals(activeShift.id);
     const actualCashValue = body.actualCash ?? 0;
-    const discrepancy = actualCashValue - expectedTotal;
+    const discrepancy = actualCashValue - totals.expectedTotal;
 
     await prisma.shift.update({
       where: { id: activeShift.id },
       data: {
         status: 'CLOSED',
         endTime: new Date(),
-        totalCash,
-        totalInstaPay,
-        totalVodafoneCash,
-        totalVisa,
+        totalCash: totals.totalCash,
+        totalInstaPay: totals.totalInstaPay,
+        totalVodafoneCash: totals.totalVodafoneCash,
+        totalVisa: totals.totalVisa,
         actualCash: actualCashValue,
-        expectedTotal,
+        expectedTotal: totals.expectedTotal,
         discrepancy,
-        orderCount,
+        orderCount: totals.orderCount,
       },
     });
 
     const result = {
-      orderCount,
-      expectedTotal,
-      totalCash,
-      totalInstaPay,
-      totalVodafoneCash,
-      totalVisa,
+      orderCount: totals.orderCount,
+      expectedTotal: totals.expectedTotal,
+      totalCash: totals.totalCash,
+      totalInstaPay: totals.totalInstaPay,
+      totalVodafoneCash: totals.totalVodafoneCash,
+      totalVisa: totals.totalVisa,
       actualCash: actualCashValue,
       discrepancy,
       shiftId: activeShift.id,

@@ -7,6 +7,18 @@ const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const apiKey = process.env.CLOUDINARY_API_KEY;
 const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
+const ALLOWED_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/avif',
+  'image/gif',
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+]);
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
+
 export async function POST(request: Request) {
   const auth = await requireAuth();
   if (auth instanceof NextResponse) return auth;
@@ -17,6 +29,20 @@ export async function POST(request: Request) {
 
     if (!file) {
       return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { success: false, error: 'File size exceeds 15MB limit' },
+        { status: 400 }
+      );
+    }
+
+    if (!ALLOWED_MIME_TYPES.has(file.type)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid file type. Only standard images and videos are permitted.' },
+        { status: 400 }
+      );
     }
 
     const timestamp = Math.floor(Date.now() / 1000).toString();
