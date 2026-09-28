@@ -181,7 +181,7 @@ export default function AdminOrdersPage() {
   if (loading) return null;
 
   return (
-    <div className="w-full max-w-full overflow-hidden">
+    <div className="w-full max-w-full min-w-0 overflow-hidden">
       <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:gap-0.75rem">
         <div className="flex items-center gap-3">
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
@@ -211,8 +211,9 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* ── Desktop orders table ── */}
-      <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
-        <table className="w-full min-w-[1100px] table-auto text-left border-collapse" style={{ fontSize: '0.85rem' }}>
+      <div className="hidden md:block w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
+        <div className="w-full overflow-x-auto">
+          <table className="w-full min-w-[1100px] table-auto text-left border-collapse" style={{ fontSize: '0.85rem' }}>
           <thead>
             <tr className="bg-[#09142E] text-white">
               <Th>Order ID</Th>
@@ -321,6 +322,7 @@ export default function AdminOrdersPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* ── Mobile order cards ── */}

@@ -91,7 +91,7 @@ export default function AnalyticsPage() {
   const maxCollSales = collPerf.length > 0 ? collPerf[0].estimatedSales : 1;
 
   return (
-    <div dir="ltr" className="w-full max-w-full overflow-hidden">
+    <div dir="ltr" className="w-full max-w-full min-w-0 overflow-hidden">
       {/* Page Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
@@ -240,8 +240,9 @@ export default function AnalyticsPage() {
           </div>
         ) : (<div>
           {/* Desktop table */}
-          <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
-            <table className="w-full min-w-[500px] table-auto text-left border-collapse">
+          <div className="hidden md:block w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full min-w-[500px] table-auto text-left border-collapse">
               <thead>
                 <tr className="bg-[#09142E]">
                   <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Image</th>
@@ -272,6 +273,7 @@ export default function AnalyticsPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Mobile low stock cards */}
@@ -306,8 +308,9 @@ export default function AnalyticsPage() {
       <div className={styles.adminContent}>
         <h3 style={sectionTitle}>Recent Transactions</h3>
         {/* Desktop table */}
-        <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
-          <table className="w-full min-w-[650px] table-auto text-left border-collapse">
+        <div className="hidden md:block w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full min-w-[650px] table-auto text-left border-collapse">
             <thead>
               <tr className="bg-[#09142E]">
                 <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Order ID</th>
@@ -351,6 +354,7 @@ export default function AnalyticsPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* Mobile transaction cards */}

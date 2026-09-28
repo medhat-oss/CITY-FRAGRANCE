@@ -76,7 +76,7 @@ export default function AdminPage() {
   }), [products]);
 
   return (
-    <div className="bg-[#111B3D] min-h-screen w-full max-w-full overflow-hidden p-4 sm:p-6 space-y-6">
+    <div className="bg-[#111B3D] min-h-screen w-full max-w-full min-w-0 overflow-hidden p-4 sm:p-6 space-y-6">
       <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-[#f8f9fa] text-2xl font-heading font-normal m-0">Products Management</h1>
         <button onClick={handleAdd} disabled={isSaving}

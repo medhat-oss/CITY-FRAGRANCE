@@ -180,7 +180,7 @@ export default function AdminGiftSetsPage() {
   if (loading) return null;
 
   return (
-    <div className="w-full max-w-full overflow-hidden">
+    <div className="w-full max-w-full min-w-0 overflow-hidden">
       <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
@@ -193,8 +193,9 @@ export default function AdminGiftSetsPage() {
       </div>
 
       {/* Desktop table */}
-      <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
-        <table className="w-full min-w-[700px] table-auto text-left border-collapse">
+      <div className="hidden md:block w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
+        <div className="w-full overflow-x-auto">
+          <table className="w-full min-w-[700px] table-auto text-left border-collapse">
           <thead>
             <tr className="bg-[#09142E]">
               <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Image</th>
@@ -251,6 +252,7 @@ export default function AdminGiftSetsPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Mobile stacked cards */}

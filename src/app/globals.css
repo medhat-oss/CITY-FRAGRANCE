@@ -10,7 +10,8 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    overflow-x: clip;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 
   body {
@@ -19,7 +20,7 @@
     color: #f1f5f9;
     line-height: 1.6;
     overflow-x: hidden;
-    overflow-x: clip;
+    max-width: 100vw;
   }
 
   h1, h2, h3, h4, h5, h6 {

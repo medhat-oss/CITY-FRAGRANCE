@@ -21,7 +21,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const closeDrawer = () => setIsMobileSidebarOpen(false);
 
   return (
-    <div className="flex min-h-screen w-full max-w-full bg-[#111B3D] overflow-hidden">
+    <div className="flex min-h-screen w-full max-w-screen overflow-x-hidden bg-[#111B3D]">
       {/* Desktop Sidebar */}
       <aside className="w-[260px] shrink-0 hidden md:flex flex-col bg-[#16234D] border-r border-[#1d3573] px-5 py-6">
         <div className="mb-8 flex flex-col items-center justify-center text-center">

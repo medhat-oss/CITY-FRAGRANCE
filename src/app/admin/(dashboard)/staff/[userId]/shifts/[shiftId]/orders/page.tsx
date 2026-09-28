@@ -170,7 +170,7 @@ export default function ShiftOrdersPage({ params }: PageProps) {
   }
 
   return (
-    <div dir="ltr" className="w-full max-w-full overflow-hidden">
+    <div dir="ltr" className="w-full max-w-full min-w-0 overflow-hidden">
       {/* ── Page Header — matches standard admin page pattern ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -193,7 +193,7 @@ export default function ShiftOrdersPage({ params }: PageProps) {
         )}
       </div>
 
-      <div className={styles.adminContent}>
+      <div className="w-full max-w-full min-w-0">
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
             <FaSpinner className={styles.spinIcon} style={{ color: '#ffffff', fontSize: '2rem' }} />
@@ -205,8 +205,9 @@ export default function ShiftOrdersPage({ params }: PageProps) {
         ) : (
           <>
             {/* ── Desktop orders table ── */}
-            <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md">
-              <table className="w-full min-w-[860px] table-auto text-left border-collapse">
+            <div className="hidden md:block w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
+              <div className="w-full overflow-x-auto">
+                <table className="w-full min-w-[700px] text-left border-collapse">
                 <thead>
                   <tr className="bg-[#09142E]">
                     {['Order ID', 'Customer', 'Payment', 'Date & Time', 'Product', 'Qty', 'Unit Price', 'Subtotal', 'Status', 'Cancel'].map((h) => (
@@ -304,6 +305,7 @@ export default function ShiftOrdersPage({ params }: PageProps) {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
 
             {/* ── Mobile order cards ── */}
