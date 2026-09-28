@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, createContext, useContext, useCallback, useMemo } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { defaultProducts } from '@/data/defaultProducts';
 import type { Product } from '@/types';
@@ -23,17 +23,15 @@ async function fetchProducts(isAdmin: boolean): Promise<Product[]> {
     const url = isAdmin ? '/api/admin/products' : '/api/products';
     const res = await fetch(`${url}?t=${Date.now()}`, {
       cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
     });
     if (!res.ok) {
       return defaultProducts;
     }
-    const data = await res.json() as { products: Product[] };
-    return data?.products || defaultProducts;
+    const data = (await res.json()) as { products?: Product[] };
+    if (Array.isArray(data?.products) && data.products.length > 0) {
+      return data.products;
+    }
+    return defaultProducts;
   } catch {
     return defaultProducts;
   }
@@ -43,21 +41,6 @@ async function fetchProducts(isAdmin: boolean): Promise<Product[]> {
 function useIsAdminRoute(): boolean {
   const pathname = usePathname();
   return (pathname?.startsWith('/admin') || pathname?.startsWith('/cashier')) ?? false;
-}
-
-/**
- * Routes that actually need product data fetched eagerly.
- * Pages like /stores, /about, /privacy-policy, /order-payment do NOT render
- * product cards, so we skip the DB round-trip there entirely.
- */
-const PRODUCT_ROUTES = [
-  '/', '/collections', '/product', '/search',
-  '/admin', '/cashier',
-];
-
-function useNeedsProducts(): boolean {
-  const pathname = usePathname() ?? '';
-  return PRODUCT_ROUTES.some((prefix) => pathname === prefix || pathname.startsWith(prefix + '/') || pathname.startsWith(prefix + '?'));
 }
 
 /** Filter out drafts for storefront visitors; admins see everything */
@@ -83,22 +66,22 @@ function inCollection(p: Product, collection: string): boolean {
 export function ProductsProvider({ children }: { children: React.ReactNode }) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const needsProducts = useNeedsProducts();
   const isAdmin = useIsAdminRoute();
   const router = useRouter();
   const products = useVisibleProducts(allProducts);
   const [fetchKey, setFetchKey] = useState(0);
 
   useEffect(() => {
-    if (!needsProducts) {
-      setIsLoaded(true);
-      return;
-    }
+    let cancelled = false;
     fetchProducts(isAdmin).then((p) => {
-      setAllProducts(p);
-      setIsLoaded(true);
+      if (!cancelled) {
+        setAllProducts(p);
+        setIsLoaded(true);
+      }
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+    };
   }, [fetchKey, isAdmin]);
 
   const addProduct = useCallback(async (product: Product) => {
@@ -209,11 +192,16 @@ export function useProducts(): ProductsContextValue {
   const products = useVisibleProducts(allProducts);
 
   useEffect(() => {
+    let cancelled = false;
     fetchProducts(isAdmin).then((p) => {
-      setAllProducts(p);
-      setIsLoaded(true);
+      if (!cancelled) {
+        setAllProducts(p);
+        setIsLoaded(true);
+      }
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+    };
   }, [fetchKey, isAdmin]);
 
   const addProduct = useCallback(async (product: Product) => {
