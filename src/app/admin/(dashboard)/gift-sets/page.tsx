@@ -181,7 +181,7 @@ export default function AdminGiftSetsPage() {
 
   return (
     <div className="w-full max-w-full min-w-0 overflow-hidden">
-      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between mt-2 md:mt-0">
         <div className="flex items-center gap-3">
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
             Gift Sets Management
@@ -194,31 +194,31 @@ export default function AdminGiftSetsPage() {
 
       {/* Desktop table */}
       <div className="hidden md:block w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
-        <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[700px] table-auto text-left border-collapse">
+        <div className="w-full overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/20">
+          <table className="w-full table-auto border-collapse text-left text-xs md:text-sm">
           <thead>
             <tr className="bg-[#09142E]">
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Image</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Name</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Price</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Products</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider">Status</th>
-              <th className="p-4 border-b border-white/20 text-white font-heading text-xs font-bold uppercase tracking-wider text-center">Actions</th>
+              <th className="px-2.5 py-3 border-b border-white/20 text-white font-heading text-xs font-semibold uppercase tracking-wider w-14">Image</th>
+              <th className="px-2.5 py-3 border-b border-white/20 text-white font-heading text-xs font-semibold uppercase tracking-wider">Name</th>
+              <th className="px-2.5 py-3 border-b border-white/20 text-white font-heading text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Price</th>
+              <th className="px-2.5 py-3 border-b border-white/20 text-white font-heading text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Products</th>
+              <th className="px-2.5 py-3 border-b border-white/20 text-white font-heading text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
+              <th className="px-2.5 py-3 border-b border-white/20 text-white font-heading text-xs font-semibold uppercase tracking-wider text-center whitespace-nowrap w-28">Actions</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((gs) => (
               <tr key={gs.id} className="hover:bg-white/5 transition-opacity" style={{ opacity: deletingId === gs.id ? 0.4 : 1 }}>
-                <td className="p-4 border-b border-white/10 align-middle">
+                <td className="px-2.5 py-3 border-b border-white/10 align-middle w-14">
                   {gs.image
-                    ? <Image src={gs.image} alt={gs.name} width={50} height={50} style={{ objectFit: 'cover', borderRadius: '4px' }} />
-                    : <div style={{ width: 50, height: 50, background: '#1d3573', borderRadius: '4px' }} />}
+                    ? <Image src={gs.image} alt={gs.name} width={44} height={44} style={{ objectFit: 'cover', borderRadius: '4px' }} />
+                    : <div style={{ width: 44, height: 44, background: '#1d3573', borderRadius: '4px' }} />}
                 </td>
-                <td className="p-4 border-b border-white/10 font-semibold text-[#e2e8f0] align-middle">{gs.name}</td>
-                <td className="p-4 border-b border-white/10 font-heading text-white font-semibold align-middle">{formatEGP(gs.price)}</td>
-                <td className="p-4 border-b border-white/10 text-[#64748b] text-sm align-middle">{gs.productIds.length} products</td>
-                <td className="p-4 border-b border-white/10 align-middle">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+                <td className="px-2.5 py-3 border-b border-white/10 font-semibold text-[#e2e8f0] align-middle">{gs.name}</td>
+                <td className="px-2.5 py-3 border-b border-white/10 font-heading text-white font-semibold align-middle whitespace-nowrap">{formatEGP(gs.price)}</td>
+                <td className="px-2.5 py-3 border-b border-white/10 text-[#94a3b8] text-xs align-middle whitespace-nowrap">{gs.productIds.length} products</td>
+                <td className="px-2.5 py-3 border-b border-white/10 align-middle whitespace-nowrap">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full"
                     style={{
                       background: gs.isDraft ? 'rgba(234,179,8,0.12)' : 'rgba(34,197,94,0.12)',
                       border: `1px solid ${gs.isDraft ? 'rgba(234,179,8,0.4)' : 'rgba(34,197,94,0.4)'}`,
@@ -231,14 +231,14 @@ export default function AdminGiftSetsPage() {
                     {gs.isDraft ? 'Draft' : 'Live'}
                   </span>
                 </td>
-                <td className="p-4 border-b border-white/10 align-middle text-center">
-                  <div className="flex items-center justify-center gap-2">
+                <td className="px-2.5 py-3 border-b border-white/10 align-middle text-center whitespace-nowrap w-28">
+                  <div className="flex items-center justify-center gap-1.5">
                     <button onClick={() => openEdit(gs)} disabled={deletingId === gs.id}
-                      className="text-xs text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] px-2.5 py-1 rounded transition-colors disabled:opacity-40" aria-label={`Edit ${gs.name}`}>
+                      className="text-xs text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] px-2 py-1 rounded transition-colors disabled:opacity-40" aria-label={`Edit ${gs.name}`}>
                       Edit
                     </button>
                     <button onClick={() => promptDelete(gs.id)} disabled={deletingId === gs.id}
-                      className="text-xs text-red-400 hover:bg-red-500/10 px-2.5 py-1 rounded transition-colors disabled:opacity-40" aria-label={`Delete ${gs.name}`}>
+                      className="text-xs text-red-400 hover:bg-red-500/10 px-2 py-1 rounded transition-colors disabled:opacity-40" aria-label={`Delete ${gs.name}`}>
                       {deletingId === gs.id ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
@@ -256,7 +256,7 @@ export default function AdminGiftSetsPage() {
       </div>
 
       {/* Mobile stacked cards */}
-      <div className="md:hidden space-y-3">
+      <div className="block md:hidden space-y-3">
         {rows.map((gs) => (
           <div key={gs.id} className="rounded-xl border border-white/10 bg-[#111B3D]/50 backdrop-blur-md p-3" style={{ opacity: deletingId === gs.id ? 0.4 : 1 }}>
             <div className="flex gap-3 items-start">
