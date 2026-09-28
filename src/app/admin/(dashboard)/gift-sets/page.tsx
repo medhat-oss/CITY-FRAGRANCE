@@ -6,6 +6,8 @@ import { useProducts } from '@/hooks/useProducts';
 import { formatEGP } from '@/utils/currency';
 import { FaTimes, FaSpinner } from 'react-icons/fa';
 import styles from '../admin.module.css';
+import ConfirmModal from '@/components/ConfirmModal';
+import AlertModal from '@/components/AlertModal';
 
 interface GiftSet {
   id: string;
@@ -48,6 +50,8 @@ export default function AdminGiftSetsPage() {
   // ── loading states ──────────────────────────────────────────────────────
   const [isSaving, setIsSaving]   = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const loadGiftSets = useCallback(async () => {
     try {
@@ -126,20 +130,30 @@ export default function AdminGiftSetsPage() {
     }
   }, [editing, form, loadGiftSets]);
 
-  const handleDelete = useCallback(async (id: string) => {
-    if (!confirm('Delete this gift set?')) return;
+  const promptDelete = useCallback((id: string) => {
+    setDeleteConfirmId(id);
+  }, []);
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteConfirmId) return;
+    const id = deleteConfirmId;
     setDeletingId(id);
+    setDeleteConfirmId(null);
     try {
-      const res  = await fetch('/api/admin/gift-sets', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+      const res = await fetch('/api/admin/gift-sets', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
       const data = await res.json();
       if (data.success) {
         setGiftSets((prev) => prev.filter((g) => g.id !== id));
         loadGiftSets();
+      } else {
+        setErrorMessage(data.error || 'Failed to delete gift set');
       }
+    } catch {
+      setErrorMessage('Network error while deleting gift set');
     } finally {
       setDeletingId(null);
     }
-  }, [loadGiftSets]);
+  }, [deleteConfirmId, loadGiftSets]);
 
   const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -222,7 +236,7 @@ export default function AdminGiftSetsPage() {
                       className="text-xs text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] px-2.5 py-1 rounded transition-colors disabled:opacity-40" aria-label={`Edit ${gs.name}`}>
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(gs.id)} disabled={deletingId === gs.id}
+                    <button onClick={() => promptDelete(gs.id)} disabled={deletingId === gs.id}
                       className="text-xs text-red-400 hover:bg-red-500/10 px-2.5 py-1 rounded transition-colors disabled:opacity-40" aria-label={`Delete ${gs.name}`}>
                       {deletingId === gs.id ? 'Deleting...' : 'Delete'}
                     </button>
@@ -271,7 +285,7 @@ export default function AdminGiftSetsPage() {
                   className="text-xs text-[#60a5fa] hover:bg-[rgba(96,165,250,0.12)] px-2.5 py-1.5 rounded transition-colors disabled:opacity-40" aria-label={`Edit ${gs.name}`}>
                   Edit
                 </button>
-                <button onClick={() => handleDelete(gs.id)} disabled={deletingId === gs.id}
+                <button onClick={() => promptDelete(gs.id)} disabled={deletingId === gs.id}
                   className="text-xs text-red-400 hover:bg-red-500/10 px-2.5 py-1.5 rounded transition-colors disabled:opacity-40" aria-label={`Delete ${gs.name}`}>
                   {deletingId === gs.id ? 'Deleting...' : 'Delete'}
                 </button>
@@ -386,6 +400,25 @@ export default function AdminGiftSetsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!deleteConfirmId}
+        title="Delete Gift Set"
+        message="Are you sure you want to delete this gift set? This action cannot be undone."
+        confirmText="Confirm Delete"
+        cancelText="Cancel"
+        isDestructive={true}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
+
+      <AlertModal
+        isOpen={!!errorMessage}
+        type="error"
+        title="Gift Set Error"
+        message={errorMessage || ''}
+        onClose={() => setErrorMessage(null)}
+      />
     </div>
   );
 }

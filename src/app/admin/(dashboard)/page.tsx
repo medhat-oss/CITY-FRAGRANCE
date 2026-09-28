@@ -6,6 +6,8 @@ import type { Product } from '@/types';
 
 import ProductModal from '@/components/ProductModal';
 import { ProductList } from './ProductList';
+import ConfirmModal from '@/components/ConfirmModal';
+import AlertModal from '@/components/AlertModal';
 
 export default function AdminPage() {
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
@@ -14,6 +16,8 @@ export default function AdminPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleAdd = useCallback(() => {
     setProductToEdit(null);
@@ -25,17 +29,23 @@ export default function AdminPage() {
     setIsModalOpen(true);
   }, []);
 
-  const handleDelete = useCallback(async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
+  const promptDelete = useCallback((id: string) => {
+    setProductToDelete(id);
+  }, []);
+
+  const confirmDelete = useCallback(async () => {
+    if (!productToDelete) return;
+    const id = productToDelete;
     setDeletingId(id);
+    setProductToDelete(null);
     try {
       await deleteProduct(id);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete product. Please try again.');
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to delete product. Please try again.');
     } finally {
       setDeletingId(null);
     }
-  }, [deleteProduct]);
+  }, [productToDelete, deleteProduct]);
 
   const handleSave = useCallback(async (data: Product) => {
     setIsSaving(true);
@@ -80,7 +90,7 @@ export default function AdminPage() {
         rows={rows}
         deletingId={deletingId}
         onEdit={handleEdit}
-        onDelete={handleDelete}
+        onDelete={promptDelete}
       />
 
       <ProductModal
@@ -90,6 +100,25 @@ export default function AdminPage() {
         productToEdit={productToEdit}
         isSaving={isSaving}
         saveError={saveError}
+      />
+
+      <ConfirmModal
+        isOpen={!!productToDelete}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        confirmText="Confirm Delete"
+        cancelText="Cancel"
+        isDestructive={true}
+        onConfirm={confirmDelete}
+        onCancel={() => setProductToDelete(null)}
+      />
+
+      <AlertModal
+        isOpen={!!errorMessage}
+        type="error"
+        title="Deletion Failed"
+        message={errorMessage || ''}
+        onClose={() => setErrorMessage(null)}
       />
     </div>
   );

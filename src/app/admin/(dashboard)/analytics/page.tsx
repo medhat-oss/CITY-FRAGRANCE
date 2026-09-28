@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { formatEGP } from '@/utils/currency';
 import styles from '../admin.module.css';
 import { FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
+import AlertModal from '@/components/AlertModal';
 
 interface Metrics {
   totalRevenue: number; netProfit: number; totalOrders: number;
@@ -34,6 +35,7 @@ export default function AnalyticsPage() {
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState('');
   const [resetSubmitting, setResetSubmitting] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/analytics')
@@ -64,10 +66,10 @@ export default function AnalyticsPage() {
         setResetConfirmText('');
         router.refresh();
       } else {
-        alert(data.error || 'Reset failed.');
+        setAlertMessage({ title: 'Reset Failed', message: data.error || 'Reset failed.', type: 'error' });
       }
     } catch {
-      alert('Network error. Please try again.');
+      setAlertMessage({ title: 'Network Error', message: 'Network error. Please try again.', type: 'error' });
     }
     setResetSubmitting(false);
   }
@@ -479,6 +481,14 @@ export default function AnalyticsPage() {
           </div>
         </div>
       )}
+
+      <AlertModal
+        isOpen={!!alertMessage}
+        title={alertMessage?.title}
+        message={alertMessage?.message || ''}
+        type={alertMessage?.type || 'error'}
+        onClose={() => setAlertMessage(null)}
+      />
     </div>
   );
 }

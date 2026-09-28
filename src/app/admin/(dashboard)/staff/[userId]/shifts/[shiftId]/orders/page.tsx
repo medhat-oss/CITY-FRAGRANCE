@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
 import { FaSpinner } from 'react-icons/fa';
 import styles from '../../../../../admin.module.css';
+import AlertModal from '@/components/AlertModal';
 
 interface PageProps {
   params: Promise<{ userId: string; shiftId: string }>;
@@ -69,6 +70,7 @@ export default function ShiftOrdersPage({ params }: PageProps) {
   const [updatingOrder, setUpdatingOrder] = useState<string | null>(null);
   const [cancellingItem, setCancellingItem] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [alertMessage, setAlertMessage] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
 
   const fetchOrders = useCallback(async () => {
     if (!shiftId) return;
@@ -109,10 +111,10 @@ export default function ShiftOrdersPage({ params }: PageProps) {
       if (data.success) {
         await fetchOrders();
       } else {
-        alert(data.error || 'Failed to cancel order');
+        setAlertMessage({ title: 'Order Update Failed', message: data.error || 'Failed to cancel order', type: 'error' });
       }
     } catch {
-      alert('Network error');
+      setAlertMessage({ title: 'Network Error', message: 'Network error while updating order', type: 'error' });
     }
     setUpdatingOrder(null);
   }
@@ -143,10 +145,10 @@ export default function ShiftOrdersPage({ params }: PageProps) {
           )
         );
       } else {
-        alert(data.error || 'Failed to cancel item');
+        setAlertMessage({ title: 'Item Cancellation Failed', message: data.error || 'Failed to cancel item', type: 'error' });
       }
     } catch {
-      alert('Network error while cancelling item');
+      setAlertMessage({ title: 'Network Error', message: 'Network error while cancelling item', type: 'error' });
     }
     setCancellingItem(null);
   }
@@ -420,6 +422,14 @@ export default function ShiftOrdersPage({ params }: PageProps) {
           </>
         )}
       </div>
+
+      <AlertModal
+        isOpen={!!alertMessage}
+        title={alertMessage?.title}
+        message={alertMessage?.message || ''}
+        type={alertMessage?.type || 'error'}
+        onClose={() => setAlertMessage(null)}
+      />
     </div>
   );
 }

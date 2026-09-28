@@ -6,6 +6,7 @@ import { formatEGP } from '@/utils/currency';
 import type { Order } from '@/types';
 import { FaTimes, FaSpinner } from 'react-icons/fa';
 import styles from '../admin.module.css';
+import AlertModal from '@/components/AlertModal';
 
 const STATUS_FLOW: Record<string, string[]> = {
   ACCEPTED: ['CONFIRMED', 'CANCELLED'],
@@ -72,6 +73,7 @@ export default function AdminOrdersPage() {
   const [cancellingItemId, setCancellingItemId] = useState<string | null>(null);
   const [latestOrder, setLatestOrder] = useState<Order | null>(null);
   const [showAlert, setShowAlert] = useState(false);
+  const [alertModalMessage, setAlertModalMessage] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
   // Tracks the orderId at position [0] from the PREVIOUS successful fetch.
   // Using orderId (string) is deterministic — no timezone or date-parse ambiguity.
   const lastTopOrderIdRef = useRef<string | null>(null);
@@ -166,7 +168,7 @@ export default function AdminOrdersPage() {
       }
     } catch (error) {
       console.error(error);
-      alert('Error cancelling product');
+      setAlertModalMessage({ title: 'Cancellation Error', message: 'Failed to cancel product from order. Please try again.', type: 'error' });
     } finally {
       setCancellingItemId(null);
     }
@@ -616,6 +618,14 @@ export default function AdminOrdersPage() {
           </div>
         </>
       )}
+
+      <AlertModal
+        isOpen={!!alertModalMessage}
+        title={alertModalMessage?.title}
+        message={alertModalMessage?.message || ''}
+        type={alertModalMessage?.type || 'error'}
+        onClose={() => setAlertModalMessage(null)}
+      />
     </div>
   );
 }

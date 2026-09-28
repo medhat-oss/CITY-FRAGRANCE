@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FaTimes, FaSpinner } from 'react-icons/fa';
 import styles from '../admin.module.css';
+import ConfirmModal from '@/components/ConfirmModal';
+import AlertModal from '@/components/AlertModal';
 
 interface StaffUser {
   id: string;
@@ -20,6 +22,9 @@ export default function ManageStaffPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; email: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
 
   // Form State
   const [form, setForm] = useState({
@@ -94,14 +99,18 @@ export default function ManageStaffPage() {
     setSubmitting(false);
   }
 
-  async function handleDelete(id: string, email: string) {
+  function promptDelete(id: string, email: string) {
     if (email.toLowerCase() === 'admin@cityfragrance.com') {
-      alert('The primary Admin account cannot be deleted.');
+      setAlertMessage({ title: 'Protected Account', message: 'The primary Admin account cannot be deleted.', type: 'warning' });
       return;
     }
+    setDeleteTarget({ id, email });
+  }
 
-    if (!confirm(`Are you sure you want to delete staff account: ${email}?`)) return;
-
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const { id } = deleteTarget;
+    setIsDeleting(true);
     try {
       const res = await fetch('/api/admin/staff', {
         method: 'DELETE',
@@ -112,11 +121,14 @@ export default function ManageStaffPage() {
 
       if (data.success) {
         setStaffList((prev) => prev.filter((u) => u.id !== id));
+        setDeleteTarget(null);
       } else {
-        alert(data.error || 'Failed to delete staff account');
+        setAlertMessage({ title: 'Deletion Failed', message: data.error || 'Failed to delete staff account', type: 'error' });
       }
     } catch {
-      alert('An error occurred while deleting.');
+      setAlertMessage({ title: 'Network Error', message: 'An error occurred while deleting staff account.', type: 'error' });
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -214,7 +226,7 @@ export default function ManageStaffPage() {
                         )}
                         <button
                           className="text-xs text-red-500 hover:bg-[rgba(239,68,68,0.12)] px-2.5 py-1 rounded transition-colors"
-                          onClick={() => handleDelete(staff.id, staff.email)}
+                          onClick={() => promptDelete(staff.id, staff.email)}
                           disabled={staff.email.toLowerCase() === 'admin@cityfragrance.com'}
                           title="Delete Staff"
                           style={{
@@ -274,7 +286,7 @@ export default function ManageStaffPage() {
                   )}
                   <button
                     className="text-xs text-red-500 hover:bg-[rgba(239,68,68,0.12)] px-2.5 py-1.5 rounded transition-colors"
-                    onClick={() => handleDelete(staff.id, staff.email)}
+                    onClick={() => promptDelete(staff.id, staff.email)}
                     disabled={staff.email.toLowerCase() === 'admin@cityfragrance.com'}
                     style={{
                       opacity: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 0.3 : 1,
@@ -443,7 +455,25 @@ export default function ManageStaffPage() {
         </div>
       )}
 
-      
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Delete Staff Account"
+        message={`Are you sure you want to delete staff account: ${deleteTarget?.email}?\n\nThis account will immediately lose access to the system.`}
+        confirmText="Confirm Delete"
+        cancelText="Cancel"
+        isDestructive={true}
+        isLoading={isDeleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
+      <AlertModal
+        isOpen={!!alertMessage}
+        title={alertMessage?.title}
+        message={alertMessage?.message || ''}
+        type={alertMessage?.type || 'info'}
+        onClose={() => setAlertMessage(null)}
+      />
     </div>
   );
 }

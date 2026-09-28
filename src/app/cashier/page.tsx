@@ -11,6 +11,8 @@ import {
   FaTimes, FaMoneyBillWave, FaMobileAlt, FaExchangeAlt, FaCreditCard,
   FaCheckCircle, FaSpinner, FaSignOutAlt, FaUser, FaClipboardList,
 } from 'react-icons/fa';
+import ConfirmModal from '@/components/ConfirmModal';
+import AlertModal from '@/components/AlertModal';
 
 /* ── Types ── */
 interface Product {
@@ -70,6 +72,19 @@ type Filter = 'all' | 'perfume' | 'gift-set';
 
 export default function CashierPage() {
   const router = useRouter();
+
+  /* ── Alert & Confirmation Modals ── */
+  const [alertModal, setAlertModal] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    type?: 'info' | 'warning' | 'error' | 'success';
+  }>({ isOpen: false, message: '' });
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const showAlert = useCallback((message: string, title?: string, type: 'info' | 'warning' | 'error' | 'success' = 'info') => {
+    setAlertModal({ isOpen: true, title, message, type });
+  }, []);
 
   /* ── Authentication ── */
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -163,7 +178,7 @@ export default function CashierPage() {
       const idx = prev.findIndex((l) => l.item.id === item.id);
       const currentQty = idx >= 0 ? prev[idx].qty : 0;
       if (currentQty + 1 > stockLimit) {
-        alert(`Sorry, only ${stockLimit} items left in stock`);
+        showAlert(`Sorry, only ${stockLimit} items left in stock`, 'Stock Limit Reached', 'warning');
         return prev;
       }
       if (idx >= 0) {
@@ -173,7 +188,7 @@ export default function CashierPage() {
       }
       return [...prev, { item, qty: 1 }];
     });
-  }, []);
+  }, [showAlert]);
 
   const updateQty = useCallback((id: string, delta: number) => {
     setCart((prev) => {
@@ -182,14 +197,14 @@ export default function CashierPage() {
       const item = prev[idx].item;
       const stockLimit = item.stock !== undefined ? item.stock : 999;
       if (delta > 0 && prev[idx].qty + delta > stockLimit) {
-        alert(`Sorry, only ${stockLimit} items left in stock`);
+        showAlert(`Sorry, only ${stockLimit} items left in stock`, 'Stock Limit Reached', 'warning');
         return prev;
       }
       return prev.map((l) =>
         l.item.id === id ? { ...l, qty: Math.max(1, l.qty + delta) } : l
       );
     });
-  }, []);
+  }, [showAlert]);
 
   const removeFromCart = useCallback((id: string) => {
     setCart((prev) => prev.filter((l) => l.item.id !== id));
@@ -343,7 +358,7 @@ export default function CashierPage() {
 
   async function openShiftCheckout() {
     if (!currentUser?.id) {
-      alert('User session not loaded yet. Please try again.');
+      showAlert('User session not loaded yet. Please try again.', 'Session Notice', 'warning');
       return;
     }
     // Instantly open the modal in loading state
@@ -362,7 +377,7 @@ export default function CashierPage() {
       }
       if (res.status === 403) {
         setShowShiftCheckout(false);
-        alert("Access Denied: You do not have permission to view shift details.");
+        showAlert('Access Denied: You do not have permission to view shift details.', 'Access Denied', 'error');
         return;
       }
       if (!res.ok) {
@@ -410,7 +425,7 @@ export default function CashierPage() {
       const errMsg = err instanceof Error ? err.message : String(err);
       console.error("CRITICAL SHIFT OPEN ERROR:", err);
       setShiftError(`Failed to load shift data: ${errMsg}`);
-      alert(`Error loading shift: ${errMsg}`);
+      showAlert(`Error loading shift: ${errMsg}`, 'Shift Error', 'error');
     } finally {
       setShiftLoading(false);
     }
@@ -492,7 +507,7 @@ export default function CashierPage() {
       if (res.status === 403) {
         console.error('FRONTEND AUTH ERROR: End Shift returned 403 — role not permitted');
         setShiftError('Access denied. Please log in again.');
-        alert('Access denied. Please log in again.');
+        showAlert('Access denied. Please log in again.', 'Access Denied', 'error');
         setShiftSubmitting(false);
         return;
       }
@@ -518,9 +533,17 @@ export default function CashierPage() {
       }
     } catch (err: any) {
       console.error("CRITICAL SHIFT CHECKOUT ERROR:", err);
-      alert("Error closing shift: " + (err?.message || String(err)));
+      showAlert("Error closing shift: " + (err?.message || String(err)), 'Shift Error', 'error');
       setShiftSubmitting(false);
     }
+  }
+
+  async function performLogout() {
+    setShowLogoutConfirm(false);
+    localStorage.clear();
+    sessionStorage.clear();
+    await fetch('/api/auth/cashier-logout', { method: 'POST' });
+    window.location.href = '/cashier/login';
   }
 
   async function handleLogout() {
@@ -530,18 +553,14 @@ export default function CashierPage() {
         const data = await res.json();
         const activeOrderCount = data?.shift?.orderCount ?? 0;
         if (activeOrderCount > 0) {
-          if (!confirm('You have an active shift with orders. Please use "End Shift" to close it properly.')) {
-            return;
-          }
+          setShowLogoutConfirm(true);
+          return;
         }
       }
     } catch (err) {
       console.error('POS Action Error - handleLogout shift check:', err);
     }
-    localStorage.clear();
-    sessionStorage.clear();
-    await fetch('/api/auth/cashier-logout', { method: 'POST' });
-    window.location.href = '/cashier/login';
+    await performLogout();
   }
 
   /* ── Mobile drawer state ── */
@@ -1220,6 +1239,25 @@ export default function CashierPage() {
           THANK YOU FOR SHOPPING AT CITY FRAGRANCE!
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        title="Active Shift with Orders"
+        message={'You have an active shift with recorded orders.\n\nPlease use "End Shift" to reconcile drawer cash and close the shift properly before logging out.'}
+        confirmText="Log Out Anyway"
+        cancelText="Stay on POS"
+        isDestructive={true}
+        onConfirm={performLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
+
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+        onClose={() => setAlertModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }
