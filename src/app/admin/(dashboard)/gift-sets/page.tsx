@@ -180,7 +180,7 @@ export default function AdminGiftSetsPage() {
   if (loading) return null;
 
   return (
-    <div>
+    <div className="w-full max-w-full overflow-hidden">
       <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>

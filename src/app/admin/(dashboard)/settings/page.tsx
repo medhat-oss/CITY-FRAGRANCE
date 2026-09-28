@@ -367,7 +367,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className={styles.adminContent} style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '900px', width: '100%' }}>
+    <div className={`${styles.adminContent} w-full max-w-full overflow-hidden`} style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '900px', width: '100%' }}>
       {/* ─── Section 1: Site Customization ─── */}
       <div>
         <div className={styles.adminHeader} style={{ border: 'none', marginBottom: '1.5rem', padding: 0 }}>

@@ -166,6 +166,9 @@
 /* ─── Main Content ─── */
 .adminMain {
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   margin-left: 250px;
   padding: 2rem 3rem;
   display: flex;

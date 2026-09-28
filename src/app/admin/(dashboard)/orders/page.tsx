@@ -181,7 +181,7 @@ export default function AdminOrdersPage() {
   if (loading) return null;
 
   return (
-    <div>
+    <div className="w-full max-w-full overflow-hidden">
       <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:gap-0.75rem">
         <div className="flex items-center gap-3">
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
@@ -469,72 +469,74 @@ export default function AdminOrdersPage() {
                 <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', fontWeight: 600, color: '#f8f9fa', display: 'block', marginBottom: '0.3rem' }}>
                   Items
                 </span>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                      <th style={{ textAlign: 'left', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Product</th>
-                      <th style={{ textAlign: 'center', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem', width: '50px' }}>Qty</th>
-                      <th style={{ textAlign: 'right', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Unit Price</th>
-                      <th style={{ textAlign: 'right', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Subtotal</th>
-                       <th style={{ textAlign: 'right', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedOrder.items.map((item) => {
-                      const orderStatus = (selectedOrder.status || '').toUpperCase();
-                      const orderLocked = orderStatus === 'CANCELLED' || orderStatus === 'DELIVERED';
-                      const isCancelling = cancellingItemId === item.id;
-                      return (
-                        <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                          <td style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                            {item.image ? (
-                              <img src={item.image} alt={item.name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', background: '#1d3573', flexShrink: 0 }} />
-                            ) : (
-                              <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: '#1d3573', flexShrink: 0 }} />
-                            )}
-                            <span style={{ color: '#e2e8f0' }}>{item.name}</span>
-                          </td>
-                          <td style={{ padding: '0.4rem 0.5rem', textAlign: 'center', color: '#cbd5e1' }}>{item.quantity}</td>
-                          <td style={{ padding: '0.4rem 0.5rem', textAlign: 'right', color: '#94a3b8', fontFamily: 'var(--font-heading)' }}>
-                            {formatEGP(item.price)}
-                          </td>
-                          <td style={{ padding: '0.4rem 0.5rem', textAlign: 'right', color: '#f1f5f9', fontFamily: 'var(--font-heading)' }}>
-                            {formatEGP(item.price * item.quantity)}
-                          </td>
-                          <td style={{ padding: '0.4rem 0.5rem', textAlign: 'right' }}>
-                            {!orderLocked ? (
-                              isCancelling ? (
-                                <FaSpinner className="animate-spin" style={{ fontSize: '0.85rem', color: '#ef4444' }} />
+                <div className="w-full overflow-x-auto rounded-lg border border-white/10">
+                  <table style={{ width: '100%', minWidth: '550px', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <th style={{ textAlign: 'left', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Product</th>
+                        <th style={{ textAlign: 'center', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem', width: '50px' }}>Qty</th>
+                        <th style={{ textAlign: 'right', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Unit Price</th>
+                        <th style={{ textAlign: 'right', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Subtotal</th>
+                         <th style={{ textAlign: 'right', padding: '0.3rem 0.5rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedOrder.items.map((item) => {
+                        const orderStatus = (selectedOrder.status || '').toUpperCase();
+                        const orderLocked = orderStatus === 'CANCELLED' || orderStatus === 'DELIVERED';
+                        const isCancelling = cancellingItemId === item.id;
+                        return (
+                          <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                            <td style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                              {item.image ? (
+                                <img src={item.image} alt={item.name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', background: '#1d3573', flexShrink: 0 }} />
                               ) : (
-                                <button
-                                  onClick={() => handleCancelSingleItem(item.id, selectedOrder.orderId)}
-                                  style={{
-                                    background: 'rgba(127,29,29,0.4)',
-                                    border: '1px solid rgba(127,29,29,0.5)',
-                                    borderRadius: '4px',
-                                    color: '#f87171',
-                                    cursor: 'pointer',
-                                    fontSize: '0.75rem',
-                                    fontWeight: 600,
-                                    padding: '0.3rem 0.7rem',
-                                    transition: 'all 0.15s',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(127,29,29,0.7)'; e.currentTarget.style.color = '#fff'; }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(127,29,29,0.4)'; e.currentTarget.style.color = '#f87171'; }}
-                                >
-                                  Cancel Item
-                                </button>
-                              )
-                            ) : (
-                              <span style={{ color: '#4a5e8a', fontSize: '0.75rem' }}>—</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: '#1d3573', flexShrink: 0 }} />
+                              )}
+                              <span style={{ color: '#e2e8f0' }}>{item.name}</span>
+                            </td>
+                            <td style={{ padding: '0.4rem 0.5rem', textAlign: 'center', color: '#cbd5e1' }}>{item.quantity}</td>
+                            <td style={{ padding: '0.4rem 0.5rem', textAlign: 'right', color: '#94a3b8', fontFamily: 'var(--font-heading)' }}>
+                              {formatEGP(item.price)}
+                            </td>
+                            <td style={{ padding: '0.4rem 0.5rem', textAlign: 'right', color: '#f1f5f9', fontFamily: 'var(--font-heading)' }}>
+                              {formatEGP(item.price * item.quantity)}
+                            </td>
+                            <td style={{ padding: '0.4rem 0.5rem', textAlign: 'right' }}>
+                              {!orderLocked ? (
+                                isCancelling ? (
+                                  <FaSpinner className="animate-spin" style={{ fontSize: '0.85rem', color: '#ef4444' }} />
+                                ) : (
+                                  <button
+                                    onClick={() => handleCancelSingleItem(item.id, selectedOrder.orderId)}
+                                    style={{
+                                      background: 'rgba(127,29,29,0.4)',
+                                      border: '1px solid rgba(127,29,29,0.5)',
+                                      borderRadius: '4px',
+                                      color: '#f87171',
+                                      cursor: 'pointer',
+                                      fontSize: '0.75rem',
+                                      fontWeight: 600,
+                                      padding: '0.3rem 0.7rem',
+                                      transition: 'all 0.15s',
+                                      whiteSpace: 'nowrap',
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(127,29,29,0.7)'; e.currentTarget.style.color = '#fff'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(127,29,29,0.4)'; e.currentTarget.style.color = '#f87171'; }}
+                                  >
+                                    Cancel Item
+                                  </button>
+                                )
+                              ) : (
+                                <span style={{ color: '#4a5e8a', fontSize: '0.75rem' }}>—</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>

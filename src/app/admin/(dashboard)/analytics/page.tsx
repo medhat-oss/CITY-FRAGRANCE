@@ -91,7 +91,7 @@ export default function AnalyticsPage() {
   const maxCollSales = collPerf.length > 0 ? collPerf[0].estimatedSales : 1;
 
   return (
-    <div dir="ltr">
+    <div dir="ltr" className="w-full max-w-full overflow-hidden">
       {/* Page Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
