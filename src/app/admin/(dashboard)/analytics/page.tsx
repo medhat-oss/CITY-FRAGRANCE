@@ -93,7 +93,7 @@ export default function AnalyticsPage() {
   return (
     <div dir="ltr" className="w-full max-w-full min-w-0 overflow-hidden">
       {/* Page Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+      <div className="mt-2 md:mt-0" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
           Analytics & Inventory
         </h2>

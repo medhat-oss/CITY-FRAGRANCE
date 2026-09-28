@@ -75,7 +75,7 @@ export default function StaffShiftsPage() {
 
   return (
     <div dir="ltr" className="w-full max-w-full min-w-0 overflow-hidden">
-      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:gap-0">
+      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:gap-0 mt-2 md:mt-0">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Link
             href="/admin/staff"

@@ -66,24 +66,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobile Top Header: visible on mobile, hidden on md+ */}
-      <header className={`flex md:hidden fixed top-0 left-0 right-0 h-20 z-[100] transition-all duration-300 items-center justify-between px-4 ${isScrolled ? 'bg-[#11224D]/80 backdrop-blur-md border-b border-white/10' : 'bg-[#11224D]'}`}>
+      <header className={`flex md:hidden fixed top-0 left-0 right-0 h-20 z-[100] transition-all duration-300 items-center justify-between px-4 ${isScrolled ? 'bg-[#16234D]/95 backdrop-blur-md border-b border-[#1d3573]' : 'bg-[#16234D] border-b border-[#1d3573]'}`}>
         <button
-          className="flex items-center justify-center p-2 text-white"
+          className="flex items-center justify-center p-2 text-white bg-transparent border-none cursor-pointer"
           onClick={() => setIsMobileSidebarOpen(true)}
           aria-label="Open menu"
         >
           <FaBars className="text-lg" />
         </button>
-        <Link href="/admin" className="flex flex-col items-center justify-center no-underline">
+        <Link href="/admin" className="flex flex-col items-center justify-center no-underline bg-transparent">
           <Image
             src="/images/admin-logo.png"
             alt="City Fragrance Logo"
             width={130}
             height={35}
-            className="w-[125px] h-auto object-contain mix-blend-screen"
+            className="w-[125px] h-auto object-contain mix-blend-screen bg-transparent"
             priority
           />
-          <span className="text-[8.5px] font-semibold text-white/70 uppercase tracking-[0.25em] mt-1 font-heading">
+          <span className="text-[8.5px] font-semibold text-slate-400 uppercase tracking-[0.25em] mt-1 font-heading bg-transparent">
             Admin Panel
           </span>
         </Link>
@@ -148,7 +148,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden p-4 md:p-8 pt-20 md:pt-8">
+      <main className="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden p-4 md:p-8 pt-24 md:pt-8">
         {children}
       </main>
     </div>

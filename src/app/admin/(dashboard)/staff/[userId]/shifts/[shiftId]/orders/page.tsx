@@ -172,7 +172,7 @@ export default function ShiftOrdersPage({ params }: PageProps) {
   return (
     <div dir="ltr" className="w-full max-w-full min-w-0 overflow-hidden">
       {/* ── Page Header — matches standard admin page pattern ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 mt-2 md:mt-0">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Link
             href={`/admin/staff/${staffId}/shifts`}

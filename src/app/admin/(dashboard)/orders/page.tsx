@@ -182,7 +182,7 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-hidden flex flex-col gap-6">
-      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-0.75rem">
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-0.75rem mt-2 md:mt-0">
         <div className="flex items-center gap-3">
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
             Orders Management
@@ -212,7 +212,7 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* ── Orders table ── */}
-      <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
+      <div className="hidden md:block w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
         <div className="w-full overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/20">
           <table className="w-full table-auto border-collapse text-left text-xs">
             <thead>
@@ -341,7 +341,7 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* ── Mobile order cards ── */}
-      <div className="md:hidden space-y-3">
+      <div className="block md:hidden space-y-3">
         {orders.map((order) => {
           const orderStatus = (order.status || '').toUpperCase();
           const allowedStatuses = STATUS_FLOW[orderStatus] || [];

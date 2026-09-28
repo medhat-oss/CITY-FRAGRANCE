@@ -160,7 +160,7 @@ export default function ManageStaffPage() {
 
   return (
     <div dir="ltr" className="w-full max-w-full min-w-0 overflow-hidden">
-      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between mt-2 md:mt-0">
         <div className="flex items-center gap-3">
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
             Manage Staff
