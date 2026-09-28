@@ -94,14 +94,21 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Staff ID is required' }, { status: 400 });
     }
 
-    const staffUser = await prisma.user.findUnique({ where: { id }, select: { id: true, email: true } });
+    const staffUser = await prisma.user.findUnique({ where: { id }, select: { id: true, email: true, role: true } });
 
     if (!staffUser) {
       return NextResponse.json({ error: 'Staff member not found' }, { status: 404 });
     }
 
-    if (staffUser.email.toLowerCase() === 'admin@cityfragrance.com') {
-      return NextResponse.json({ error: 'The primary Admin account cannot be deleted.' }, { status: 400 });
+    if (staffUser.id === auth.id) {
+      return NextResponse.json({ error: 'You cannot delete your own account.' }, { status: 400 });
+    }
+
+    if (staffUser.role === 'ADMIN') {
+      const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } });
+      if (adminCount <= 1) {
+        return NextResponse.json({ error: 'Cannot delete the last remaining administrator account.' }, { status: 400 });
+      }
     }
 
     await prisma.user.delete({ where: { id } });

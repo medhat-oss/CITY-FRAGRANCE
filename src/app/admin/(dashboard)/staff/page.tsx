@@ -100,8 +100,10 @@ export default function ManageStaffPage() {
   }
 
   function promptDelete(id: string, email: string) {
-    if (email.toLowerCase() === 'admin@cityfragrance.com') {
-      setAlertMessage({ title: 'Protected Account', message: 'The primary Admin account cannot be deleted.', type: 'warning' });
+    const target = staffList.find((s) => s.id === id);
+    const adminCount = staffList.filter((s) => s.role === 'ADMIN').length;
+    if (target?.role === 'ADMIN' && adminCount <= 1) {
+      setAlertMessage({ title: 'Protected Account', message: 'Cannot delete the last remaining administrator account.', type: 'warning' });
       return;
     }
     setDeleteTarget({ id, email });
@@ -225,18 +227,23 @@ export default function ManageStaffPage() {
                             Password
                           </button>
                         )}
-                        <button
-                          className="text-xs text-red-500 hover:bg-[rgba(239,68,68,0.12)] px-2.5 py-1 rounded transition-colors"
-                          onClick={() => promptDelete(staff.id, staff.email)}
-                          disabled={staff.email.toLowerCase() === 'admin@cityfragrance.com'}
-                          title="Delete Staff"
-                          style={{
-                            opacity: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 0.3 : 1,
-                            cursor: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 'not-allowed' : 'pointer',
-                          }}
-                        >
-                          Delete
-                        </button>
+                        {(() => {
+                          const isOnlyAdmin = staff.role === 'ADMIN' && staffList.filter((s) => s.role === 'ADMIN').length <= 1;
+                          return (
+                            <button
+                              className="text-xs text-red-500 hover:bg-[rgba(239,68,68,0.12)] px-2.5 py-1 rounded transition-colors"
+                              onClick={() => promptDelete(staff.id, staff.email)}
+                              disabled={isOnlyAdmin}
+                              title={isOnlyAdmin ? 'Cannot delete the only admin' : 'Delete Staff'}
+                              style={{
+                                opacity: isOnlyAdmin ? 0.3 : 1,
+                                cursor: isOnlyAdmin ? 'not-allowed' : 'pointer',
+                              }}
+                            >
+                              Delete
+                            </button>
+                          );
+                        })()}
                       </div>
                     </td>
                   </tr>
@@ -286,17 +293,23 @@ export default function ManageStaffPage() {
                       Password
                     </button>
                   )}
-                  <button
-                    className="text-xs text-red-500 hover:bg-[rgba(239,68,68,0.12)] px-2.5 py-1.5 rounded transition-colors"
-                    onClick={() => promptDelete(staff.id, staff.email)}
-                    disabled={staff.email.toLowerCase() === 'admin@cityfragrance.com'}
-                    style={{
-                      opacity: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 0.3 : 1,
-                      cursor: staff.email.toLowerCase() === 'admin@cityfragrance.com' ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    Delete
-                  </button>
+                  {(() => {
+                    const isOnlyAdmin = staff.role === 'ADMIN' && staffList.filter((s) => s.role === 'ADMIN').length <= 1;
+                    return (
+                      <button
+                        className="text-xs text-red-500 hover:bg-[rgba(239,68,68,0.12)] px-2.5 py-1.5 rounded transition-colors"
+                        onClick={() => promptDelete(staff.id, staff.email)}
+                        disabled={isOnlyAdmin}
+                        title={isOnlyAdmin ? 'Cannot delete the only admin' : 'Delete Staff'}
+                        style={{
+                          opacity: isOnlyAdmin ? 0.3 : 1,
+                          cursor: isOnlyAdmin ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        Delete
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             ))}
