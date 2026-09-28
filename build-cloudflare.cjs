@@ -231,11 +231,15 @@ var handler2 = async (...args) => {
   // Step 9: Deploy to Cloudflare Workers
   console.log('\n=== Deploying to Cloudflare Workers ===');
   try {
-    execSync('npx opennextjs-cloudflare deploy --config wrangler.jsonc', { stdio: 'inherit' });
+    try {
+      execSync('npx wrangler deploy --config wrangler.jsonc', { stdio: 'inherit' });
+    } catch {
+      execSync('npx opennextjs-cloudflare deploy --config wrangler.jsonc', { stdio: 'inherit' });
+    }
     console.log('  ✓ Deployed successfully');
   } catch (deployErr) {
     console.error('  ✗ Deploy failed: ' + deployErr.message);
-    console.error('    You can deploy manually with: npx opennextjs-cloudflare deploy --config wrangler.jsonc');
+    console.error('    You can deploy manually with: npx wrangler deploy --config wrangler.jsonc');
   }
 
   console.log('\n✅ Build complete!');

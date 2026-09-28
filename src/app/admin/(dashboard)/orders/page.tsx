@@ -213,116 +213,130 @@ export default function AdminOrdersPage() {
 
       {/* ── Orders table ── */}
       <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
-        <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[950px] border-collapse text-left" style={{ fontSize: '0.85rem' }}>
-          <thead>
-            <tr className="bg-[#09142E] text-white">
-              <Th>Order ID</Th>
-              <Th>Customer</Th>
-              <Th>Phone</Th>
-              <Th>Governorate</Th>
-              <Th>Items</Th>
-              <Th>Total</Th>
-              <Th>Payment</Th>
-              <Th>Status</Th>
-              <Th>Date</Th>
-              <Th>Time</Th>
-              <Th>{' '}</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => {
-              const orderStatus = (order.status || '').toUpperCase();
-    const allowedStatuses = STATUS_FLOW[orderStatus] || [];
-    const isNew = orderStatus === 'ACCEPTED';
-              return (
-                <tr
-                  key={order.orderId}
-                  className="border-b border-white/[0.06] hover:bg-white/[0.03] transition-colors"
-                >
-                  <Td>
-                    <div className="flex items-center">
-                      {isNew && (
-                        <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse mr-2 inline-block shrink-0" style={{ boxShadow: '0 0 8px #ef4444' }} title="New Order" />
-                      )}
-                      <span
-                        className="cursor-pointer text-[#60a5fa] underline underline-offset-2 decoration-[rgba(96,165,250,0.3)] hover:text-[#93c5fd]"
-                        onClick={() => setSelectedOrder(order)}
-                      >{order.orderId}</span>
-                    </div>
-                  </Td>
-                  <Td>{order.customerName}</Td>
-                  <Td><span dir="ltr">{order.phoneNumber}</span></Td>
-                  <Td>{order.governorate || '\u2014'}</Td>
-                  <Td>
-                    <div className="flex flex-col gap-1">
-                      {order.items.map((item) => {
-                        const isCancelling = cancellingItemId === item.id;
-                        const showCancelBtn = orderStatus !== 'CANCELLED' && orderStatus !== 'DELIVERED' && order.items.length > 1;
-                        return (
-                          <div key={item.id} className="flex items-center justify-between bg-[rgba(24,24,27,0.5)] px-2 py-1.5 rounded-lg border border-[rgba(63,63,70,0.4)] min-w-[180px]">
-                            <span className="text-[#e4e4e7]">{item.quantity}x {item.name}</span>
-                            {showCancelBtn && (
-                              <button
-                                type="button"
-                                disabled={isCancelling}
-                                onClick={(e) => { e.stopPropagation(); handleCancelSingleItem(item.id, order.orderId); }}
-                                className="ml-2 w-7 h-7 inline-flex items-center justify-center text-red-500 bg-[rgba(127,29,29,0.2)] border border-[rgba(127,29,29,0.3)] rounded-md font-bold text-sm cursor-pointer transition-all hover:bg-[rgba(127,29,29,0.7)] hover:text-white hover:border-red-500 disabled:opacity-50"
-                                title="Cancel this item"
-                              >
-                                {isCancelling ? <FaSpinner className="animate-spin text-xs" /> : '✕'}
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </Td>
-                  <Td style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, color: '#ffffff' }}>
-                    {formatEGP(order.totalPrice)}
-                  </Td>
-                  <Td>{order.paymentMethod || '\u2014'}</Td>
-                  <Td>
-                    <div className="flex items-center gap-1.5">
-                      <select
-                        value={order.status}
-                        onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
-                        className={`text-xs font-semibold rounded-sm px-2 py-1 border-none ${allowedStatuses.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${STATUS_COLORS[orderStatus] || 'bg-gray-100 text-gray-800'}`}
-                        disabled={updatingId === order.orderId || allowedStatuses.length === 0}
-                      >
-                        <option value={order.status}>{order.status}</option>
-                        {allowedStatuses.map((s) => (
-                          <option key={s} value={s}>{s}</option>
-                        ))}
-                      </select>
-                      {updatingId === order.orderId && (
-                        <FaSpinner className="animate-spin text-xs text-white" />
-                      )}
-                    </div>
-                  </Td>
-                  <Td style={{ color: '#94a3b8' }}>{order.date}</Td>
-                  <Td style={{ color: '#64748b', whiteSpace: 'nowrap', fontSize: '0.8rem' }}>
-                    {order.createdAt
-                      ? new Date(order.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
-                      : '—'}
-                  </Td>
-                  <Td>
-                    <button
-                      onClick={() => setSelectedOrder(order)}
-                      className="bg-none border border-white/20 rounded px-2.5 py-1.5 cursor-pointer text-[#e2e8f0] text-xs inline-flex items-center gap-1 transition-all hover:bg-white hover:text-[#09142E] hover:border-white"
-                    >
-                      View
-                    </button>
-                  </Td>
-                </tr>
-              ); })}
-            {orders.length === 0 && (
-              <tr>
-                <td colSpan={11} className="text-center p-12 text-[#64748b]">No orders yet.</td>
+        <div className="w-full overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/20">
+          <table className="w-full min-w-[850px] border-collapse text-left text-xs md:text-sm">
+            <thead>
+              <tr className="bg-[#09142E] text-white">
+                <Th className="whitespace-nowrap w-24">Order ID</Th>
+                <Th className="max-w-[120px]">Customer</Th>
+                <Th className="whitespace-nowrap text-xs">Phone</Th>
+                <Th className="whitespace-nowrap text-xs">Governorate</Th>
+                <Th className="max-w-[180px]">Items</Th>
+                <Th className="whitespace-nowrap font-semibold">Total</Th>
+                <Th className="whitespace-nowrap text-xs">Payment</Th>
+                <Th className="w-32">Status</Th>
+                <Th className="whitespace-nowrap text-xs text-slate-400">Date / Time</Th>
+                <Th className="w-16 text-center">Actions</Th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {orders.map((order) => {
+                const orderStatus = (order.status || '').toUpperCase();
+                const allowedStatuses = STATUS_FLOW[orderStatus] || [];
+                const isNew = orderStatus === 'ACCEPTED';
+                return (
+                  <tr
+                    key={order.orderId}
+                    className="border-b border-white/[0.06] hover:bg-white/[0.03] transition-colors"
+                  >
+                    <Td className="whitespace-nowrap w-24">
+                      <div className="flex items-center">
+                        {isNew && (
+                          <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-1.5 inline-block shrink-0" style={{ boxShadow: '0 0 8px #ef4444' }} title="New Order" />
+                        )}
+                        <span
+                          className="cursor-pointer text-[#60a5fa] underline underline-offset-2 decoration-[rgba(96,165,250,0.3)] hover:text-[#93c5fd] font-mono text-xs"
+                          onClick={() => setSelectedOrder(order)}
+                        >{order.orderId}</span>
+                      </div>
+                    </Td>
+                    <Td className="max-w-[120px]">
+                      <div className="truncate text-xs font-medium" title={order.customerName}>
+                        {order.customerName}
+                      </div>
+                    </Td>
+                    <Td className="whitespace-nowrap text-xs">
+                      <span dir="ltr">{order.phoneNumber}</span>
+                    </Td>
+                    <Td className="whitespace-nowrap text-xs text-slate-300">
+                      {order.governorate || '—'}
+                    </Td>
+                    <Td className="max-w-[180px]">
+                      <div className="flex flex-col gap-1">
+                        {order.items.map((item) => {
+                          const isCancelling = cancellingItemId === item.id;
+                          const showCancelBtn = orderStatus !== 'CANCELLED' && orderStatus !== 'DELIVERED' && order.items.length > 1;
+                          return (
+                            <div key={item.id} className="flex items-center justify-between bg-[rgba(24,24,27,0.5)] px-2 py-0.5 rounded-md border border-[rgba(63,63,70,0.4)] text-xs">
+                              <span className="text-[#e4e4e7] truncate max-w-[130px]" title={`${item.quantity}x ${item.name}`}>
+                                {item.quantity}x {item.name}
+                              </span>
+                              {showCancelBtn && (
+                                <button
+                                  type="button"
+                                  disabled={isCancelling}
+                                  onClick={(e) => { e.stopPropagation(); handleCancelSingleItem(item.id, order.orderId); }}
+                                  className="ml-1 w-5 h-5 inline-flex items-center justify-center text-red-400 bg-[rgba(127,29,29,0.2)] border border-[rgba(127,29,29,0.3)] rounded text-[10px] font-bold cursor-pointer transition-all hover:bg-[rgba(127,29,29,0.7)] hover:text-white disabled:opacity-50 shrink-0"
+                                  title="Cancel this item"
+                                >
+                                  {isCancelling ? <FaSpinner className="animate-spin text-[10px]" /> : '✕'}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </Td>
+                    <Td className="whitespace-nowrap font-semibold text-white font-heading">
+                      {formatEGP(order.totalPrice)}
+                    </Td>
+                    <Td className="whitespace-nowrap text-xs text-slate-300">
+                      {order.paymentMethod || '—'}
+                    </Td>
+                    <Td className="w-32">
+                      <div className="flex items-center gap-1.5">
+                        <select
+                          value={order.status}
+                          onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
+                          className={`text-xs font-semibold rounded px-2 py-1 border-none ${allowedStatuses.length === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${STATUS_COLORS[orderStatus] || 'bg-gray-100 text-gray-800'}`}
+                          disabled={updatingId === order.orderId || allowedStatuses.length === 0}
+                        >
+                          <option value={order.status}>{order.status}</option>
+                          {allowedStatuses.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                        {updatingId === order.orderId && (
+                          <FaSpinner className="animate-spin text-xs text-white shrink-0" />
+                        )}
+                      </div>
+                    </Td>
+                    <Td className="whitespace-nowrap text-xs text-slate-400">
+                      <div>{order.date}</div>
+                      <div className="text-[11px] text-slate-500">
+                        {order.createdAt
+                          ? new Date(order.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                          : '—'}
+                      </div>
+                    </Td>
+                    <Td className="w-16 text-center">
+                      <button
+                        onClick={() => setSelectedOrder(order)}
+                        className="bg-none border border-white/20 rounded px-2 py-1 cursor-pointer text-[#e2e8f0] text-xs inline-flex items-center justify-center transition-all hover:bg-white hover:text-[#09142E] hover:border-white"
+                      >
+                        View
+                      </button>
+                    </Td>
+                  </tr>
+                );
+              })}
+              {orders.length === 0 && (
+                <tr>
+                  <td colSpan={10} className="text-center p-12 text-[#64748b]">No orders yet.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -648,28 +662,25 @@ function DetailRow({ label, value, dir }: { label: string; value: string; dir?: 
   );
 }
 
-function Th({ children }: { children: React.ReactNode }) {
+function Th({ children, className, style: extraStyle }: { children?: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   return (
     <th
-      style={{
-        padding: '0.85rem 1rem',
-        textAlign: 'start',
-        fontFamily: 'var(--font-heading)',
-        fontSize: '0.75rem',
-        fontWeight: 600,
-        letterSpacing: '0.05em',
-        textTransform: 'uppercase',
-      }}
+      className={`px-2.5 py-3 text-start font-heading text-xs font-semibold tracking-wider uppercase text-white ${className || ''}`}
+      style={extraStyle}
     >
       {children}
     </th>
   );
 }
 
-function Td({ children, style: extraStyle }: { children: React.ReactNode; style?: React.CSSProperties }) {
+function Td({ children, className, style: extraStyle }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   return (
-    <td style={{ padding: '0.85rem 1rem', color: '#e2e8f0', verticalAlign: 'top', ...extraStyle }}>
+    <td
+      className={`px-2.5 py-3 text-[#e2e8f0] align-middle ${className || ''}`}
+      style={extraStyle}
+    >
       {children}
     </td>
   );
 }
+
