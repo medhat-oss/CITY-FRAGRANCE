@@ -181,8 +181,8 @@ export default function AdminOrdersPage() {
   if (loading) return null;
 
   return (
-    <div className="w-full max-w-full min-w-0 overflow-hidden">
-      <div className="flex flex-col items-start gap-3 mb-6 sm:flex-row sm:items-center sm:gap-0.75rem">
+    <div className="w-full max-w-full min-w-0 overflow-x-hidden flex flex-col gap-6">
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-0.75rem">
         <div className="flex items-center gap-3">
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
             Orders Management
@@ -191,29 +191,30 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Revenue Badge */}
-      <div
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          background: '#09142E',
-          color: '#ffffff',
-          padding: '0.75rem 1.25rem',
-          borderRadius: '6px',
-          marginBottom: '1.5rem',
-          fontFamily: 'var(--font-heading)',
-          fontSize: '0.95rem',
-          fontWeight: 500,
-        }}
-      >
-                <span style={{ opacity: 0.8, fontWeight: 400 }}>Total Revenue</span>
-        <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{formatEGP(totalRevenue)}</span>
+      <div>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            background: '#09142E',
+            color: '#ffffff',
+            padding: '0.75rem 1.25rem',
+            borderRadius: '6px',
+            fontFamily: 'var(--font-heading)',
+            fontSize: '0.95rem',
+            fontWeight: 500,
+          }}
+        >
+          <span style={{ opacity: 0.8, fontWeight: 400 }}>Total Revenue</span>
+          <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{formatEGP(totalRevenue)}</span>
+        </div>
       </div>
 
       {/* ── Desktop orders table ── */}
       <div className="hidden md:block w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
-        <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[1100px] table-auto text-left border-collapse" style={{ fontSize: '0.85rem' }}>
+        <div className="w-full overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="w-full min-w-[950px] border-collapse text-left" style={{ fontSize: '0.85rem' }}>
           <thead>
             <tr className="bg-[#09142E] text-white">
               <Th>Order ID</Th>
