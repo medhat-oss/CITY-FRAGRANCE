@@ -181,7 +181,7 @@ export default function AdminOrdersPage() {
   if (loading) return null;
 
   return (
-    <div className="w-full max-w-full min-w-0 overflow-x-hidden flex flex-col gap-6">
+    <div className="w-full min-w-0 max-w-full overflow-hidden flex flex-col gap-6">
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-0.75rem">
         <div className="flex items-center gap-3">
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, color: '#f8f9fa', margin: 0 }}>
@@ -211,9 +211,9 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* ── Desktop orders table ── */}
-      <div className="hidden md:block w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
-        <div className="w-full overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+      {/* ── Orders table ── */}
+      <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/10 bg-[#16234D]">
+        <div className="w-full overflow-x-auto">
           <table className="w-full min-w-[950px] border-collapse text-left" style={{ fontSize: '0.85rem' }}>
           <thead>
             <tr className="bg-[#09142E] text-white">

@@ -21,9 +21,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const closeDrawer = () => setIsMobileSidebarOpen(false);
 
   return (
-    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-[#111B3D]">
+    <div className="flex h-screen w-screen max-w-full overflow-hidden bg-[#111B3D]">
       {/* Desktop Sidebar */}
-      <aside className="w-[260px] shrink-0 hidden md:flex flex-col bg-[#16234D] border-r border-[#1d3573] px-5 py-6">
+      <aside className="w-64 shrink-0 h-full overflow-y-auto hidden md:flex flex-col bg-[#16234D] border-r border-[#1d3573] px-5 py-6">
         <div className="mb-8 flex flex-col items-center justify-center text-center">
           <Link href="/admin" className="flex flex-col items-center group no-underline">
             <Image
@@ -148,7 +148,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="w-full max-w-full md:max-w-[calc(100vw-260px)] min-w-0 overflow-x-hidden overflow-y-auto flex-1 px-4 md:px-8 pt-20 md:pt-8 pb-4 md:pb-8">
+      <main className="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden p-4 md:p-8 pt-20 md:pt-8">
         {children}
       </main>
     </div>
