@@ -126,24 +126,63 @@ export async function PATCH(request: Request) {
   if (auth instanceof NextResponse) return auth;
 
   try {
-    const { id, shiftPassword } = await request.json();
-    if (!id || !shiftPassword) {
-      return NextResponse.json({ error: 'Staff ID and new shift password are required' }, { status: 400 });
+    const { id, password, shiftPassword } = await request.json();
+    if (!id) {
+      return NextResponse.json({ error: 'Staff ID is required' }, { status: 400 });
     }
 
-    const trimmedPassword = shiftPassword.trim();
-    if (trimmedPassword.length < 3) {
-      return NextResponse.json({ error: 'Shift password must be at least 3 characters' }, { status: 400 });
+    const hasLoginPass = typeof password === 'string' && password.trim().length > 0;
+    const hasShiftPass = typeof shiftPassword === 'string' && shiftPassword.trim().length > 0;
+
+    if (!hasLoginPass && !hasShiftPass) {
+      return NextResponse.json(
+        { error: 'Please provide a new login password or shift password' },
+        { status: 400 }
+      );
     }
 
-    const staffUser = await prisma.user.findUnique({ where: { id }, select: { id: true } });
+    const staffUser = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, role: true, email: true },
+    });
 
     if (!staffUser) {
       return NextResponse.json({ error: 'Staff member not found' }, { status: 404 });
     }
 
-    await prisma.user.update({ where: { id }, data: { shiftPassword: trimmedPassword } });
-    return NextResponse.json({ success: true, message: 'Shift password updated successfully' });
+    const dataToUpdate: { password?: string; shiftPassword?: string } = {};
+
+    if (hasLoginPass) {
+      const trimmed = password.trim();
+      if (trimmed.length < 6) {
+        return NextResponse.json(
+          { error: 'Login password must be at least 6 characters' },
+          { status: 400 }
+        );
+      }
+      dataToUpdate.password = await hashPassword(trimmed);
+    }
+
+    if (hasShiftPass) {
+      const trimmedShift = shiftPassword.trim();
+      if (trimmedShift.length < 3) {
+        return NextResponse.json(
+          { error: 'Shift password must be at least 3 characters' },
+          { status: 400 }
+        );
+      }
+      dataToUpdate.shiftPassword = trimmedShift;
+    }
+
+    await prisma.user.update({
+      where: { id },
+      data: dataToUpdate,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Password updated successfully',
+    });
   } catch (err) {
     console.error('STAFF PATCH ERROR:', err);
     const errorMessage = err instanceof Error ? err.message : 'Internal server error';

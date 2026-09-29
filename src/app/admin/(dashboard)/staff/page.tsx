@@ -35,12 +35,21 @@ export default function ManageStaffPage() {
     shiftPassword: '',
   });
 
-  // Change Shift Password
+  // Password Update Modal
   const [passwordModal, setPasswordModal] = useState<{ open: boolean; staff: StaffUser | null }>({ open: false, staff: null });
+  const [newLoginPassword, setNewLoginPassword] = useState('');
   const [newShiftPassword, setNewShiftPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+
+  function openPasswordModal(staff: StaffUser) {
+    setPasswordModal({ open: true, staff });
+    setNewLoginPassword('');
+    setNewShiftPassword('');
+    setPasswordError('');
+    setPasswordSuccess('');
+  }
 
 // View Shifts — state kept for backward compat, now navigates to dedicated page
 
@@ -135,29 +144,59 @@ export default function ManageStaffPage() {
     }
   }
 
-  async function handleChangeShiftPassword() {
-    if (!passwordModal.staff || !newShiftPassword.trim()) return;
+  async function handleChangePassword() {
+    if (!passwordModal.staff) return;
+    const loginPass = newLoginPassword.trim();
+    const shiftPass = newShiftPassword.trim();
+
+    if (!loginPass && !shiftPass) {
+      setPasswordError(
+        passwordModal.staff.role === 'CASHIER'
+          ? 'Please enter a new login password or shift password.'
+          : 'Please enter a new login password.'
+      );
+      return;
+    }
+
+    if (loginPass && loginPass.length < 6) {
+      setPasswordError('Login password must be at least 6 characters.');
+      return;
+    }
+
+    if (shiftPass && shiftPass.length < 3) {
+      setPasswordError('Shift password must be at least 3 characters.');
+      return;
+    }
+
     setPasswordError('');
     setPasswordSuccess('');
     setPasswordSubmitting(true);
     try {
+      const payload: { id: string; password?: string; shiftPassword?: string } = {
+        id: passwordModal.staff.id,
+      };
+      if (loginPass) payload.password = loginPass;
+      if (shiftPass) payload.shiftPassword = shiftPass;
+
       const res = await fetch('/api/admin/staff', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: passwordModal.staff.id, shiftPassword: newShiftPassword.trim() }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) {
-        setPasswordError(data.error || 'Failed to update shift password');
+        setPasswordError(data.error || 'Failed to update password');
       } else {
-        setPasswordSuccess('Shift password updated successfully');
+        setPasswordSuccess(data.message || 'Password updated successfully');
+        setNewLoginPassword('');
         setNewShiftPassword('');
         setTimeout(() => setPasswordModal({ open: false, staff: null }), 1200);
       }
     } catch {
       setPasswordError('An error occurred. Please try again.');
+    } finally {
+      setPasswordSubmitting(false);
     }
-    setPasswordSubmitting(false);
   }
 
 
@@ -219,15 +258,13 @@ export default function ManageStaffPage() {
                         >
                           Shifts
                         </Link>
-                        {staff.role === 'CASHIER' && (
-                          <button
-                            className="text-xs text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] px-2.5 py-1 rounded transition-colors"
-                            onClick={() => { setPasswordModal({ open: true, staff }); setNewShiftPassword(''); setPasswordError(''); setPasswordSuccess(''); }}
-                            title="Change Shift Password"
-                          >
-                            Password
-                          </button>
-                        )}
+                        <button
+                          className="text-xs text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] px-2.5 py-1 rounded transition-colors"
+                          onClick={() => openPasswordModal(staff)}
+                          title="Change Password"
+                        >
+                          Password
+                        </button>
                         {(() => {
                           const isOnlyAdmin = staff.role === 'ADMIN' && staffList.filter((s) => s.role === 'ADMIN').length <= 1;
                           return (
@@ -286,14 +323,12 @@ export default function ManageStaffPage() {
                   >
                     Shifts
                   </Link>
-                  {staff.role === 'CASHIER' && (
-                    <button
-                      className="text-xs text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] px-2.5 py-1.5 rounded transition-colors inline-flex items-center"
-                      onClick={() => { setPasswordModal({ open: true, staff }); setNewShiftPassword(''); setPasswordError(''); setPasswordSuccess(''); }}
-                    >
-                      Password
-                    </button>
-                  )}
+                  <button
+                    className="text-xs text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] px-2.5 py-1.5 rounded transition-colors inline-flex items-center"
+                    onClick={() => openPasswordModal(staff)}
+                  >
+                    Password
+                  </button>
                   {(() => {
                     const isOnlyAdmin = staff.role === 'ADMIN' && staffList.filter((s) => s.role === 'ADMIN').length <= 1;
                     return (
@@ -423,29 +458,46 @@ export default function ManageStaffPage() {
         </div>
       )}
 
-      {/* Change Shift Password Modal */}
+      {/* Update Password Modal */}
       {passwordModal.open && passwordModal.staff && (
         <div className={`${styles.modalOverlay} ${styles.active}`} onClick={() => setPasswordModal({ open: false, staff: null })}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '460px' }}>
             <div className={styles.modalHeader}>
-              <h3>Change Shift Password</h3>
+              <h3>Update Password</h3>
               <button type="button" className={styles.btnClose} onClick={() => setPasswordModal({ open: false, staff: null })}><FaTimes /></button>
             </div>
             <div className={styles.modalForm}>
-              <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1rem' }}>
-                Updating shift password for: <strong style={{ color: '#e2e8f0' }}>{passwordModal.staff.username}</strong> ({passwordModal.staff.email})
-              </p>
+              <div style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: '1.5' }}>
+                Updating password for: <strong style={{ color: '#e2e8f0' }}>{passwordModal.staff.username}</strong> ({passwordModal.staff.email})
+                <div style={{ marginTop: '0.25rem' }}>
+                  <span className={`badge ${passwordModal.staff.role === 'ADMIN' ? 'badge-primary' : 'badge-secondary'}`}>
+                    {passwordModal.staff.role}
+                  </span>
+                </div>
+              </div>
+
               <div className={styles.formGroup}>
-                <label>New Shift Password</label>
+                <label>New Account Login Password <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>(min 6 characters)</span></label>
                 <input
-                  type="text"
-                  value={newShiftPassword}
-                  onChange={(e) => { setNewShiftPassword(e.target.value); setPasswordError(''); setPasswordSuccess(''); }}
-                  placeholder="Enter new shift password"
-                  minLength={3}
-                  required
+                  type="password"
+                  value={newLoginPassword}
+                  onChange={(e) => { setNewLoginPassword(e.target.value); setPasswordError(''); setPasswordSuccess(''); }}
+                  placeholder="Enter new account login password"
+                  autoComplete="new-password"
                 />
               </div>
+
+              {passwordModal.staff.role === 'CASHIER' && (
+                <div className={styles.formGroup}>
+                  <label>New Shift PIN / Drawer Password <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>(optional, min 3 characters)</span></label>
+                  <input
+                    type="text"
+                    value={newShiftPassword}
+                    onChange={(e) => { setNewShiftPassword(e.target.value); setPasswordError(''); setPasswordSuccess(''); }}
+                    placeholder="Enter new shift PIN"
+                  />
+                </div>
+              )}
 
               {passwordError && (
                 <p style={{ color: '#f87171', fontSize: '0.85rem', textAlign: 'center', background: 'rgba(239,68,68,0.1)', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(239,68,68,0.2)' }}>
@@ -470,12 +522,12 @@ export default function ManageStaffPage() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  disabled={passwordSubmitting || !newShiftPassword.trim()}
-                  onClick={handleChangeShiftPassword}
+                  disabled={passwordSubmitting || (!newLoginPassword.trim() && !newShiftPassword.trim())}
+                  onClick={handleChangePassword}
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
                   {passwordSubmitting && <FaSpinner className={styles.spinIcon} />}
-                  <span>Update Password</span>
+                  <span>Save Password</span>
                 </button>
               </div>
             </div>
