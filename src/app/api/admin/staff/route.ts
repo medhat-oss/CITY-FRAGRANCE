@@ -61,9 +61,14 @@ export async function POST(request: Request) {
 
     const hashedPassword = await hashPassword(password);
     const roleEnum = role.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'CASHIER';
+    const existingUserWithPin = await prisma.user.findFirst({
+      where: { shiftPassword: { not: '' } },
+      select: { shiftPassword: true },
+    });
+    const unifiedShiftPin = existingUserWithPin?.shiftPassword || '123456';
     const cleanShiftPassword = typeof shiftPassword === 'string' && shiftPassword.trim().length >= 3
       ? shiftPassword.trim()
-      : '123456';
+      : unifiedShiftPin;
 
     const newUser = await prisma.user.create({
       data: {
@@ -126,17 +131,37 @@ export async function PATCH(request: Request) {
   if (auth instanceof NextResponse) return auth;
 
   try {
-    const { id, password, shiftPassword } = await request.json();
+    const body = await request.json();
+    const { id, password, globalShiftPin } = body;
+
+    // ── 1. Global / Unified Shift PIN Update (All accounts) ──
+    if (globalShiftPin !== undefined) {
+      if (typeof globalShiftPin !== 'string' || globalShiftPin.trim().length < 3) {
+        return NextResponse.json(
+          { error: 'Global Shift PIN must be at least 3 characters' },
+          { status: 400 }
+        );
+      }
+
+      const trimmedPin = globalShiftPin.trim();
+      await prisma.user.updateMany({
+        data: { shiftPassword: trimmedPin },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Global Shift PIN updated successfully for all accounts',
+      });
+    }
+
+    // ── 2. User-specific Account Login Password Update ──
     if (!id) {
       return NextResponse.json({ error: 'Staff ID is required' }, { status: 400 });
     }
 
-    const hasLoginPass = typeof password === 'string' && password.trim().length > 0;
-    const hasShiftPass = typeof shiftPassword === 'string' && shiftPassword.trim().length > 0;
-
-    if (!hasLoginPass && !hasShiftPass) {
+    if (!password || typeof password !== 'string' || password.trim().length < 6) {
       return NextResponse.json(
-        { error: 'Please provide a new login password or shift password' },
+        { error: 'Login password must be at least 6 characters' },
         { status: 400 }
       );
     }
@@ -150,38 +175,16 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Staff member not found' }, { status: 404 });
     }
 
-    const dataToUpdate: { password?: string; shiftPassword?: string } = {};
-
-    if (hasLoginPass) {
-      const trimmed = password.trim();
-      if (trimmed.length < 6) {
-        return NextResponse.json(
-          { error: 'Login password must be at least 6 characters' },
-          { status: 400 }
-        );
-      }
-      dataToUpdate.password = await hashPassword(trimmed);
-    }
-
-    if (hasShiftPass) {
-      const trimmedShift = shiftPassword.trim();
-      if (trimmedShift.length < 3) {
-        return NextResponse.json(
-          { error: 'Shift password must be at least 3 characters' },
-          { status: 400 }
-        );
-      }
-      dataToUpdate.shiftPassword = trimmedShift;
-    }
+    const hashedPassword = await hashPassword(password.trim());
 
     await prisma.user.update({
       where: { id },
-      data: dataToUpdate,
+      data: { password: hashedPassword },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Password updated successfully',
+      message: 'Account login password updated successfully',
     });
   } catch (err) {
     console.error('STAFF PATCH ERROR:', err);

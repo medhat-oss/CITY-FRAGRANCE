@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FaTimes, FaSpinner } from 'react-icons/fa';
+import { FaTimes, FaSpinner, FaKey } from 'react-icons/fa';
 import styles from '../admin.module.css';
 import ConfirmModal from '@/components/ConfirmModal';
 import AlertModal from '@/components/AlertModal';
@@ -26,19 +26,31 @@ export default function ManageStaffPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [alertMessage, setAlertMessage] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
 
-  // Form State
+  // Form State for creating staff
   const [form, setForm] = useState({
     username: '',
     email: '',
     password: '',
     role: 'CASHIER',
-    shiftPassword: '',
   });
 
-  // Password Update Modal
+  // Global Unified Shift PIN Modal
+  const [globalPinModalOpen, setGlobalPinModalOpen] = useState(false);
+  const [newGlobalPin, setNewGlobalPin] = useState('');
+  const [globalPinError, setGlobalPinError] = useState('');
+  const [globalPinSuccess, setGlobalPinSuccess] = useState('');
+  const [globalPinSubmitting, setGlobalPinSubmitting] = useState(false);
+
+  function openGlobalPinModal() {
+    setNewGlobalPin('');
+    setGlobalPinError('');
+    setGlobalPinSuccess('');
+    setGlobalPinModalOpen(true);
+  }
+
+  // User Account Login Password Modal
   const [passwordModal, setPasswordModal] = useState<{ open: boolean; staff: StaffUser | null }>({ open: false, staff: null });
   const [newLoginPassword, setNewLoginPassword] = useState('');
-  const [newShiftPassword, setNewShiftPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
@@ -46,7 +58,6 @@ export default function ManageStaffPage() {
   function openPasswordModal(staff: StaffUser) {
     setPasswordModal({ open: true, staff });
     setNewLoginPassword('');
-    setNewShiftPassword('');
     setPasswordError('');
     setPasswordSuccess('');
   }
@@ -75,7 +86,7 @@ export default function ManageStaffPage() {
   }
 
   function openAdd() {
-    setForm({ username: '', email: '', password: '', role: 'CASHIER', shiftPassword: '' });
+    setForm({ username: '', email: '', password: '', role: 'CASHIER' });
     setError('');
     setModalOpen(true);
   }
@@ -144,27 +155,48 @@ export default function ManageStaffPage() {
     }
   }
 
+  async function handleUpdateGlobalPin() {
+    const pin = newGlobalPin.trim();
+    if (!pin || pin.length < 3) {
+      setGlobalPinError('Shift PIN must be at least 3 characters.');
+      return;
+    }
+
+    setGlobalPinError('');
+    setGlobalPinSuccess('');
+    setGlobalPinSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/staff', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ globalShiftPin: pin }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setGlobalPinError(data.error || 'Failed to update global shift PIN');
+      } else {
+        setGlobalPinSuccess(data.message || 'Global Shift PIN updated successfully!');
+        setNewGlobalPin('');
+        setTimeout(() => setGlobalPinModalOpen(false), 1200);
+      }
+    } catch {
+      setGlobalPinError('An error occurred. Please try again.');
+    } finally {
+      setGlobalPinSubmitting(false);
+    }
+  }
+
   async function handleChangePassword() {
     if (!passwordModal.staff) return;
     const loginPass = newLoginPassword.trim();
-    const shiftPass = newShiftPassword.trim();
 
-    if (!loginPass && !shiftPass) {
-      setPasswordError(
-        passwordModal.staff.role === 'CASHIER'
-          ? 'Please enter a new login password or shift password.'
-          : 'Please enter a new login password.'
-      );
+    if (!loginPass) {
+      setPasswordError('Please enter a new login password.');
       return;
     }
 
-    if (loginPass && loginPass.length < 6) {
+    if (loginPass.length < 6) {
       setPasswordError('Login password must be at least 6 characters.');
-      return;
-    }
-
-    if (shiftPass && shiftPass.length < 3) {
-      setPasswordError('Shift password must be at least 3 characters.');
       return;
     }
 
@@ -172,24 +204,20 @@ export default function ManageStaffPage() {
     setPasswordSuccess('');
     setPasswordSubmitting(true);
     try {
-      const payload: { id: string; password?: string; shiftPassword?: string } = {
-        id: passwordModal.staff.id,
-      };
-      if (loginPass) payload.password = loginPass;
-      if (shiftPass) payload.shiftPassword = shiftPass;
-
       const res = await fetch('/api/admin/staff', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          id: passwordModal.staff.id,
+          password: loginPass,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
         setPasswordError(data.error || 'Failed to update password');
       } else {
-        setPasswordSuccess(data.message || 'Password updated successfully');
+        setPasswordSuccess(data.message || 'Account login password updated successfully');
         setNewLoginPassword('');
-        setNewShiftPassword('');
         setTimeout(() => setPasswordModal({ open: false, staff: null }), 1200);
       }
     } catch {
@@ -208,9 +236,26 @@ export default function ManageStaffPage() {
             Manage Staff
           </h2>
         </div>
-        <button onClick={openAdd} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'center' }}>
-          Create Staff Account
-        </button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={openGlobalPinModal}
+            className="px-4 py-2 text-xs font-semibold rounded border border-[#f59e0b] text-[#f59e0b] hover:bg-[rgba(245,158,11,0.12)] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+            style={{ letterSpacing: '0.04em' }}
+            title="Update Global Shift PIN for Cash Drawer Shifts"
+          >
+            <FaKey />
+            <span>CHANGE SHIFT PIN</span>
+          </button>
+          <button
+            type="button"
+            onClick={openAdd}
+            className="btn btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}
+          >
+            Create Staff Account
+          </button>
+        </div>
       </div>
 
       <div className="w-full max-w-full min-w-0">
@@ -261,7 +306,7 @@ export default function ManageStaffPage() {
                         <button
                           className="text-xs text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] px-2.5 py-1 rounded transition-colors"
                           onClick={() => openPasswordModal(staff)}
-                          title="Change Password"
+                          title="Change Login Password"
                         >
                           Password
                         </button>
@@ -326,6 +371,7 @@ export default function ManageStaffPage() {
                   <button
                     className="text-xs text-[#fbbf24] hover:bg-[rgba(251,191,36,0.12)] px-2.5 py-1.5 rounded transition-colors inline-flex items-center"
                     onClick={() => openPasswordModal(staff)}
+                    title="Change Login Password"
                   >
                     Password
                   </button>
@@ -407,18 +453,6 @@ export default function ManageStaffPage() {
                 </select>
               </div>
 
-              {form.role === 'CASHIER' && (
-                <div className={styles.formGroup}>
-                  <label>Shift PIN / Password (optional, default: 123456)</label>
-                  <input
-                    type="text"
-                    value={form.shiftPassword}
-                    onChange={(e) => setForm((p) => ({ ...p, shiftPassword: e.target.value }))}
-                    placeholder="123456 (or custom 3+ characters)"
-                  />
-                </div>
-              )}
-
               {error && (
                 <p style={{
                   color: '#f87171',
@@ -458,17 +492,81 @@ export default function ManageStaffPage() {
         </div>
       )}
 
-      {/* Update Password Modal */}
+      {/* Global Shift PIN Modal */}
+      {globalPinModalOpen && (
+        <div className={`${styles.modalOverlay} ${styles.active}`} onClick={() => setGlobalPinModalOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '460px' }}>
+            <div className={styles.modalHeader}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <FaKey style={{ color: '#f59e0b', fontSize: '0.95rem' }} />
+                <span>Update Global Shift PIN</span>
+              </h3>
+              <button type="button" className={styles.btnClose} onClick={() => setGlobalPinModalOpen(false)}><FaTimes /></button>
+            </div>
+            <div className={styles.modalForm}>
+              <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: '1.5' }}>
+                This PIN is unified across all cashiers and staff to unlock, verify, and close cash drawer shifts at POS checkout.
+              </p>
+
+              <div className={styles.formGroup}>
+                <label>New Unified Shift PIN <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>(min 3 characters)</span></label>
+                <input
+                  type="text"
+                  value={newGlobalPin}
+                  onChange={(e) => { setNewGlobalPin(e.target.value); setGlobalPinError(''); setGlobalPinSuccess(''); }}
+                  placeholder="e.g. 123456"
+                  minLength={3}
+                  required
+                />
+              </div>
+
+              {globalPinError && (
+                <p style={{ color: '#f87171', fontSize: '0.85rem', textAlign: 'center', background: 'rgba(239,68,68,0.1)', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(239,68,68,0.2)' }}>
+                  {globalPinError}
+                </p>
+              )}
+              {globalPinSuccess && (
+                <p style={{ color: '#22c55e', fontSize: '0.85rem', textAlign: 'center', background: 'rgba(34,197,94,0.1)', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(34,197,94,0.2)' }}>
+                  {globalPinSuccess}
+                </p>
+              )}
+
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  style={{ color: '#e2e8f0', borderColor: 'rgba(255,255,255,0.3)' }}
+                  onClick={() => setGlobalPinModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  disabled={globalPinSubmitting || !newGlobalPin.trim()}
+                  onClick={handleUpdateGlobalPin}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#d97706', borderColor: '#d97706' }}
+                >
+                  {globalPinSubmitting && <FaSpinner className={styles.spinIcon} />}
+                  <span>Save Global PIN</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Login Password Modal */}
       {passwordModal.open && passwordModal.staff && (
         <div className={`${styles.modalOverlay} ${styles.active}`} onClick={() => setPasswordModal({ open: false, staff: null })}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '460px' }}>
             <div className={styles.modalHeader}>
-              <h3>Update Password</h3>
+              <h3>Change Login Password</h3>
               <button type="button" className={styles.btnClose} onClick={() => setPasswordModal({ open: false, staff: null })}><FaTimes /></button>
             </div>
             <div className={styles.modalForm}>
               <div style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: '1.5' }}>
-                Updating password for: <strong style={{ color: '#e2e8f0' }}>{passwordModal.staff.username}</strong> ({passwordModal.staff.email})
+                Updating login password for: <strong style={{ color: '#e2e8f0' }}>{passwordModal.staff.username}</strong> ({passwordModal.staff.email})
                 <div style={{ marginTop: '0.25rem' }}>
                   <span className={`badge ${passwordModal.staff.role === 'ADMIN' ? 'badge-primary' : 'badge-secondary'}`}>
                     {passwordModal.staff.role}
@@ -484,20 +582,10 @@ export default function ManageStaffPage() {
                   onChange={(e) => { setNewLoginPassword(e.target.value); setPasswordError(''); setPasswordSuccess(''); }}
                   placeholder="Enter new account login password"
                   autoComplete="new-password"
+                  minLength={6}
+                  required
                 />
               </div>
-
-              {passwordModal.staff.role === 'CASHIER' && (
-                <div className={styles.formGroup}>
-                  <label>New Shift PIN / Drawer Password <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>(optional, min 3 characters)</span></label>
-                  <input
-                    type="text"
-                    value={newShiftPassword}
-                    onChange={(e) => { setNewShiftPassword(e.target.value); setPasswordError(''); setPasswordSuccess(''); }}
-                    placeholder="Enter new shift PIN"
-                  />
-                </div>
-              )}
 
               {passwordError && (
                 <p style={{ color: '#f87171', fontSize: '0.85rem', textAlign: 'center', background: 'rgba(239,68,68,0.1)', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(239,68,68,0.2)' }}>
@@ -522,12 +610,12 @@ export default function ManageStaffPage() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  disabled={passwordSubmitting || (!newLoginPassword.trim() && !newShiftPassword.trim())}
+                  disabled={passwordSubmitting || !newLoginPassword.trim()}
                   onClick={handleChangePassword}
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
                   {passwordSubmitting && <FaSpinner className={styles.spinIcon} />}
-                  <span>Save Password</span>
+                  <span>Update Password</span>
                 </button>
               </div>
             </div>

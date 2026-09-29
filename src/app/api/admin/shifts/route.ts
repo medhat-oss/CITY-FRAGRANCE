@@ -4,7 +4,7 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { verifySession, verifySessionForPOS } from '@/lib/auth';
+import { verifySession, verifySessionForPOS, requireAdmin } from '@/lib/auth';
 import { computeShiftTotals } from '@/lib/shiftTotals';
 
 
@@ -89,12 +89,32 @@ export async function POST(request: Request) {
     // ── FAIL-FAST: Validate action BEFORE any session/DB work ──────────────
     // This ensures malformed requests are rejected in <1ms without touching
     // the database or verifying the session cookie.
-    const VALID_ACTIONS = ['open', 'verify-password', 'close'] as const;
+    const VALID_ACTIONS = ['open', 'verify-password', 'close', 'update-global-pin'] as const;
     if (!body.action || !VALID_ACTIONS.includes(body.action as typeof VALID_ACTIONS[number])) {
       return NextResponse.json(
         { success: false, error: `Invalid action. Must be one of: ${VALID_ACTIONS.join(', ')}` },
         { status: 400 }
       );
+    }
+
+    // ── Global Shift PIN Update (Admin Only) ──
+    if (body.action === 'update-global-pin') {
+      const adminAuth = await requireAdmin();
+      if (adminAuth instanceof NextResponse) return adminAuth;
+
+      if (!body.shiftPassword || typeof body.shiftPassword !== 'string' || body.shiftPassword.trim().length < 3) {
+        return NextResponse.json(
+          { success: false, error: 'Global Shift PIN must be at least 3 characters' },
+          { status: 400 }
+        );
+      }
+
+      const trimmedPin = body.shiftPassword.trim();
+      await prisma.user.updateMany({
+        data: { shiftPassword: trimmedPin },
+      });
+
+      return NextResponse.json({ success: true, message: 'Global Shift PIN updated successfully for all accounts' });
     }
 
     // For 'close' and 'verify-password', shiftPassword is required — validate early.
@@ -115,6 +135,18 @@ export async function POST(request: Request) {
     }
 
     const targetCashierId = session.id;
+
+    // Helper to get unified expected shift PIN
+    async function getExpectedShiftPin(cashierUser: { shiftPassword?: string | null }) {
+      if (cashierUser.shiftPassword && cashierUser.shiftPassword.trim().length > 0) {
+        return cashierUser.shiftPassword.trim();
+      }
+      const anyUser = await prisma.user.findFirst({
+        where: { shiftPassword: { not: '' } },
+        select: { shiftPassword: true },
+      });
+      return anyUser?.shiftPassword?.trim() || '123456';
+    }
 
     if (body.action === 'open') {
       // strict active shift check
@@ -154,10 +186,9 @@ export async function POST(request: Request) {
       if (!cashier) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
-      if (!cashier.shiftPassword) {
-        return NextResponse.json({ error: 'Shift password not configured for this account. Please set a shift password in staff management.' }, { status: 403 });
-      }
-      if (cashier.shiftPassword !== body.shiftPassword) {
+      const expectedPin = await getExpectedShiftPin(cashier);
+      const inputPin = (body.shiftPassword || '').trim();
+      if (expectedPin !== inputPin) {
         return NextResponse.json({ error: 'Incorrect shift password' }, { status: 401 });
       }
       return NextResponse.json({ success: true });
@@ -169,10 +200,9 @@ export async function POST(request: Request) {
     if (!cashier) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    if (!cashier.shiftPassword) {
-      return NextResponse.json({ error: 'Shift password not configured for this account. Please set a shift password in staff management.' }, { status: 403 });
-    }
-    if (cashier.shiftPassword !== body.shiftPassword) {
+    const expectedPin = await getExpectedShiftPin(cashier);
+    const inputPin = (body.shiftPassword || '').trim();
+    if (expectedPin !== inputPin) {
       return NextResponse.json({ error: 'Incorrect shift password' }, { status: 401 });
     }
 
