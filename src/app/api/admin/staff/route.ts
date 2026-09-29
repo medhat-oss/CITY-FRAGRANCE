@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     const roleEnum = role.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'CASHIER';
     const cleanShiftPassword = typeof shiftPassword === 'string' && shiftPassword.trim().length >= 3
       ? shiftPassword.trim()
-      : null;
+      : '123456';
 
     const newUser = await prisma.user.create({
       data: {
@@ -80,7 +80,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, user: newUser });
   } catch (err) {
     console.error('STAFF POST ERROR:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : 'Internal server error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -115,7 +116,8 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('STAFF DELETE ERROR:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : 'Internal server error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -144,6 +146,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: true, message: 'Shift password updated successfully' });
   } catch (err) {
     console.error('STAFF PATCH ERROR:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : 'Internal server error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

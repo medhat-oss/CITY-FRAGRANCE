@@ -32,6 +32,7 @@ export default function ManageStaffPage() {
     email: '',
     password: '',
     role: 'CASHIER',
+    shiftPassword: '',
   });
 
   // Change Shift Password
@@ -65,7 +66,7 @@ export default function ManageStaffPage() {
   }
 
   function openAdd() {
-    setForm({ username: '', email: '', password: '', role: 'CASHIER' });
+    setForm({ username: '', email: '', password: '', role: 'CASHIER', shiftPassword: '' });
     setError('');
     setModalOpen(true);
   }
@@ -370,6 +371,18 @@ export default function ManageStaffPage() {
                   <option value="ADMIN">Admin (Full Control)</option>
                 </select>
               </div>
+
+              {form.role === 'CASHIER' && (
+                <div className={styles.formGroup}>
+                  <label>Shift PIN / Password (optional, default: 123456)</label>
+                  <input
+                    type="text"
+                    value={form.shiftPassword}
+                    onChange={(e) => setForm((p) => ({ ...p, shiftPassword: e.target.value }))}
+                    placeholder="123456 (or custom 3+ characters)"
+                  />
+                </div>
+              )}
 
               {error && (
                 <p style={{
