@@ -46,4 +46,8 @@ data/admin-users.json
 *.tsbuildinfo
 next-env.d.ts
 
+# OpenNext Build Output
 .open-next/
+
+# Local Agent/Editor Context
+.opencode/
