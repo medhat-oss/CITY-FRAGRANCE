@@ -1,6 +1,6 @@
 export default function LoadingScreen() {
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-[#09142E] px-4 overflow-hidden select-none">
+    <div className="fixed inset-0 z-[9999] min-h-screen w-screen flex flex-col items-center justify-center bg-[#09142E] px-4 overflow-hidden select-none pointer-events-auto">
       {/* Center: Logo Video */}
       <div className="flex flex-col items-center justify-center">
         <video

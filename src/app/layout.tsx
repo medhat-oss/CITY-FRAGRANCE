@@ -7,6 +7,7 @@ import { LocaleProvider } from '@/context/LocaleContext';
 import { ProductsProvider } from '@/hooks/useProducts';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ScrollToTop from '@/components/ScrollToTop';
+import GlobalPreloader from '@/components/GlobalPreloader';
 
 const instrumentSans = Instrument_Sans({
   subsets: ['latin'],
@@ -168,15 +169,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             }),
           }}
         />
-        <LocaleProvider>
-          <CartProvider>
-            <ProductsProvider>
-              {children}
-              <WhatsAppButton />
-              <ScrollToTop />
-            </ProductsProvider>
-          </CartProvider>
-        </LocaleProvider>
+        <GlobalPreloader>
+          <LocaleProvider>
+            <CartProvider>
+              <ProductsProvider>
+                {children}
+                <WhatsAppButton />
+                <ScrollToTop />
+              </ProductsProvider>
+            </CartProvider>
+          </LocaleProvider>
+        </GlobalPreloader>
       </body>
     </html>
   );
