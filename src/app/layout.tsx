@@ -7,7 +7,6 @@ import { LocaleProvider } from '@/context/LocaleContext';
 import { ProductsProvider } from '@/hooks/useProducts';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ScrollToTop from '@/components/ScrollToTop';
-import DisclaimerModal from '@/components/DisclaimerModal';
 
 const instrumentSans = Instrument_Sans({
   subsets: ['latin'],
@@ -175,7 +174,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               {children}
               <WhatsAppButton />
               <ScrollToTop />
-              <DisclaimerModal />
             </ProductsProvider>
           </CartProvider>
         </LocaleProvider>
