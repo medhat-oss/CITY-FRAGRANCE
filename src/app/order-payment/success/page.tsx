@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '201044415982';
 
@@ -62,13 +63,7 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[#09142E] flex items-center justify-center">
-          <p className="text-white font-heading">Loading...</p>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingScreen />}>
       <SuccessContent />
     </Suspense>
   );
