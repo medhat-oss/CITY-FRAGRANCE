@@ -1,7 +1,7 @@
 export default function LoadingScreen() {
   return (
-    <div className="fixed inset-0 z-[9999] min-h-screen w-screen flex flex-col items-center justify-center bg-[#0E1131] px-4 overflow-hidden select-none pointer-events-auto">
-      {/* Center: Logo Video */}
+    <div className="fixed inset-0 z-[9999] min-h-screen w-screen flex flex-col items-center justify-center bg-[#09142E] px-4 overflow-hidden select-none pointer-events-auto">
+      {/* Center: Logo Video & Catchphrase */}
       <div className="flex flex-col items-center justify-center">
         <video
           src="/logo-animation.mp4"
@@ -11,16 +11,21 @@ export default function LoadingScreen() {
           playsInline
           preload="auto"
           suppressHydrationWarning
-          className="w-20 h-20 md:w-24 md:h-24 object-contain"
+          className="w-20 h-20 md:w-24 md:h-24 object-contain mix-blend-screen grayscale contrast-150 brightness-75"
           aria-label="City Fragrance Loading"
         />
+        <h2 className="mt-6 text-xs md:text-sm tracking-[0.3em] text-white/80 uppercase font-light text-center">
+          Seamless Operations <span className="text-emerald-500 mx-2">•</span> Infinite Growth
+        </h2>
       </div>
 
       {/* Bottom: Machine Code Footer */}
-      <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex flex-col items-center justify-center text-slate-400 text-xs space-y-1.5 text-center px-4">
-        <p>© 2026 Machine Code — All Rights Reserved</p>
-        <p>Software Solutions for Business Management & Operations - ERP - POS - Custom Systems</p>
-        <p className="mt-2 text-slate-300">Eng. Medhat Elaraby — Founder & Software Engineer</p>
+      <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex flex-col items-center justify-center text-xs space-y-1.5 text-center px-4">
+        <p className="text-slate-500">© 2026 Machine Code — All Rights Reserved</p>
+        <p className="text-slate-400">Software Solutions for Business Management & Operations - ERP - POS - Custom Systems</p>
+        <p className="mt-2 text-slate-300 font-medium">
+          Eng. Medhat Elaraby <span className="text-slate-500 font-normal">— Founder & Software Engineer</span>
+        </p>
       </div>
     </div>
   );
