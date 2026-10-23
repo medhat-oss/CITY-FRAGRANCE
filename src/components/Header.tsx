@@ -112,7 +112,7 @@ export default function Header() {
               playsInline
               preload="none"
               suppressHydrationWarning
-              className="h-14 w-auto object-contain"
+              className="h-14 w-auto object-contain mix-blend-screen grayscale contrast-150 brightness-75"
               aria-label="City Fragrance"
             />
           </Link>
