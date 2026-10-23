@@ -1,7 +1,7 @@
 export default function LoadingScreen() {
   return (
-    <div className="fixed inset-0 z-[9999] min-h-screen w-screen flex flex-col items-center justify-center bg-[#09142E] px-4 overflow-hidden select-none pointer-events-auto">
-      {/* Center: Logo Video & Catchphrase */}
+    <div className="fixed inset-0 z-[9999] min-h-screen w-screen flex flex-col items-center justify-center bg-[#09142E] px-4 overflow-hidden select-none pointer-events-auto animate-fade-in-smooth">
+      {/* Center: Logo Video */}
       <div className="flex flex-col items-center justify-center">
         <video
           src="/logo-animation.mp4"
@@ -14,9 +14,6 @@ export default function LoadingScreen() {
           className="w-20 h-20 md:w-24 md:h-24 object-contain mix-blend-screen grayscale contrast-150 brightness-75"
           aria-label="City Fragrance Loading"
         />
-        <h2 className="mt-6 text-xs md:text-sm tracking-[0.3em] text-white/80 uppercase font-light text-center">
-          Seamless Operations <span className="text-emerald-500 mx-2">•</span> Infinite Growth
-        </h2>
       </div>
 
       {/* Bottom: Machine Code Footer */}

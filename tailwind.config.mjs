@@ -38,6 +38,7 @@ const config = {
       animation: {
         'fade-up': 'fadeUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
         'fade-in': 'fadeIn 0.2s ease forwards',
+        'fade-in-smooth': 'fadeIn 0.5s ease-in-out forwards',
         'slow-zoom': 'slowZoom 25s ease-in-out infinite alternate',
         'waft': 'waft 2.5s ease-in-out infinite',
       },
