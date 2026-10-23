@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { formatEGP } from '@/utils/currency';
 import styles from '../admin.module.css';
-import { FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
+import { FaSpinner, FaExclamationTriangle, FaSearch, FaCalendarAlt, FaDownload } from 'react-icons/fa';
 import AlertModal from '@/components/AlertModal';
 
 interface Metrics {
@@ -36,6 +36,8 @@ export default function AnalyticsPage() {
   const [resetConfirmText, setResetConfirmText] = useState('');
   const [resetSubmitting, setResetSubmitting] = useState(false);
   const [alertMessage, setAlertMessage] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
+  const [dateRange, setDateRange] = useState('30d');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetch('/api/admin/analytics')
@@ -112,6 +114,50 @@ export default function AnalyticsPage() {
         >
           Reset Data
         </button>
+      </div>
+
+      {/* ═══ ENTERPRISE ERP FILTER BAR ═══ */}
+      <div className="mb-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3.5 rounded-2xl bg-[#16234D] border border-[#1d3573] shadow-sm">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter metrics, sales channels, or categories..."
+              className="w-full pl-9 pr-4 py-2 rounded-lg bg-[#111B3D] border border-[#1d3573] text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Date Range Selector */}
+          <div className="flex items-center gap-1.5 bg-[#111B3D] border border-[#1d3573] rounded-lg px-3 py-1.5 text-xs text-slate-300">
+            <FaCalendarAlt className="text-slate-400 text-xs" />
+            <select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              className="bg-transparent text-xs text-white border-none outline-none cursor-pointer font-medium"
+            >
+              <option value="today" className="bg-[#111B3D] text-white">Today</option>
+              <option value="7d" className="bg-[#111B3D] text-white">Last 7 Days</option>
+              <option value="30d" className="bg-[#111B3D] text-white">Last 30 Days (Default)</option>
+              <option value="quarter" className="bg-[#111B3D] text-white">This Quarter</option>
+              <option value="ytd" className="bg-[#111B3D] text-white">Year to Date (YTD)</option>
+              <option value="all" className="bg-[#111B3D] text-white">All Time</option>
+            </select>
+          </div>
+
+          {/* Export Report Action */}
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#111B3D] border border-[#1d3573] hover:bg-[#1a2d5a] text-slate-300 hover:text-white text-xs font-medium transition-colors"
+          >
+            <FaDownload className="text-xs text-slate-400" />
+            <span>Export Report</span>
+          </button>
+        </div>
       </div>
 
       {/* ═══ METRIC CARDS ═══ */}
@@ -497,22 +543,30 @@ export default function AnalyticsPage() {
   );
 }
 
-/* ═══ Metric Card Component ═══ */
+/* ═══ Metric Card Component (Odoo-Inspired Enterprise KPI) ═══ */
 function MetricCard({ label, value, accent, sub }: {
   label: string; value: string; accent: string; sub?: string;
 }) {
   return (
-    <div style={{
-      background: '#11224D', border: '1px solid #1d3573', borderRadius: 10,
-      padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.6rem',
-      position: 'relative', overflow: 'hidden',
-    }}>
-      <div style={{ position: 'absolute', top: -12, right: -12, width: 60, height: 60, borderRadius: '50%', background: accent, opacity: 0.06 }} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ fontSize: '0.78rem', color: '#e2e8f0', fontWeight: 600 }}>{label}</span>
+    <div className="relative overflow-hidden rounded-2xl bg-[#16234D] border border-[#1d3573] p-5 flex flex-col justify-between transition-all hover:border-slate-500/40 hover:bg-[#1a2d5a]/60 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[11px] font-bold text-slate-400 tracking-[0.12em] uppercase font-sans">{label}</span>
+        <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: accent }} />
       </div>
-      <span style={{ fontSize: '1.35rem', fontWeight: 700, color: '#ffffff', fontFamily: 'var(--font-heading)' }}>{value}</span>
-      {sub && <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{sub}</span>}
+      <div className="flex flex-col gap-1.5">
+        <span className="text-2xl sm:text-3xl font-bold text-white font-heading tracking-tight">{value}</span>
+        {sub ? (
+          <span className="text-xs text-slate-400 font-medium flex items-center gap-1.5 pt-1 border-t border-[#1d3573]/50">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 shrink-0" />
+            <span>{sub}</span>
+          </span>
+        ) : (
+          <span className="text-[11px] text-emerald-400/90 font-medium flex items-center gap-1.5 pt-1 border-t border-[#1d3573]/50">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+            <span>Active KPI Metric</span>
+          </span>
+        )}
+      </div>
     </div>
   );
 }

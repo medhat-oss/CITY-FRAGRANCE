@@ -5,12 +5,53 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './admin.module.css';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import AdminSidebarUser from '@/components/AdminSidebarUser';
+
+const NAV_GROUPS = [
+  {
+    category: 'COMMERCE & SALES',
+    links: [
+      { href: '/admin', label: 'Products Management' },
+      { href: '/admin/orders', label: 'Orders' },
+      { href: '/admin/gift-sets', label: 'Gift Sets' },
+    ],
+  },
+  {
+    category: 'CRM & PIPELINE',
+    links: [
+      { href: '/admin/crm/leads', label: 'Leads' },
+      { href: '/admin/crm/pipeline', label: 'Sales Pipeline' },
+      { href: '/admin/crm/customers', label: 'Customers' },
+    ],
+  },
+  {
+    category: 'FINANCE & ANALYTICS',
+    links: [
+      { href: '/admin/analytics', label: 'Analytics & Inventory' },
+    ],
+  },
+  {
+    category: 'SYSTEM & SETTINGS',
+    links: [
+      { href: '/admin/settings', label: 'Site Customization' },
+      { href: '/admin/staff', label: 'Manage Staff' },
+      { href: '/', label: 'Back to Store' },
+    ],
+  },
+];
+
+function isLinkActive(pathname: string, href: string) {
+  if (href === '/admin') return pathname === '/admin';
+  if (href === '/') return false;
+  return pathname === href || pathname.startsWith(href + '/');
+}
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -23,46 +64,53 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen w-screen max-w-full overflow-hidden bg-[#111B3D]">
       {/* Desktop Sidebar */}
-      <aside className="w-64 shrink-0 h-full overflow-y-auto hidden md:flex flex-col bg-[#16234D] border-r border-[#1d3573] px-5 py-6">
-        <div className="mb-8 flex flex-col items-center justify-center text-center">
+      <aside className="w-64 shrink-0 h-full overflow-y-auto hidden md:flex flex-col bg-[#16234D] border-r border-[#1d3573] px-4 py-6">
+        <div className="mb-6 flex flex-col items-center justify-center text-center">
           <Link href="/admin" className="flex flex-col items-center group no-underline">
             <Image
               src="/images/admin-logo.png"
               alt="City Fragrance Logo"
               width={180}
               height={48}
-              className="w-[160px] h-auto object-contain mix-blend-screen transition-opacity group-hover:opacity-90"
+              className="w-[155px] h-auto object-contain mix-blend-screen transition-opacity group-hover:opacity-90"
               priority
             />
             <span className="font-heading text-[10px] font-semibold text-slate-400 tracking-[0.3em] uppercase mt-2">
-              ADMIN PANEL
+              ENTERPRISE ERP & CRM
             </span>
           </Link>
         </div>
-        <nav className="flex flex-col gap-1.5 flex-1">
-          <Link href="/admin" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
-            Products Management
-          </Link>
-          <Link href="/admin/settings" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
-            Site Customization
-          </Link>
-          <Link href="/admin/orders" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
-            Orders
-          </Link>
-          <Link href="/admin/gift-sets" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
-            Gift Sets
-          </Link>
-          <Link href="/admin/analytics" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
-            Analytics & Inventory
-          </Link>
-          <Link href="/admin/staff" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
-            Manage Staff
-          </Link>
-          <Link href="/" className="flex items-center px-4 py-3 text-white/75 rounded hover:bg-white hover:text-[#11224D] transition-all text-sm font-medium" onClick={closeDrawer}>
-            Back to Store
-          </Link>
+
+        <nav className="flex flex-col gap-4 flex-1">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.category} className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-slate-400 tracking-[0.18em] uppercase px-3 pb-1 select-none">
+                {group.category}
+              </span>
+              {group.links.map((link) => {
+                const active = isLinkActive(pathname, link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={closeDrawer}
+                    className={`flex items-center px-3.5 py-2 rounded text-xs font-medium transition-all ${
+                      active
+                        ? 'bg-white text-[#11224D] font-semibold shadow-sm'
+                        : 'text-white/75 hover:bg-white hover:text-[#11224D]'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
-        <AdminSidebarUser />
+
+        <div className="mt-4 pt-4 border-t border-[#1d3573]">
+          <AdminSidebarUser />
+        </div>
       </aside>
 
       {/* Mobile Top Header: visible on mobile, hidden on md+ */}
@@ -84,7 +132,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             priority
           />
           <span className="text-[8.5px] font-semibold text-slate-400 uppercase tracking-[0.25em] mt-1 font-heading bg-transparent">
-            Admin Panel
+            ERP & CRM
           </span>
         </Link>
         <div className="w-8" />
@@ -108,7 +156,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               priority
             />
             <span className="font-heading text-[9.5px] font-semibold text-slate-400 tracking-[0.28em] uppercase mt-1">
-              Admin Panel
+              ERP & CRM
             </span>
           </div>
           <button
@@ -119,29 +167,34 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <FaTimes />
           </button>
         </div>
-        <nav className={styles.mobileDrawerNav}>
-          <Link href="/admin" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            Products Management
-          </Link>
-          <Link href="/admin/settings" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            Site Customization
-          </Link>
-          <Link href="/admin/orders" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            Orders
-          </Link>
-          <Link href="/admin/gift-sets" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            Gift Sets
-          </Link>
-          <Link href="/admin/analytics" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            Analytics & Inventory
-          </Link>
-          <Link href="/admin/staff" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            Manage Staff
-          </Link>
-          <Link href="/" className={styles.mobileDrawerLink} onClick={closeDrawer}>
-            Back to Store
-          </Link>
+
+        <nav className="flex flex-col gap-4 p-4 flex-1 overflow-y-auto">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.category} className="flex flex-col gap-1">
+              <span className="text-[9.5px] font-bold text-slate-400 tracking-[0.18em] uppercase px-2 pb-1 select-none">
+                {group.category}
+              </span>
+              {group.links.map((link) => {
+                const active = isLinkActive(pathname, link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={closeDrawer}
+                    className={`flex items-center px-3.5 py-2.5 rounded text-xs font-medium transition-all ${
+                      active
+                        ? 'bg-white text-[#11224D] font-semibold shadow-sm'
+                        : 'text-white/75 hover:bg-white hover:text-[#11224D]'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
+
         <div className={styles.mobileDrawerFooter}>
           <AdminSidebarUser />
         </div>
