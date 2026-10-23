@@ -6,6 +6,7 @@ import CollectionCategories from '@/components/CollectionCategories';
 import Footer from '@/components/Footer';
 import { ServicesSection } from '@/components/ServicesSection';
 import { getOptimizedVideoUrl, getOptimizedImageUrl } from '@/lib/videoUtils';
+import AutoPlayVideo from '@/components/AutoPlayVideo';
 import { loadHomepageData } from './HomepageData';
 
 export const dynamic = 'force-dynamic';
@@ -31,8 +32,8 @@ export default async function Homepage() {
         <section className="relative w-full bg-[#09142E] overflow-hidden mb-24 transform-gpu backface-hidden translate-z-0">
           {hasVideo ? (
             <>
-              <video key="mood-video-mobile" src={getOptimizedVideoUrl(settings.moodVideoMobile || settings.moodVideoUrl)} autoPlay loop muted playsInline preload="metadata" className="w-full h-auto block md:hidden" />
-              <video key="mood-video-desktop" src={getOptimizedVideoUrl(settings.moodVideoUrl || settings.moodVideoMobile)} autoPlay loop muted playsInline preload="metadata" className="w-full h-auto hidden md:block" />
+              <AutoPlayVideo key="mood-video-mobile" src={getOptimizedVideoUrl(settings.moodVideoMobile || settings.moodVideoUrl)} className="w-full h-auto block md:hidden" />
+              <AutoPlayVideo key="mood-video-desktop" src={getOptimizedVideoUrl(settings.moodVideoUrl || settings.moodVideoMobile)} className="w-full h-auto hidden md:block" />
             </>
           ) : hasImage ? (
             <>

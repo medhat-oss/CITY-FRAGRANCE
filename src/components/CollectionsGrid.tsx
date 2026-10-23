@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { HiArrowRight } from 'react-icons/hi2';
 import type { CollectionData } from '@/types';
 import { getOptimizedVideoUrl } from '@/lib/videoUtils';
+import AutoPlayVideo from '@/components/AutoPlayVideo';
 import { dedupFetch } from '@/lib/dedupFetch';
 
 interface Collection {
@@ -77,13 +78,8 @@ export default function CollectionsGrid({ initialImages = {} }: { initialImages?
               className="relative group w-full mx-auto cursor-pointer rounded-2xl overflow-hidden aspect-square transition-transform duration-300 ease-out hover:scale-[1.03] transform-gpu backface-hidden translate-z-0 will-change-transform"
             >
               {collection.videoUrl ? (
-                <video
+                <AutoPlayVideo
                   src={getOptimizedVideoUrl(collection.videoUrl)}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               ) : (

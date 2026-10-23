@@ -6,6 +6,7 @@ import { useLocale } from '@/context/LocaleContext';
 import type { SiteSettings } from '@/types';
 import { getOptimizedImageUrl, getOptimizedVideoUrl } from '@/lib/videoUtils';
 import { sanitizeHtml } from '@/utils/sanitize';
+import AutoPlayVideo from '@/components/AutoPlayVideo';
 
 interface HeroProps {
   settings: SiteSettings | null;
@@ -41,20 +42,18 @@ export default function Hero({ settings }: HeroProps) {
 
       {/* Mobile Video */}
       {hasVideo && (
-        <video
+        <AutoPlayVideo
           key="hero-video-mobile"
           src={getOptimizedVideoUrl(heroVideoMobile || heroVideoUrl)}
-          autoPlay loop muted playsInline preload="metadata"
           className="w-full h-auto block md:hidden"
         />
       )}
 
       {/* Desktop Video */}
       {hasVideo && (
-        <video
+        <AutoPlayVideo
           key="hero-video-desktop"
           src={getOptimizedVideoUrl(heroVideoUrl || heroVideoMobile)}
-          autoPlay loop muted playsInline preload="metadata"
           className="w-full h-auto hidden md:block"
         />
       )}

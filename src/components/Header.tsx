@@ -110,7 +110,7 @@ export default function Header() {
               loop
               muted
               playsInline
-              preload="none"
+              preload="auto"
               suppressHydrationWarning
               className="h-14 w-auto object-contain mix-blend-screen grayscale contrast-150 brightness-75"
               aria-label="City Fragrance"

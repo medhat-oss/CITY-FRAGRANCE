@@ -7,6 +7,7 @@ import { useLocale } from '@/context/LocaleContext';
 import type { CollectionData } from '@/types';
 
 import { getOptimizedVideoUrl } from '@/lib/videoUtils';
+import AutoPlayVideo from '@/components/AutoPlayVideo';
 
 interface Collection {
   title: string;
@@ -48,9 +49,8 @@ export default function CollectionCategories({ collectionData }: Props) {
               className="relative group w-full cursor-pointer rounded-2xl overflow-hidden aspect-square transition-transform duration-300 ease-out hover:scale-[1.03] transform-gpu backface-hidden translate-z-0 will-change-transform"
             >
               {collection.videoUrl ? (
-                <video
+                <AutoPlayVideo
                   src={getOptimizedVideoUrl(collection.videoUrl)}
-                  autoPlay loop muted playsInline preload="metadata"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               ) : (
