@@ -1,6 +1,14 @@
-export default function LoadingScreen() {
+interface LoadingScreenProps {
+  instant?: boolean;
+}
+
+export default function LoadingScreen({ instant = false }: LoadingScreenProps = {}) {
   return (
-    <div className="fixed inset-0 z-[9999] min-h-screen w-screen flex flex-col items-center justify-center bg-[#09142E] px-4 overflow-hidden select-none pointer-events-auto animate-fade-in-smooth">
+    <div
+      className={`fixed inset-0 z-[9999] min-h-screen w-screen flex flex-col items-center justify-center bg-[#09142E] px-4 overflow-hidden select-none pointer-events-auto ${
+        instant ? '' : 'animate-fade-in-smooth'
+      }`}
+    >
       {/* Center: Logo Video */}
       <div className="flex flex-col items-center justify-center">
         <video

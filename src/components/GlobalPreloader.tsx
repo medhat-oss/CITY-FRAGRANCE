@@ -45,11 +45,11 @@ export default function GlobalPreloader({ children }: { children: React.ReactNod
     <>
       {isLoading && (
         <div
-          className={`fixed inset-0 z-[9999] transition-opacity duration-700 ease-in-out ${
+          className={`fixed inset-0 z-[9999] bg-[#09142E] transition-opacity duration-700 ease-in-out ${
             isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'
           }`}
         >
-          <LoadingScreen />
+          <LoadingScreen instant={true} />
         </div>
       )}
       {children}
