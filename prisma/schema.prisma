@@ -27,10 +27,13 @@ model Order {
   cashierId      String?
   shiftId        String?
   shift          Shift?   @relation(fields: [shiftId], references: [id])
+  crmCustomerId  String?
+  crmCustomer    CrmCustomer? @relation(fields: [crmCustomerId], references: [id], onDelete: SetNull)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   @@index([shiftId])
+  @@index([crmCustomerId])
   @@index([status])
   @@index([createdAt])
 }
@@ -205,4 +208,70 @@ model CollectionImage {
 enum Role {
   ADMIN
   CASHIER
+}
+
+// ─── CRM & ERP MODELS ───
+
+model CrmLead {
+  id               String       @id @default(cuid())
+  name             String
+  phone            String
+  email            String       @default("")
+  company          String       @default("")
+  source           String       @default("Website") // Facebook, Instagram, Walk-in, Website, Referral
+  status           String       @default("New")     // New, Contacted, Qualified, Lost, Converted
+  preferredNotes   String?                          // e.g. "Oud, Floral, Citrus"
+  purchaseOccasion String?                          // e.g. "Wedding", "Corporate Gifting", "Personal Signature"
+  estimatedBudget  Float?
+  nextFollowUp     DateTime?
+  notes            String       @default("")
+  customerId       String?
+  customer         CrmCustomer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  deals            CrmDeal[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([status])
+  @@index([phone])
+  @@index([nextFollowUp])
+}
+
+model CrmDeal {
+  id            String       @id @default(cuid())
+  title         String                            // e.g. "Corporate Gift Set 50pcs"
+  expectedValue Float        @default(0)
+  stage         String       @default("Lead In") // Lead In, Qualified, Proposal Sent, Closed Won, Closed Lost
+  leadId        String?
+  lead          CrmLead?     @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  customerId    String?
+  customer      CrmCustomer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  closingDate   DateTime?
+  notes         String       @default("")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([stage])
+  @@index([leadId])
+  @@index([customerId])
+}
+
+model CrmCustomer {
+  id              String    @id @default(cuid())
+  name            String
+  phone           String    @unique
+  email           String    @default("")
+  city            String    @default("")
+  customerSegment String    @default("Regular") // VIP, Regular, Wholesale, Corporate
+  lifetimeValue   Float     @default(0)
+  totalOrders     Int       @default(0)
+  notes           String    @default("")
+  leads           CrmLead[]
+  deals           CrmDeal[]
+  orders          Order[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([phone])
+  @@index([customerSegment])
+  @@index([lifetimeValue])
 }
