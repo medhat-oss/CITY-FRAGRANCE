@@ -41,7 +41,7 @@ async function main() {
 
   // Step 3: Build OpenNext Cloudflare bundle
   console.log('\n=== Building OpenNext Cloudflare bundle ===');
-  execSync('npx opennextjs-cloudflare build -c wrangler.jsonc', { stdio: 'inherit' });
+  execSync('npx opennextjs-cloudflare build -c wrangler.jsonc --dangerouslyUseUnsupportedNextVersion', { stdio: 'inherit' });
 
   // Step 3b: Copy all manifest files (Windows workaround for OpenNext omissions)
   console.log('\n=== Copying manifest files ===');
