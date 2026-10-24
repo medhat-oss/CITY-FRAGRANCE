@@ -4,25 +4,15 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { verifySession } from '@/lib/auth';
-
+import { requireAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function PUT(request: Request) {
-  try {
-    const session = await verifySession();
-    if (!session?.id) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-    const adminUser = await prisma.user.findUnique({
-      where: { id: session.id },
-      select: { role: true },
-    });
-    if (!adminUser || adminUser.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
 
+  try {
     const body = (await request.json()) as { orderId: string; orderItemId?: string; itemId?: string };
     const orderItemId = body.orderItemId || body.itemId || '';
 
@@ -60,62 +50,76 @@ export async function PUT(request: Request) {
     if (itemIdx === -1) {
       itemIdx = items.findIndex((it) => legacyIdOf(it) === orderItemId);
     }
+
     if (itemIdx === -1) {
       return NextResponse.json({ success: false, error: 'Item not found in order' }, { status: 400 });
     }
 
-    const removedItem = items.splice(itemIdx, 1)[0];
+    const removedItem = items[itemIdx];
+    const remainingItems = items.filter((_, idx) => idx !== itemIdx);
+    const newTotalPrice = remainingItems.reduce((sum, it) => sum + (it.price * it.quantity), 0);
 
-    // Restore stock for the removed item
+    const result = await (async () => {
+      // 1. Update order with remaining items and new total
+      const updated = await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          items: remainingItems,
+          totalPrice: newTotalPrice,
+          ...(remainingItems.length === 0 ? { status: 'CANCELLED' } : {}),
+        },
+      });
+
+      // 2. Restore stock for the cancelled item in Product table
       const product = await prisma.product.findFirst({
-        where: { name: removedItem.name },
-        select: { id: true },
+        where: { name: { equals: removedItem.name, mode: 'insensitive' } },
+        select: { id: true, stock: true },
       });
-    if (product) {
-      await prisma.product.update({
-        where: { id: product.id },
-        data: { stock: { increment: removedItem.quantity } },
-      });
-    }
+      if (product) {
+        await prisma.product.update({
+          where: { id: product.id },
+          data: { stock: { increment: removedItem.quantity } },
+        });
+      }
 
-    // Recalculate total price from remaining items
-    const newTotal = items.reduce((sum, it) => sum + it.price * it.quantity, 0);
+      // 3. Restore gift-set stock if applicable
+      try {
+        const giftSet = await prisma.giftSet.findFirst({
+          where: { name: { equals: removedItem.name, mode: 'insensitive' } },
+          select: { id: true, stock: true },
+        });
+        if (giftSet) {
+          await prisma.giftSet.update({
+            where: { id: giftSet.id },
+            data: { stock: { increment: removedItem.quantity } },
+          });
+        }
+      } catch (giftErr) {
+        console.error('[GIFT SET RESTORE ERROR]', giftErr);
+      }
 
-    // Update the order
-    const updated = await prisma.order.update({
-      where: { orderId: body.orderId },
-      data: {
-        items: JSON.parse(JSON.stringify(items)),
-        totalPrice: newTotal,
-      },
-      select: { id: true, orderId: true, totalPrice: true, items: true, shiftId: true, status: true },
-    });
+      return { updated, removedItem };
+    })();
 
-    const result = { updated, removedItem, newTotal };
-
-    // --- Recalculate Shift Totals (if order is tied to a shift) ---
+    // ── Recalculate shift totals if this order belongs to a shift ──
     if (result.updated.shiftId) {
       try {
-        const ordersInShift = await prisma.order.findMany({
-          where: { shiftId: result.updated.shiftId },
-          select: { totalPrice: true, paymentMethod: true, status: true },
+        const shiftOrders = await prisma.order.findMany({
+          where: { shiftId: result.updated.shiftId, status: { not: 'CANCELLED' } },
+          select: { totalPrice: true, paymentMethod: true },
         });
 
-        let expectedTotal = 0;
-        let orderCount = 0;
+        const orderCount = shiftOrders.length;
+        const expectedTotal = shiftOrders.reduce((sum: number, o: { totalPrice: number }) => sum + o.totalPrice, 0);
         let totalCash = 0;
         let totalInstaPay = 0;
         let totalVodafoneCash = 0;
         let totalVisa = 0;
 
-        for (const o of ordersInShift) {
-          const orderStatus = (o.status || '').toLowerCase();
-          if (orderStatus === 'cancelled') continue;
-          expectedTotal += o.totalPrice;
-          orderCount++;
+        for (const o of shiftOrders) {
           const method = (o.paymentMethod || '').toLowerCase();
-          if (method.includes('cash')) totalCash += o.totalPrice;
-          else if (method.includes('instapay')) totalInstaPay += o.totalPrice;
+          if (method.includes('cash') || method === 'cod') totalCash += o.totalPrice;
+          else if (method.includes('insta')) totalInstaPay += o.totalPrice;
           else if (method.includes('vodafone')) totalVodafoneCash += o.totalPrice;
           else if (method.includes('visa')) totalVisa += o.totalPrice;
         }

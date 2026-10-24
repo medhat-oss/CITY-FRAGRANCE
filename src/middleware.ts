@@ -19,7 +19,7 @@ export function middleware(request: NextRequest) {
     const cashierCookie = request.cookies.get(CASHIER_COOKIE);
 
     if (pathname.startsWith('/admin')) {
-      if (!adminCookie && !cashierCookie)
+      if (!adminCookie)
         return NextResponse.redirect(new URL('/admin/login', request.url));
       return NextResponse.next();
     }

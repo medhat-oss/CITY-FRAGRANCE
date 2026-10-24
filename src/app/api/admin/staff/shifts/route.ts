@@ -3,27 +3,16 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { verifySession } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { computeShiftTotals } from '@/lib/shiftTotals';
-
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
-    const session = await verifySession();
-    if (!session?.id) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-
-    const adminUser = await prisma.user.findUnique({
-      where: { id: session.id },
-      select: { role: true },
-    });
-    if (!adminUser || adminUser.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
@@ -59,15 +48,14 @@ export async function GET(request: Request) {
           expectedTotal: totals.expectedTotal,
           orderCount: totals.orderCount,
         };
-      }),
+      })
     );
 
     return NextResponse.json({ success: true, shifts: shiftsWithLiveTotals });
   } catch (err) {
-    console.error('[STAFF SHIFTS API]', err);
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Failed to fetch shifts' },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

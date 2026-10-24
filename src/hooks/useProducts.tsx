@@ -176,107 +176,12 @@ export function ProductsProvider({ children }: { children: React.ReactNode }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Hook (standalone fallback – runs when used outside the Provider tree)
+// Hook
 // ─────────────────────────────────────────────────────────────────────────────
 export function useProducts(): ProductsContextValue {
   const ctx = useContext(ProductsContext);
-  if (ctx) return ctx;
-
-  // Fallback (rare – only when used outside ProductsProvider)
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [fetchKey, setFetchKey] = useState(0);
-  const router = useRouter();
-  const isAdmin = useIsAdminRoute();
-
-  const products = useVisibleProducts(allProducts);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchProducts(isAdmin).then((p) => {
-      if (!cancelled) {
-        setAllProducts(p);
-        setIsLoaded(true);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchKey, isAdmin]);
-
-  const addProduct = useCallback(async (product: Product) => {
-    const res = await fetch('/api/admin/products', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-      body: JSON.stringify(product),
-    });
-    const data = await res.json() as { success: boolean; product?: Product; error?: string };
-    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to add product');
-    setAllProducts((prev) => [...prev, data.product!]);
-    setFetchKey((k) => k + 1);
-    router.refresh();
-  }, [router]);
-
-  const updateProduct = useCallback(async (updated: Product) => {
-    const res = await fetch('/api/admin/products', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-      body: JSON.stringify(updated),
-    });
-    const data = await res.json() as { success: boolean; product?: Product; error?: string };
-    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to update product');
-    setAllProducts((prev) => prev.map((p) => (p.id === data.product!.id ? data.product! : p)));
-    setFetchKey((k) => k + 1);
-    router.refresh();
-  }, [router]);
-
-  const deleteProduct = useCallback(async (id: string) => {
-    const res = await fetch('/api/admin/products', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-      body: JSON.stringify({ id }),
-    });
-    const data = await res.json() as { success: boolean; error?: string };
-    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to delete product');
-    setAllProducts((prev) => prev.filter((p) => p.id !== id));
-    setFetchKey((k) => k + 1);
-    router.refresh();
-  }, [router]);
-
-  const getBestSellers = useCallback(
-    (): Product[] =>
-      products
-        .filter(
-          (p) =>
-            p.badge &&
-            (p.badge.toUpperCase().includes('BEST SELLER') ||
-              p.badge.toUpperCase().includes('SALE'))
-        )
-        .slice(0, 4),
-    [products]
-  );
-
-  const getProductsByCategory = useCallback(
-    (category: string): Product[] => products.filter((p) => p.category === category),
-    [products]
-  );
-
-  const getProductsByCollection = useCallback(
-    (collection: string): Product[] => products.filter((p) => inCollection(p, collection)),
-    [products]
-  );
-
-  return {
-    products,
-    isLoaded,
-    addProduct,
-    updateProduct,
-    deleteProduct,
-    getBestSellers,
-    getProductsByCategory,
-    getProductsByCollection,
-  };
+  if (!ctx) {
+    throw new Error('useProducts must be used within a ProductsProvider');
+  }
+  return ctx;
 }

@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { generateSignature } from '@/lib/cloudinary';
 
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -20,8 +20,15 @@ const ALLOWED_MIME_TYPES = new Set([
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 
 export async function POST(request: Request) {
-  const auth = await requireAuth();
+  const auth = await requireAdmin();
   if (auth instanceof NextResponse) return auth;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    return NextResponse.json(
+      { success: false, error: 'Cloudinary storage service is not configured.' },
+      { status: 500 }
+    );
+  }
 
   try {
     const formData = await request.formData();
@@ -49,13 +56,13 @@ export async function POST(request: Request) {
     const folder = 'city-fragrance';
 
     const params: Record<string, string> = { timestamp, folder };
-    const signature = await generateSignature(params, apiSecret!);
+    const signature = await generateSignature(params, apiSecret);
 
     const cloudinaryForm = new FormData();
     cloudinaryForm.append('file', file);
     cloudinaryForm.append('folder', folder);
     cloudinaryForm.append('timestamp', timestamp);
-    cloudinaryForm.append('api_key', apiKey!);
+    cloudinaryForm.append('api_key', apiKey);
     cloudinaryForm.append('signature', signature);
 
     const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;

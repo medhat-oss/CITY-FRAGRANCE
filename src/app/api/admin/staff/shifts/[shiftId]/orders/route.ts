@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { verifySession } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { computeShiftTotals } from '@/lib/shiftTotals';
 
 export const dynamic = 'force-dynamic';
@@ -9,19 +9,10 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ shiftId: string }> },
 ) {
-  try {
-    const session = await verifySession();
-    if (!session?.id) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-    const adminUser = await prisma.user.findUnique({
-      where: { id: session.id },
-      select: { role: true },
-    });
-    if (!adminUser || adminUser.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
 
+  try {
     const { shiftId } = await params;
     if (!shiftId) {
       return NextResponse.json({ success: false, error: 'Shift ID is required' }, { status: 400 });
@@ -50,36 +41,26 @@ export async function GET(
         : shift;
 
     const orders = await prisma.order.findMany({
-      where: { shiftId },
+      where: { shiftId, source: 'POS' },
+      orderBy: { createdAt: 'desc' },
       select: {
-        id: true, orderId: true, date: true, customerName: true,
-        phoneNumber: true, createdAt: true,
-        totalPrice: true, paymentMethod: true, status: true,
-        items: true, address: true,
+        id: true,
+        orderId: true,
+        customerName: true,
+        phoneNumber: true,
+        items: true,
+        totalPrice: true,
+        paymentMethod: true,
+        createdAt: true,
+        status: true,
       },
     });
 
-    // Ensure every item in every order has a stable `id` field.
-    const ordersWithItemIds = orders.map((o: any) => ({
-      ...o,
-      items: (Array.isArray(o.items) ? o.items as any[] : []).map(
-        (it: any, idx: number) => ({
-          ...it,
-          id: it.id || `${o.orderId}-item-${idx}`,
-        })
-      ),
-    }));
-
-    return NextResponse.json({
-      success: true,
-      shift: shiftWithLiveTotals,
-      orders: ordersWithItemIds,
-    });
+    return NextResponse.json({ success: true, shift: shiftWithLiveTotals, orders });
   } catch (err) {
-    console.error('[SHIFT ORDERS API]', err);
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : 'Failed to fetch shift orders' },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

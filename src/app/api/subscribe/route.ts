@@ -1,14 +1,6 @@
 import { NextResponse } from 'next/server';
-import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
+import prisma from '@/lib/prisma';
 import { rateLimit, extractIp } from '@/lib/rateLimit';
-
-const FILE = 'subscribers.json';
-
-interface Subscriber {
-  email: string;
-  subscribedAt: string;
-}
-
 
 export async function POST(request: Request) {
   try {
@@ -22,25 +14,29 @@ export async function POST(request: Request) {
     }
 
     const { email } = (await request.json()) as { email: string };
+    const normalizedEmail = email?.trim().toLowerCase();
 
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       return NextResponse.json(
         { success: false, message: 'Invalid email address' },
         { status: 400 }
       );
     }
 
-    const subscribers = await readJsonFile<Subscriber[]>(FILE, []);
+    const existing = await prisma.subscriber.findUnique({
+      where: { email: normalizedEmail },
+    });
 
-    if (subscribers.some((s) => s.email.toLowerCase() === email.toLowerCase())) {
+    if (existing) {
       return NextResponse.json(
         { success: false, message: 'Already subscribed' },
         { status: 409 }
       );
     }
 
-    subscribers.push({ email, subscribedAt: new Date().toISOString() });
-    await writeJsonFile(FILE, subscribers);
+    await prisma.subscriber.create({
+      data: { email: normalizedEmail },
+    });
 
     return NextResponse.json({ success: true, message: 'Subscribed successfully' });
   } catch (err) {

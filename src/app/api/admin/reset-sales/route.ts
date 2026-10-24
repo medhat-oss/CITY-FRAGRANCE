@@ -1,18 +1,15 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
-import { verifySession } from '@/lib/auth';
-
+import { requireAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
-  try {
-    const session = await verifySession();
-    if (!session || session.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
 
+  try {
     // Delete orders (frees FK references) then all shifts
     const deleteResult = await prisma.order.deleteMany();
     await prisma.shift.deleteMany();

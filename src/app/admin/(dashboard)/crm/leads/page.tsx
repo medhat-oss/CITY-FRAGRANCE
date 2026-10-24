@@ -18,6 +18,8 @@ import {
   FaExclamationCircle,
 } from 'react-icons/fa';
 import { formatEGP } from '@/utils/currency';
+import { cleanPhoneNumber, formatWhatsAppLink } from '@/utils/phone';
+import { exportToCSV } from '@/utils/exportCsv';
 
 interface CrmLead {
   id: string;
@@ -242,37 +244,19 @@ export default function LeadsPage() {
     const headers = ['Lead ID', 'Name', 'Phone', 'Email', 'Company', 'Source', 'Status', 'Preferred Notes', 'Occasion', 'Budget EGP', 'Created At'];
     const rows = filteredLeads.map((l) => [
       l.id,
-      `"${l.name.replace(/"/g, '""')}"`,
-      `"${l.phone}"`,
-      `"${l.email}"`,
-      `"${l.company.replace(/"/g, '""')}"`,
-      `"${l.source}"`,
-      `"${l.status}"`,
-      `"${(l.preferredNotes || '').replace(/"/g, '""')}"`,
-      `"${l.purchaseOccasion || ''}"`,
+      l.name,
+      l.phone,
+      l.email,
+      l.company,
+      l.source,
+      l.status,
+      l.preferredNotes || '',
+      l.purchaseOccasion || '',
       l.estimatedBudget || 0,
-      `"${new Date(l.createdAt).toLocaleDateString()}"`,
+      new Date(l.createdAt).toLocaleDateString(),
     ]);
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `leads_export_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const cleanPhone = (phone: string) => {
-    return phone.replace(/[^\d+]/g, '');
-  };
-
-  const getWhatsAppLink = (phone: string) => {
-    let p = cleanPhone(phone);
-    if (p.startsWith('01')) p = '2' + p;
-    else if (p.startsWith('+20')) p = p.substring(1);
-    return `https://wa.me/${p}`;
+    exportToCSV(`leads_export_${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
   };
 
   return (
@@ -506,14 +490,14 @@ export default function LeadsPage() {
                       <div className="flex items-center gap-2 font-mono text-slate-200">
                         <span>{lead.phone}</span>
                         <a
-                          href={`tel:${cleanPhone(lead.phone)}`}
+                          href={`tel:${cleanPhoneNumber(lead.phone)}`}
                           title="Call client"
                           className="text-slate-400 hover:text-indigo-400 transition-colors p-1"
                         >
                           <FaPhoneAlt className="text-[10px]" />
                         </a>
                         <a
-                          href={getWhatsAppLink(lead.phone)}
+                          href={formatWhatsAppLink(lead.phone)}
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Open WhatsApp chat"

@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { readJsonFile, writeJsonFile } from '@/lib/dataFile';
-import { verifySession, verifySessionForPOS, requireAdmin } from '@/lib/auth';
+import { verifySessionForPOS, requireAdmin } from '@/lib/auth';
 import { sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
@@ -38,7 +38,7 @@ async function injectProductImages(orders: any[]): Promise<any[]> {
   const names = [...new Set(orders.flatMap((o) => (o.items as any[])?.map((i: any) => i.name) || []))];
   if (!names.length) return orders;
   const products = await prisma.product.findMany({
-      where: { name: { in: names } },
+    where: { name: { in: names } },
     select: { name: true, images: true },
   });
   const imageMap = new Map<string, string>();
@@ -55,7 +55,6 @@ async function injectProductImages(orders: any[]): Promise<any[]> {
     })) || [],
   }));
 }
-
 
 export async function GET() {
   const auth = await requireAdmin();
@@ -103,6 +102,13 @@ export async function POST(request: Request) {
       discountAmount?: number;
     };
 
+    if (!body.customerName || !body.phoneNumber || !Array.isArray(body.items) || body.items.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Customer name, phone number, and at least one order item are required.' },
+        { status: 400 }
+      );
+    }
+
     // Determine source and cashierId from session
     let source = 'WEB';
     let cashierId: string | null = null;
@@ -116,13 +122,14 @@ export async function POST(request: Request) {
       }
     }
 
-    // ── Ensure every item has an id ──
+    // ── Ensure every item has an id and valid quantity ──
     const itemsWithIds = body.items.map((item) => ({
       ...item,
       id: item.id || generateItemId(),
+      quantity: Math.max(1, Math.floor(Number(item.quantity) || 1)),
     }));
 
-    // ── Sequential order creation + stock deduction + shift resolution ──
+    // ── Sequential order validation + shift resolution ──
     if (source === 'POS' && cashierId) {
       const activeShift = await prisma.shift.findFirst({
         where: { cashierId, status: 'OPEN' },
@@ -134,20 +141,135 @@ export async function POST(request: Request) {
       shiftId = activeShift.id;
     }
 
+    // ── Batch stock check + server-side price verification (S1) ──
+    const itemNames = itemsWithIds.map(i => i.name);
+    const [allProducts, allGiftSets] = await Promise.all([
+      prisma.product.findMany({
+        where: { name: { in: itemNames } },
+        select: { id: true, name: true, stock: true, price: true, salePrice: true },
+      }),
+      prisma.giftSet.findMany({
+        where: { name: { in: itemNames } },
+        select: { id: true, name: true, stock: true, price: true },
+      }),
+    ]);
+
+    interface DbProductInfo {
+      id: string;
+      name: string;
+      stock: number;
+      price: number;
+      salePrice: number | null;
+    }
+    interface DbGiftSetInfo {
+      id: string;
+      name: string;
+      stock: number;
+      price: number;
+    }
+
+    const productMap = new Map<string, DbProductInfo>(
+      allProducts.map((p: any) => [p.name.toLowerCase(), p as DbProductInfo])
+    );
+    const giftSetMap = new Map<string, DbGiftSetInfo>(
+      allGiftSets.map((g: any) => [g.name.toLowerCase(), g as DbGiftSetInfo])
+    );
+
+    // 1. Stock check BEFORE creating order record (fail-fast)
+    for (const item of itemsWithIds) {
+      const product = productMap.get(item.name.toLowerCase());
+      if (product) {
+        if (product.stock < item.quantity) {
+          return NextResponse.json(
+            { success: false, error: `Insufficient stock for "${product.name}": requested ${item.quantity}, available ${product.stock}` },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
+    // 2. Compute server-verified unit prices and subtotal (S1)
+    let subtotal = 0;
+    for (const item of itemsWithIds) {
+      const product = productMap.get(item.name.toLowerCase());
+      const giftSet = giftSetMap.get(item.name.toLowerCase());
+
+      let unitPrice = Number(item.price) || 0;
+      if (source !== 'POS') {
+        if (product) {
+          unitPrice = typeof product.salePrice === 'number' && product.salePrice > 0 ? product.salePrice : product.price;
+        } else if (giftSet) {
+          unitPrice = giftSet.price;
+        }
+      } else {
+        // POS: Use database price as fallback if not provided
+        if (unitPrice <= 0) {
+          if (product) unitPrice = typeof product.salePrice === 'number' && product.salePrice > 0 ? product.salePrice : product.price;
+          else if (giftSet) unitPrice = giftSet.price;
+        }
+      }
+
+      item.price = unitPrice;
+      subtotal += unitPrice * item.quantity;
+    }
+
+    // 3. Coupon validation & increment (S4)
+    let discountCode = '';
+    let discountAmount = 0;
+
+    if (body.discountCode) {
+      const cleanCode = body.discountCode.trim().toUpperCase();
+      try {
+        const coupon = await prisma.coupon.findUnique({
+          where: { code: cleanCode },
+        });
+
+        if (coupon && coupon.active && (coupon.maxUses === 0 || coupon.usedCount < coupon.maxUses)) {
+          discountCode = cleanCode;
+          discountAmount = Math.round(subtotal * (coupon.discountPct / 100));
+
+          // Increment coupon usage count atomically
+          await prisma.coupon.update({
+            where: { code: cleanCode },
+            data: { usedCount: { increment: 1 } },
+          });
+        }
+      } catch (couponErr) {
+        console.error('COUPON VALIDATION ERROR (non-blocking):', couponErr);
+      }
+    }
+
+    // 4. Calculate final verified total price (S1)
+    let shippingCost = 0;
+    if (source !== 'POS' && body.governorate) {
+      try {
+        const settings = await prisma.siteSetting.findUnique({ where: { id: 'default' } });
+        const rates = (settings?.shippingRates as Record<string, number>) || {};
+        if (typeof rates[body.governorate] === 'number') {
+          shippingCost = rates[body.governorate];
+        }
+      } catch {
+        shippingCost = 0;
+      }
+    }
+
+    const verifiedTotalPrice = Math.max(0, subtotal + shippingCost - discountAmount);
+
+    // 5. Create Order with verified data
     const order = await prisma.order.create({
       data: {
         orderId: generateOrderId(source === 'POS' ? 'POS' : 'CF'),
         customerName: body.customerName,
         phoneNumber: body.phoneNumber,
         email: body.email || '',
-        address: body.address,
+        address: body.address || '',
         apartment: body.apartment || '',
-        city: body.city,
+        city: body.city || '',
         governorate: body.governorate || '',
         items: JSON.parse(JSON.stringify(itemsWithIds)),
-        totalPrice: body.totalPrice,
-        discountCode: body.discountCode || '',
-        discountAmount: body.discountAmount || 0,
+        totalPrice: verifiedTotalPrice,
+        discountCode,
+        discountAmount,
         status: 'ACCEPTED',
         date: new Date().toLocaleDateString('en-CA'),
         paymentMethod: body.paymentMethod || null,
@@ -157,25 +279,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // ── Batch stock check + deduction ──
-    const itemNames = itemsWithIds.map(i => i.name);
-    const allProducts: any[] = await prisma.product.findMany({
-      where: { name: { in: itemNames } },
-      select: { id: true, name: true, stock: true },
-    });
-    const productMap = new Map(allProducts.map((p: any) => [p.name.toLowerCase(), p]));
-
-    for (const item of itemsWithIds) {
-      const product = productMap.get(item.name.toLowerCase());
-      if (product) {
-        if (product.stock < item.quantity) {
-          throw new Error(
-            `Insufficient stock for "${product.name}": requested ${item.quantity}, available ${product.stock}`
-          );
-        }
-      }
-    }
-
+    // 6. Deduct stock in database
     for (const item of itemsWithIds) {
       const product = productMap.get(item.name.toLowerCase());
       if (product) {
@@ -186,21 +290,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // ── Increment coupon usage count ──
-    if (body.discountCode) {
-      try {
-        await prisma.coupon.update({
-          where: { code: body.discountCode.toUpperCase() },
-          data: { usedCount: { increment: 1 } },
-        });
-      } catch (couponErr) {
-        console.error('COUPON INCREMENT ERROR (non-blocking):', couponErr);
-      }
-    }
-
     // ── JSON file sync (for legacy analytics / gift-set stock) ──
-    // Product stock is already decremented in the main loop above; only
-    // gift-set stock (stored separately, not in the products table) needs syncing.
     try {
       const giftSets = await readJsonFile<any[]>('gift-sets.json', []);
       let updatedGiftSets = false;
@@ -242,8 +332,8 @@ export async function POST(request: Request) {
         governorate: order.governorate,
         items: itemsWithIds,
         totalPrice: order.totalPrice,
-        discountCode: body.discountCode,
-        discountAmount: body.discountAmount,
+        discountCode: order.discountCode || undefined,
+        discountAmount: order.discountAmount || 0,
         status: order.status,
         paymentMethod: order.paymentMethod || undefined,
       }).catch(() => {});
@@ -329,8 +419,6 @@ export async function PUT(request: Request) {
     });
 
     // ── JSON file sync (for legacy gift-set stock) ──
-    // Product stock is already restored in the main loop above; only
-    // gift-set stock (stored separately, not in the products table) needs syncing.
     if (isNowCancelled) {
       try {
         const giftSets = await readJsonFile<any[]>('gift-sets.json', []);
