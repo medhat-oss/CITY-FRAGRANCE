@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fa';
 import ConfirmModal from '@/components/ConfirmModal';
 import AlertModal from '@/components/AlertModal';
+import CashierLoadingScreen from '@/components/CashierLoadingScreen';
 
 /* ── Types ── */
 interface Product {
@@ -577,18 +578,11 @@ export default function CashierPage() {
 
   /* ── Render ── */
   if (authLoading || loading) {
-    return (
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        height: '100vh', background: '#16234D', color: '#ffffff'
-      }}>
-        <FaSpinner className="animate-spin" style={{ fontSize: '2.5rem' }} />
-      </div>
-    );
+    return <CashierLoadingScreen status="Initializing POS Station..." />;
   }
 
   return (
-    <div dir="ltr" className="flex flex-col h-screen bg-[#16234D] text-white overflow-hidden max-w-[100vw]">
+    <div dir="ltr" className="flex flex-col h-screen bg-[#16234D] text-white overflow-hidden max-w-[100vw] animate-fade-in-smooth">
       {/* ── Header ── */}
       <header className="flex items-center justify-between px-2 md:px-6 py-2 md:py-3 bg-[#111B3D] border-b border-white/10 flex-shrink-0">
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
