@@ -76,7 +76,7 @@ export async function createCrmLead(data: CreateLeadInput) {
     ? data.estimatedBudget
     : (data.estimatedBudget ? parseFloat(String(data.estimatedBudget)) || null : null);
 
-  return await prisma.crmLead.create({
+  const newLead = await prisma.crmLead.create({
     data: {
       name,
       phone,
@@ -90,6 +90,10 @@ export async function createCrmLead(data: CreateLeadInput) {
       notes: data.notes?.trim() || '',
       customerId,
     },
+  });
+
+  const fullLead = await prisma.crmLead.findUnique({
+    where: { id: newLead.id },
     include: {
       customer: {
         select: {
@@ -101,6 +105,8 @@ export async function createCrmLead(data: CreateLeadInput) {
       },
     },
   });
+
+  return fullLead || newLead;
 }
 
 /**

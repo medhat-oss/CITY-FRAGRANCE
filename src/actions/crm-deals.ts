@@ -97,7 +97,7 @@ export async function createDeal(data: CreateDealInput) {
 
   const closingDate = data.closingDate ? new Date(data.closingDate) : null;
 
-  return await prisma.crmDeal.create({
+  const newDeal = await prisma.crmDeal.create({
     data: {
       title,
       expectedValue,
@@ -107,6 +107,10 @@ export async function createDeal(data: CreateDealInput) {
       closingDate,
       notes: data.notes?.trim() || '',
     },
+  });
+
+  const fullDeal = await prisma.crmDeal.findUnique({
+    where: { id: newDeal.id },
     include: {
       lead: {
         select: {
@@ -127,6 +131,8 @@ export async function createDeal(data: CreateDealInput) {
       },
     },
   });
+
+  return fullDeal || newDeal;
 }
 
 /**
