@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fa';
 import ConfirmModal from '@/components/ConfirmModal';
 import AlertModal from '@/components/AlertModal';
-import CashierLoadingScreen from '@/components/CashierLoadingScreen';
+import BrandedLoadingScreen from '@/components/BrandedLoadingScreen';
 
 /* ── Types ── */
 interface Product {
@@ -578,7 +578,7 @@ export default function CashierPage() {
 
   /* ── Render ── */
   if (authLoading || loading) {
-    return <CashierLoadingScreen status="Initializing POS Station..." />;
+    return <BrandedLoadingScreen subtitle="Point of Sale" status="Initializing POS Station..." fullScreen={true} />;
   }
 
   return (
